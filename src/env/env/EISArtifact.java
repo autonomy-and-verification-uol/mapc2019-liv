@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
 
-import massim.scenario.city.data.Location;
+
 import cartago.AgentId;
 import cartago.Artifact;
 import cartago.INTERNAL_OPERATION;
@@ -119,21 +119,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 		}
 	}
 	
-	@OPERATION
-	void initMap(String map, double cellsize, int proximity){
-		MapHelper.getInstance().init(map, cellsize, proximity);
-		mapSet = 1;
-	}
-	
-	@OPERATION
-	void setMap(){
-		mapSet = 1;
-	}
-	
-	@OPERATION
-	void resetMap(){
-		mapSet = 0;
-	}
 	
 	@OPERATION
 	void setReady(){
@@ -168,7 +153,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 							int currentStep = getCurrentStep(percepts);
 							if (lastStep != currentStep) { // only updates if it is a new step
 								lastStep = currentStep;
-								if (mapSet == 1) { filterLocations(agent, percepts); }
 								//logger.info("Agent "+agent);
 								updatePerception(agent, previousPercepts, percepts);
 								previousPercepts = percepts;
@@ -357,33 +341,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 //		"route",
 	}));
 	
-	static List<String> location_perceptions = Arrays.asList(new String[] { "shop", "storage", "workshop", "chargingStation", "dump", "entity", "resourceNode", "well" });
-
-	private void filterLocations(String agent, Collection<Percept> perceptions) {
-		double agLat = Double.NaN, agLon = Double.NaN;
-		for (Percept perception : perceptions) {
-			if(perception.getName().equals("lon")){
-				agLon = Double.parseDouble(perception.getParameters().get(0).toString());
-			}
-			if(perception.getName().equals("lat")){
-				agLat = Double.parseDouble(perception.getParameters().get(0).toString());
-			}
-			if (location_perceptions.contains(perception.getName())) {
-				boolean isEntity = perception.getName().equals("entity"); // Second parameter of entity is the team. :(
-				LinkedList<Parameter> parameters = perception.getParameters();
-				String facility = parameters.get(0).toString();
-				if (!MapHelper.getInstance().hasLocation(facility)) {
-					String local = parameters.get(0).toString();
-					double lat = Double.parseDouble(parameters.get(isEntity ? 2 : 1).toString());
-					double lon = Double.parseDouble(parameters.get(isEntity ? 3 : 2).toString());
-					MapHelper.getInstance().addLocation(local, new Location(lon, lat));
-				}
-			}
-		}
-		if(!Double.isNaN(agLat) && !Double.isNaN(agLon)){
-			MapHelper.getInstance().addLocation(agent, new Location(agLon, agLat));
-		}
-	}
 
     @Override
     public void handlePercept(String agent, Percept percept) {}

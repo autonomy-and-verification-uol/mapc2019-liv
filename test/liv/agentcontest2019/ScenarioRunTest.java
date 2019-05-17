@@ -57,7 +57,7 @@ public class ScenarioRunTest {
 			public void run() {
 				try {
 					
-					Server.main(new String[] {"-conf", "conf/TestConfig.json", "--monitor 8000"});				
+					Server.main(new String[] {"-conf", "conf/TestConfig.json", "--monitor"});				
 					
 				} catch (Exception e) {
 					e.printStackTrace();
