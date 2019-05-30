@@ -42,8 +42,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private List<Literal> start = new ArrayList<Literal>();
 	private List<Literal> percs = new ArrayList<Literal>();
 	private List<Literal> signalList = new ArrayList<Literal>();
-	private int mapSet = 0;
-	private int ready = 0;
 	
 	private static Set<String> agents = new ConcurrentSkipListSet<String>();
 
@@ -120,16 +118,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 	}
 	
 	
-	@OPERATION
-	void setReady(){
-		ready = 1;
-	}
-	
-	@OPERATION
-	void unsetReady(){
-		ready = 0;
-	}
-	
 	@INTERNAL_OPERATION
 	void receiving(String agent) throws JasonException {
 		lastStep = -1;
@@ -145,7 +133,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 				try {
 //					if (ei.getAllPercepts(agent).get(agentToEntity.get(agent))) {
 						Collection<Percept> percepts = ei.getAllPercepts(agent).get(agentToEntity.get(agent));
-						while (ready == 0) { await_time(100); }
 						if (!percepts.isEmpty()) {
 //							startTime = System.nanoTime();
 //							logger.info("***"+percepts);
@@ -287,58 +274,24 @@ public class EISArtifact extends Artifact implements AgentListener {
 	}
 
 	static Set<String> match_obs_prop = new HashSet<String>( Arrays.asList(new String[] {
-		"map",
 		"name",
 		"steps",
-		"item",
-		"upgrade",
-		"wellType",
-		"role",
-		"cellSize",
-		"proximity",
-		"seedCapital",
-		"minLon",
-		"maxLon",
-		"minLat",
-		"maxLat",
 		"team",
-//		"id",
 	}));
 	
 	static Set<String> step_obs_prop = new HashSet<String>( Arrays.asList(new String[] {
-		"chargingStation",
 		"actionID",
-		"routeLength",
-		"shop",			
-		"storage",
-		"workshop",
-		"resourceNode",		
-		"dump",
-		"lat",
-		"lon",
-		"charge",
-		"load",
-		"facility",
-		"hasItem",
 		"step",
 		"simEnd",
 		"lastAction",
 		"lastActionResult",
-		"massium",
-		"well",
-		"speed",
-		"maxLoad",
-		"maxBattery",
-		"skill",
-		"vision",
-		"auction",
-		"mission",
-		"job",
-//		"entity",
-//		"lastActionParams",
+		"score",
+		"thing",
+		"task",
+		"obstacle",
+		"goal",
 //		"timestamp",
 //		"deadline",
-//		"route",
 	}));
 	
 
