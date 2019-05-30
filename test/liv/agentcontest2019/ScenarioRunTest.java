@@ -2,22 +2,19 @@ package liv.agentcontest2019;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import jacamo.infra.JaCaMoLauncher;
-import jade.util.leap.ArrayList;
-import jade.util.leap.List;
 import jason.JasonException;
 import massim.Server;
 
 
 public class ScenarioRunTest {
 	
-
 	@Before
 	public void cleanUpFolders() throws IOException {
 
@@ -25,28 +22,25 @@ public class ScenarioRunTest {
 		String path = currentDir.getAbsolutePath();	
 				
 		ScenarioRunTest deletefiles = new ScenarioRunTest();
-		deletefiles.delete(5, path + "\\logs");
-		deletefiles.delete(5, path + "\\log");
-		deletefiles.delete(5, path + "\\replays");	
+		deletefiles.delete(5, path + "/logs");
+		deletefiles.delete(4, path + "/log");
+		deletefiles.delete(5, path + "/replays");	
 		
 	}
 	
 	public void delete(long nFiles, String directoryFolder) throws IOException {
-		
-		File currentDir = new File("");
-		String path = currentDir.getAbsolutePath();	
-		
 		File folder = new File(directoryFolder);
-		
 		if(folder.exists()) {
 			File[] listFiles = folder.listFiles();
-			String[] filesInDir = folder.list();			
+			Arrays.sort(listFiles);
 			for ( int i=0; i < listFiles.length - nFiles ; i++ ){
-				listFiles[i].delete();
-				FileUtils.deleteDirectory(listFiles[i]);				
+				if (!listFiles[i].getName().equals(".keepfolder")) {
+					System.out.println(listFiles[i].getName());
+					listFiles[i].delete();
+					FileUtils.deleteDirectory(listFiles[i]);
+				}
 			}		
 		}
-		
 	}		
 	
 	@Before
