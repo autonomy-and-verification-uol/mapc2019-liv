@@ -22,6 +22,9 @@ To run the sample map, right-click test/liv/agentcontest2019/ScenarioRunSample.j
 
 The server's output is shown on the Eclipse console. The JaCaMo output is loaded into a separate window. Press `enter` at the Eclipse console to start the simulation.
 
+## How to watch the match live
+Open [this link](http://localhost:8000/)
+
 ## How to contribute
 Make sure to always keep your version up-to-date with the live repository by constantly pulling from it.
 
