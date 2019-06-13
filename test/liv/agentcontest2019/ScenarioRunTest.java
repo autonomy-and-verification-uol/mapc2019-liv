@@ -35,7 +35,7 @@ public class ScenarioRunTest {
 			Arrays.sort(listFiles);
 			for ( int i=0; i < listFiles.length - nFiles ; i++ ){
 				if (!listFiles[i].getName().equals(".keepfolder")) {
-					System.out.println(listFiles[i].getName());
+//					System.out.println(listFiles[i].getName());
 					listFiles[i].delete();
 					FileUtils.deleteDirectory(listFiles[i]);
 				}

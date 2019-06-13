@@ -16,17 +16,16 @@
 	addServerName(Me,ServerMe);
 	.
 
-+default::steps(Steps)
++default::actionID(0)
 	: True
 <- 
-	.print("Hello World!");
-	!always_move_north;
+	!!always_move_north;
     .
     
-+!default::always_move_north
++!always_move_north
 	: True
 <-
-	!action::move_north;
-	!always_move_north;
+	!action::move(n);
+	!!always_move_north;
 	.
-    
+-!always_move_north <- !!always_move_north.

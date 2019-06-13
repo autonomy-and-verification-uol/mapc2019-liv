@@ -1,3 +1,5 @@
+action::current_token(0).
+
 +!commit_action(Action)
 	: .current_intention(intention(IntentionId,_)) & not ::access_token(IntentionId,_) & ::current_token(Token)
 <-
@@ -45,24 +47,25 @@
 	.print("Last action result ",IntentionId," was: ",Result);
 	
 	?default::lastAction(LastAction);
-	if (LastAction == noAction | LastAction == randomFail){
+	if (LastAction == no_action | Result == failed_random){
 		.print("My action was replaced by ",LastAction,", sending true action again");
 		!commit_action(Action); // repeat the previous action
 	}else{
-		if (Result \== successful & Result \== successful_partial){
-			if (Action \== recharge & Action \== continue & not .substring("assist_assemble",Action) & Result == failed){
-				.print("Failed to execute action ",Action," with actionId ",Id,". Executing it again.");
-				!commit_action(Action);
-			} else{
-				.print("Failing action ",Action," because ",Result);
-				.fail(action(Action),result(Result));
-			}
+		if (Result \== success){
+			.print("Failing action ",Action," because ",Result);
+			.fail(action(Action),result(Result));
+//			if (Action \== recharge & Action \== continue & not .substring("assist_assemble",Action) & Result == failed){
+//				.print("Failed to execute action ",Action," with actionId ",Id,". Executing it again.");
+//				!commit_action(Action);
+//			} else{
+//				.print("Failing action ",Action," because ",Result);
+//				.fail(action(Action),result(Result));
+//			}
 		}
 	}
 	.
-+!commit_action(Action) : Action == recharge <- .suspend;.
 +!commit_action(Action)
-	: default::actionID(Id) & action::action(Id,ChosenAction) & ChosenAction \== recharge & .current_intention(intention(IntentionId,_))
+	: default::actionID(Id) & action::action(Id,ChosenAction) & .current_intention(intention(IntentionId,_))
 <-
 	.print("I've already picked an action ",ChosenAction," for ",Id," trying ",Action," next. I am ",IntentionId);
 	.drop_all_intentions;
@@ -145,7 +148,7 @@
 
 @helprequest[atomic]
 +team::chosenActions(ActionId, Agents) // all the agents have chosen their actions
-	: .length(Agents) == 34 & not ::committedToAction(ActionId) & not ::action_sent(ActionId)
+	: .length(Agents) == 10 & not ::committedToAction(ActionId) & not ::action_sent(ActionId)
 <-
 	.print("All agents have chosen their action on ",ActionId,", dropping wait_request_for_help");
 	.drop_desire(::wait_request_for_help(ActionId));
@@ -179,4 +182,3 @@
 <-
 	.print("SHOULDN'T PASS HERE ON ",ActionId);
 	. // action already sent to the server, our team is slowly
-

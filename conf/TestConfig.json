@@ -2,14 +2,12 @@
   "server" : "$(server/server.json)",
 
   "manual-mode" : [
-    ["A", "B"],
-    ["B", "C"],
-    ["A", "C"]
+    ["A"]
   ],
 
   "match" : [
     {
-      "steps" : 10,
+      "steps" : 20,
       "randomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
@@ -31,7 +29,6 @@
   ],
 
   "teams" : {
-    "A" : "$(teams/A.json)",
-    "B" : "$(teams/B.json)"
+    "A" : "$(teams/A.json)"
   }
 }

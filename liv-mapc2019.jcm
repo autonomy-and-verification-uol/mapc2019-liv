@@ -2,61 +2,61 @@ mas scenario {
 		
 	agent vehicle1: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle1, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle1, team::vehicleart.team_artifact
 		goals: register("connectionA1")
 
 	}
 	agent vehicle2: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle2, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle2, team::vehicleart.team_artifact
 		goals: register("connectionA2")
 
 	}
 	agent vehicle3: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle3, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle3, team::vehicleart.team_artifact
 		goals: register("connectionA3")
 
 	}
 	agent vehicle4: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle4, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle4, team::vehicleart.team_artifact
 		goals: register("connectionA4")
 
 	}
 	agent vehicle5: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle5, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle5, team::vehicleart.team_artifact
 		goals: register("connectionA5")
 
 	}
 	agent vehicle6: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle6, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle6, team::vehicleart.team_artifact
 		goals: register("connectionA6")
 
 	}
 	agent vehicle7: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle7, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle7, team::vehicleart.team_artifact
 		goals: register("connectionA7")
 
 	}
 	agent vehicle8: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle8, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle8, team::vehicleart.team_artifact
 		goals: register("connectionA8")
 
 	}
 	agent vehicle9: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle9, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle9, team::vehicleart.team_artifact
 		goals: register("connectionA9")
 
 	}
 	agent vehicle10: agent.asl {
 		join: vehicleart
-		focus: vehicleart.eis_art_vehicle10, team::vehicleart.team_artifact, vehicleart.task_board
+		focus: vehicleart.eis_art_vehicle10, team::vehicleart.team_artifact
 		goals: register("connectionA10")
 
 	}
@@ -73,12 +73,11 @@ mas scenario {
 		artifact eis_art_vehicle9: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig9.json")
 		artifact eis_art_vehicle10: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig10.json")
 		artifact team_artifact: env.TeamArtifact()
-		artifact task_board: cnp.TaskBoard()
 	}
 	
-	organisation org : org.xml{
-		group g1 : team		
-	}
+//	organisation org : org.xml{
+//		group g1 : team		
+//	}
 
     asl-path: src/agt
               src/agt/inc
