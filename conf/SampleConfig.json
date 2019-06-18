@@ -7,7 +7,7 @@
 
   "match" : [
     {
-      "steps" : 20,
+      "steps" : 1000,
       "randomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],

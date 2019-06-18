@@ -19,12 +19,11 @@ action::current_token(0).
 	: default::actionID(Id) & action::action_sent(Id) & metrics::next_actions(C) & default::step(Step)
 <-
 	.print("I've already sent an action at step ",Step,", I cannot send a new one ", Action);
-	-+metrics::next_actions(C+1); 
 	.wait({+default::actionID(_)}); 
 	!commit_action(Action);
 	.
 +!commit_action(Action)
-	: default::actionID(Id) & not action::action(Id,_) & .current_intention(intention(IntentionId,_))
+	: default::actionID(Id) & not action::action(Id,_) & .current_intention(intention(IntentionId,_)) & ::access_token(IntentionId,Token)
 <-
 	.current_intention(intention(IntentionId2,_));
 	if(IntentionId \== IntentionId2){
@@ -39,6 +38,7 @@ action::current_token(0).
 	.wait({+default::actionID(_)}); 
 	.wait(not action::reasoning_about_belief(_)); 
 	
+	-::access_token(IntentionId,Token);
 	-::action(Id,Action);
 	-::action_sent(Id);
 	-::committedToAction(Id);
@@ -47,8 +47,11 @@ action::current_token(0).
 	.print("Last action result ",IntentionId," was: ",Result);
 	
 	?default::lastAction(LastAction);
+	if ( Result == unknown_action){
+		.print("My action ",LastAction," was unknown to the server. This should never happen!");
+	}	
 	if (LastAction == no_action | Result == failed_random){
-		.print("My action was replaced by ",LastAction,", sending true action again");
+		.print("My action failed due to random failure, sending it again.");
 		!commit_action(Action); // repeat the previous action
 	}else{
 		if (Result \== success){
