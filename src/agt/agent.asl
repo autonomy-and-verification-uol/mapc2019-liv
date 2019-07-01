@@ -29,3 +29,11 @@
 	!!always_move_north;
 	.
 -!always_move_north <- !!always_move_north.
+
+
++default::thing(X, Y, entity, Team)
+	: default::team(Team)
+<-
+	.print("I see another agent of my team at ",X,",",Y);
+	.
+	
