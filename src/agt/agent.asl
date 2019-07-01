@@ -21,6 +21,7 @@
 <- 
 	!!always_move_north;
     .
+
     
 +!always_move_north
 	: True

@@ -2,7 +2,7 @@
   "server" : "$(server/server.json)",
 
   "manual-mode" : [
-    ["A"]
+    ["A", "B"]
   ],
 
   "match" : [
@@ -16,6 +16,7 @@
         "width" : 40,
         "file" : "conf/maps/test40x40.bmp"
       },
+      "setup" : "conf/setup/testsample.txt",
       "attachLimit" : 10,
       "blockTypes" : [3, 3],
       "dispensers" : [2, 3],
@@ -28,6 +29,7 @@
   ],
 
   "teams" : {
-    "A" : "$(teams/A.json)"
+    "A" : "$(teams/A.json)",
+    "B" : "$(teams/B.json)"
   }
 }

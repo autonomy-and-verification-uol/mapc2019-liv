@@ -17,7 +17,7 @@
         "file" : "conf/maps/test.bmp"
       },
       "setup" : "conf/setup/test.txt",
-      "attachLimit" : 3,
+      "attachLimit" : 10,
       "blockTypes" : [3, 3],
       "dispensers" : [2, 3],
       "tasks" : {
