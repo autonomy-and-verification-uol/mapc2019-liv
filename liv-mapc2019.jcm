@@ -2,61 +2,61 @@ mas scenario {
 		
 	agent agent1: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent1, team::agentart.team_artifact
+		focus: agentart.eis_art_agent1, team::agentart.team_artifact, map::agentart.map_agent1
 		goals: register("connectionA1")
 
 	}
 	agent agent2: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent2, team::agentart.team_artifact
+		focus: agentart.eis_art_agent2, team::agentart.team_artifact, map::agentart.map_agent2
 		goals: register("connectionA2")
 
 	}
 	agent agent3: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent3, team::agentart.team_artifact
+		focus: agentart.eis_art_agent3, team::agentart.team_artifact, map::agentart.map_agent3
 		goals: register("connectionA3")
 
 	}
 	agent agent4: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent4, team::agentart.team_artifact
+		focus: agentart.eis_art_agent4, team::agentart.team_artifact, map::agentart.map_agent4
 		goals: register("connectionA4")
 
 	}
 	agent agent5: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent5, team::agentart.team_artifact
+		focus: agentart.eis_art_agent5, team::agentart.team_artifact, map::agentart.map_agent5
 		goals: register("connectionA5")
 
 	}
 	agent agent6: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent6, team::agentart.team_artifact
+		focus: agentart.eis_art_agent6, team::agentart.team_artifact, map::agentart.map_agent6
 		goals: register("connectionA6")
 
 	}
 	agent agent7: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent7, team::agentart.team_artifact
+		focus: agentart.eis_art_agent7, team::agentart.team_artifact, map::agentart.map_agent7
 		goals: register("connectionA7")
 
 	}
 	agent agent8: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent8, team::agentart.team_artifact
+		focus: agentart.eis_art_agent8, team::agentart.team_artifact, map::agentart.map_agent8
 		goals: register("connectionA8")
 
 	}
 	agent agent9: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent9, team::agentart.team_artifact
+		focus: agentart.eis_art_agent9, team::agentart.team_artifact, map::agentart.map_agent9
 		goals: register("connectionA9")
 
 	}
 	agent agent10: agent.asl {
 		join: agentart
-		focus: agentart.eis_art_agent10, team::agentart.team_artifact
+		focus: agentart.eis_art_agent10, team::agentart.team_artifact, map::agentart.map_agent10
 		goals: register("connectionA10")
 
 	}
@@ -72,6 +72,18 @@ mas scenario {
 		artifact eis_art_agent8: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig8.json")
 		artifact eis_art_agent9: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig9.json")
 		artifact eis_art_agent10: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig10.json")
+		
+		artifact map_agent1: env.MapArtifact()
+		artifact map_agent2: env.MapArtifact()
+		artifact map_agent3: env.MapArtifact()
+		artifact map_agent4: env.MapArtifact()
+		artifact map_agent5: env.MapArtifact()
+		artifact map_agent6: env.MapArtifact()
+		artifact map_agent7: env.MapArtifact()
+		artifact map_agent8: env.MapArtifact()
+		artifact map_agent9: env.MapArtifact()
+		artifact map_agent10: env.MapArtifact()
+		
 		artifact team_artifact: env.TeamArtifact()
 	}
 	
