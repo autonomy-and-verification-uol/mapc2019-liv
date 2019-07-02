@@ -3,21 +3,19 @@ package env;
 import jason.JasonException;
 import jason.NoValueException;
 import jason.asSyntax.*;
-import jason.asSyntax.parser.ParseException;
 
-import static org.junit.Assert.fail;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
 
 
@@ -26,7 +24,6 @@ import cartago.Artifact;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.ObsProperty;
-import eis.EnvironmentInterfaceStandard;
 import eis.AgentListener;
 import eis.EnvironmentListener;
 import eis.exceptions.*;
@@ -43,17 +40,22 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private List<Literal> percs = new ArrayList<Literal>();
 	private List<Literal> signalList = new ArrayList<Literal>();
 	
-	private static Set<String> agents = new ConcurrentSkipListSet<String>();
-
+	private Map<Point, String>  map 	 	= new HashMap<Point, String>();
+	
+	private Point mypos = new Point(0,0);
+	
 	private EnvironmentInterface ei = null;
 	private boolean receiving;
 	private int lastStep = -1;
+	
 	public EISArtifact() {
 		agentIds      = new ConcurrentHashMap<String, AgentId>();
 		agentToEntity = new ConcurrentHashMap<String, String>();
 	}
 	
 	protected void init(String config) throws IOException, InterruptedException {
+		
+		
 		
 		ei = new EnvironmentInterface(config);
         try {
@@ -72,16 +74,11 @@ public class EISArtifact extends Artifact implements AgentListener {
         
 	}
 	
-	public static Set<String> getRegisteredAgents(){
-		return agents;
-	}
-	
 	@OPERATION
 	void register(String entity)  {
 		String agent = getCurrentOpAgentId().getAgentName();
 		logger = Logger.getLogger(EISArtifact.class.getName()+"_"+agent);
 		logger.info("Registering " + agent + " to entity " + entity);
-		agents.add(agent);
 		try {
 			ei.registerAgent(agent);
 		} catch (Exception e) {
@@ -183,42 +180,35 @@ public class EISArtifact extends Artifact implements AgentListener {
 		
 		// compute new perception
 		Literal step 				= null;
-//		Literal auction 			= null;
-		List<Literal> auction 		= new ArrayList<Literal>();
 		Literal lastAction			= null;
 		Literal lastActionResult 	= null;
+		Literal lastActionParams	= null;
 		Literal actionID 			= null;
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
-				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult")) { // really new perception 
+				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams")) { // really new perception 
 					Literal literal = Translator.perceptToLiteral(percept);
 					if (percept.getName().equals("step")) {
 						step = literal;
-					} else if(percept.getName().equals("auction")){
-						auction.add(literal);
 					} else if (percept.getName().equals("simEnd")) {
 						defineObsProperty(percept.getName(), (Object[]) literal.getTermsArray());
 						cleanObsProps(match_obs_prop);
 						lastStep = -1;						
 						break;
 					} else {
-//							logger.info("adding "+literal);
 						if (percept.getName().equals("lastActionResult")) {
 							lastActionResult = literal;
 						} 
+//						else if (percept.getName().equals())
 						else if (percept.getName().equals("lastAction")) { lastAction = literal; }
-//						else if (agent.equals("vehicle1") && (percept.getName().equals("job") || percept.getName().equals("mission"))) { signalList.add(literal); }
+						else if (percept.getName().equals("lastActionParams")) { lastActionParams = literal; }
 						else if (percept.getName().equals("actionID")) { actionID = literal; }
-						else if (percept.getName().equals("shop") || percept.getName().equals("workshop") || percept.getName().equals("routeLength") || percept.getName().equals("facility")) { percs.add(0,literal); }
 						else { percs.add(literal); }
 					}
 				}
 			} if (match_obs_prop.contains(percept.getName())) {
 				Literal literal = Translator.perceptToLiteral(percept);
-//					logger.info("adding "+literal);
-				if (percept.getName().equals("role")) {
-					start.add(0,literal);
-				} else { start.add(literal); }
+				start.add(literal);
 			}
 		}
 
@@ -228,20 +218,23 @@ public class EISArtifact extends Artifact implements AgentListener {
 			}
 			start.clear();
 		}
-			
 		if (step != null) {
-			for (Literal a : auction) {
-				defineObsProperty(a.getFunctor(), (Object[]) a.getTermsArray());
+			if (lastAction.getTerm(0).toString().equals("move") && lastActionResult.getTerm(0).toString().equals("success")) {
+				if (lastActionParams.getTerm(0).toString().contains("n")) { mypos.y--; }
+				else if (lastActionParams.getTerm(0).toString().contains("s")) { mypos.y++; }
+				else if (lastActionParams.getTerm(0).toString().contains("e")) { mypos.x++; }
+				else { mypos.x--; }
+				logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y);
 			}
 			defineObsProperty(step.getFunctor(), (Object[]) step.getTermsArray());
 			defineObsProperty(lastAction.getFunctor(), (Object[]) lastAction.getTermsArray());
 			defineObsProperty(lastActionResult.getFunctor(), (Object[]) lastActionResult.getTermsArray());
+			defineObsProperty(lastActionParams.getFunctor(), (Object[]) lastActionParams.getTermsArray());
 			
 			for (Literal lit: percs) {
 				defineObsProperty(lit.getFunctor(), (Object[]) lit.getTermsArray());
 			}
 			percs.clear();
-//			if (!signalList.isEmpty() && acceptJobs == 1) {
 			if (!signalList.isEmpty()) {
 				for (Literal lit: signalList) {
 					signal(agentIds.get(agent),lit.getFunctor(),(Object[]) lit.getTermsArray());
@@ -290,11 +283,11 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"task",
 		"obstacle",
 		"goal",
+		"lastActionParams",
 //		"timestamp",
 //		"deadline",
 	}));
 	
-
     @Override
     public void handlePercept(String agent, Percept percept) {}
    
