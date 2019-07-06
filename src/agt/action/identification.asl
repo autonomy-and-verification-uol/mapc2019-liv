@@ -1,22 +1,31 @@
 /* Initial beliefs and rules */
 
 identify_1(WhatItSees, WhoX, WhoY) :-
-	.findall(Name,
+	.findall(see(X1, Y1, Kind, Name),
 	(
 		.member(see(X, Y, Kind, Name), WhatItSees) &
 		X1 = WhoX + X & Y1 = WhoY + Y &
-		X1 < 5 & Y1 < 5 &
+		X1 < 5 & Y1 < 5
+	), Sees) &
+	.length(Sees, N) & N > 1 &
+	.findall(Name,
+	(
+		.member(see(X, Y, Kind, Name), Sees) &
+		//.member(see(X, Y, Kind, Name), WhatItSees) &
+		//X1 = WhoX + X & Y1 = WhoY + Y &
+		//X1 < 5 & Y1 < 5 &
 		not(default::thing(X1, Y1, Kind, Name))
 	), []).
 	
 identify(_, [], _, _) :- true.
-identify(Agent, [see(Agent, X, Y, entity, _)|L], WhoX, WhoY) :-
-	MyViewX = -X & MyViewY = -Y & default::thing(MyViewX, MyViewY, entity, _) &
-	.findall(see(X1, Y1, Kind, Name), see(Agent, X1, Y1, Kind, Name), WhatItSees) &
+identify(Agent, [see(Agent, X, Y, _, _)|L], WhoX, WhoY) :-
+	//MyViewX = -X & MyViewY = -Y & default::thing(MyViewX, MyViewY, _, _) &
+	agent_sees(Agent, WhatItSees) &
+	//.findall(see(X1, Y1, Kind, Name), see(Agent, X1, Y1, Kind, Name), WhatItSees) &
 	identify_1(WhatItSees, WhoX, WhoY) &
 	identify(Agent, L, WhoX, WhoY).
-identify(Agent, [_|L], WhoX, WhoY) :-
-	identify(Agent, L, WhoX, Whoy).
+//identify(Agent, [_|L], WhoX, WhoY) :-
+	//identify(Agent, L, WhoX, Whoy).
 	
 i_see_it(EverythingSeen, MyViewX, MyViewY) :-
  	.member(see(X, Y, _, _), EverythingSeen) &
@@ -49,13 +58,14 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	
 +!check_things : .my_name(Me)
 <- 
-	.findall(see(X, Y, Kind, Name), (thing(X, Y, Kind, Name) & (X \== 0 | Y \== 0)), EverythingSeen);
+	.findall(see(X, Y, Kind, Name), (default::thing(X, Y, Kind, Name) & not(X == 0 & Y == 0)), EverythingSeen);
 	.broadcast(tell, agent_sees(Me, EverythingSeen));
 	-+identification::go(Me).
 
 +default::agent_sees(Name, EverythingSeen)[source(Name)]: true
 <-
 	.wait("+identification::go(_)");
+	.print("EVERYTHING: ", EverythingSeen);
 	!check_agent_sees(Name, EverythingSeen);
 	-agent_sees(Name, EverythingSeen).
 
@@ -67,7 +77,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	+i_know(Name, MyViewX, MyViewY).
 +!check_agent_sees(Name, EverythingSeen):
 	i_see_it(EverythingSeen, MyViewX, MyViewY) &
-	identify(Name, EverythingSeen, MyViewX, MyViewY)
+	identify_1(EverythingSeen, MyViewX, MyViewY)
 <- 
 	+i_know(Name, MyViewX, MyViewY).
 +!check_agent_sees(Name, EverythingSeen) : true 
