@@ -7,10 +7,10 @@
 
   "match" : [
     {
-      "steps" : 20,
+      "steps" : 2000,
       "randomSeed" : 17,
       "randomFail" : 1,
-      "entities" : [{"standard" : 10}],
+      "entities" : [{"standard" : 4}],
       "grid" : {
         "height" : 20,
         "width" : 20,
@@ -19,7 +19,7 @@
       "setup" : "conf/setup/test.txt",
       "attachLimit" : 10,
       "blockTypes" : [3, 3],
-      "dispensers" : [2, 3],
+      "dispensers" : [0, 0],
       "tasks" : {
         "size" : [2, 4],
         "duration" : [100, 200],
