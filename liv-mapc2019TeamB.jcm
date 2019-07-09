@@ -1,0 +1,88 @@
+mas scenario {
+		
+	agent agent1: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent1, team::agentart.team_artifact
+		goals: register("connectionB1")
+
+	}
+	agent agent2: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent2, team::agentart.team_artifact
+		goals: register("connectionB2")
+
+	}
+	agent agent3: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent3, team::agentart.team_artifact
+		goals: register("connectionB3")
+
+	}
+	agent agent4: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent4, team::agentart.team_artifact
+		goals: register("connectionB4")
+
+	}
+	agent agent5: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent5, team::agentart.team_artifact
+		goals: register("connectionB5")
+
+	}
+	agent agent6: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent6, team::agentart.team_artifact
+		goals: register("connectionB6")
+
+	}
+	agent agent7: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent7, team::agentart.team_artifact
+		goals: register("connectionB7")
+
+	}
+	agent agent8: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent8, team::agentart.team_artifact
+		goals: register("connectionB8")
+
+	}
+	agent agent9: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent9, team::agentart.team_artifact
+		goals: register("connectionB9")
+
+	}
+	agent agent10: agentB.asl {
+		join: agentart
+		focus: agentart.eis_art_agent10, team::agentart.team_artifact
+		goals: register("connectionB10")
+
+	}
+	
+	workspace agentart {
+		artifact eis_art_agent1: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig1.json")
+		artifact eis_art_agent2: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig2.json")
+		artifact eis_art_agent3: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig3.json")
+		artifact eis_art_agent4: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig4.json")
+		artifact eis_art_agent5: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig5.json")
+		artifact eis_art_agent6: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig6.json")
+		artifact eis_art_agent7: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig7.json")
+		artifact eis_art_agent8: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig8.json")
+		artifact eis_art_agent9: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig9.json")
+		artifact eis_art_agent10: env.EISArtifact("conf/eisconfig/localhost/teamB/eismassimconfig10.json")
+		
+		artifact team_artifact: env.TeamArtifact()
+	}
+	
+//	organisation org : org.xml{
+//		group g1 : team		
+//	}
+
+    asl-path: src/agt
+              src/agt/inc
+	
+	platform: cartago("infrastructure")
+
+}
