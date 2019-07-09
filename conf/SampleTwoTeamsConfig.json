@@ -1,0 +1,35 @@
+{
+  "server" : "$(server/server2.json)",
+
+  "manual-mode" : [
+    ["A", "B"]
+  ],
+
+  "match" : [
+    {
+      "steps" : 1000,
+      "randomSeed" : 17,
+      "randomFail" : 1,
+      "entities" : [{"standard" : 10}],
+      "grid" : {
+        "height" : 40,
+        "width" : 40,
+        "file" : "conf/maps/test40x40.bmp"
+      },
+      "setup" : "conf/setup/testsampletwoteams.txt",
+      "attachLimit" : 10,
+      "blockTypes" : [3, 3],
+      "dispensers" : [2, 3],
+      "tasks" : {
+        "size" : [2, 4],
+        "duration" : [100, 200],
+        "probability" : 0.05
+      }
+    }
+  ],
+
+  "teams" : {
+    "A" : "$(teams/A.json)",
+    "B" : "$(teams/B.json)"
+  }
+}
