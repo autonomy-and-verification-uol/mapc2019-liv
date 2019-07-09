@@ -1,10 +1,12 @@
 # simple setup file for testing
 move 3 3 agentA1
-move 10 3 agentA2
+move 5 5 agentA2
+move 12 12 agentA3
+move 14 14 agentA4
 # add 4 3 dispenser b1
 # add 5 3 dispenser b2
-#add 4 3 block b1
-add 11 3 block b2
+add 5 3 block b1
+#add 11 3 block b2
 #add 6 6 block b2
 
 # create task test 100 1,0,b1;2,0,b2
