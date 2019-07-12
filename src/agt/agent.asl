@@ -32,12 +32,17 @@
 	!action::move(w).
 	//!!always_move_north.*/
 
-+default::actionID(_)
-	: .my_name(Me) <- 
-	!identification::check_things.
-	//.random(N);
-	//!random_move(N).
-	//!!always_move_south.
+// Commented Angelo's agent detection for now
+//+default::actionID(_)
+//	: .my_name(Me) <- 
+//	!identification::check_things.
+//	//.random(N);
+//	//!random_move(N).
+//	//!!always_move_south.
+
++default::actionID(0)
+	: True <- 
+	!!always_move_south.
 
 +!random_move(N) : N <= 0.25 <- .print("go north"); !action::move(n).
 +!random_move(N) : N <= 0.5 <- .print("go south"); !action::move(s).
