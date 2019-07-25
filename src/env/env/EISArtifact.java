@@ -163,7 +163,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException {
 		for (Percept old: previousPercepts) {
 			if (step_obs_prop.contains(old.getName())) {
-				if (!percepts.contains(old) || old.getName().equals("lastAction") || old.getName().equals("lastActionResult")) { // not perceived anymore
+				if (!percepts.contains(old) || old.getName().equals("lastAction") || old.getName().equals("lastActionResult") || old.getName().equals("lastActionParams")) { // not perceived anymore
 					Literal literal = Translator.perceptToLiteral(old);
 					try{				
 						removeObsPropertyByTemplate(old.getName(), (Object[]) literal.getTermsArray());
@@ -283,6 +283,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"task",
 		"obstacle",
 		"goal",
+		"attached",
 		"lastActionParams",
 //		"timestamp",
 //		"deadline",
