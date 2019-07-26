@@ -2,7 +2,8 @@
 { include("common-moise.asl") }
 { include("org-obedient.asl", org) }
 { include("action/actions.asl",action) }
-{ include("action/identification.asl",identification) }
+{ include("strategy/identification.asl",identification) }
+{ include("strategy/exploration.asl",exploration) }
 	
 +!register(E)
 	: .my_name(Me)
@@ -42,20 +43,10 @@
 
 +default::actionID(0)
 	: True <- 
-	!!always_move_south.
-
-+!random_move(N) : N <= 0.25 <- .print("go north"); !action::move(n).
-+!random_move(N) : N <= 0.5 <- .print("go south"); !action::move(s).
-+!random_move(N) : N <= 0.75 <- .print("go west"); !action::move(w).
-+!random_move(N) <- .print("go east"); !action::move(e).
-
-+!always_move_south
-	: True
-<-
-	!action::move(s);
-	!!always_move_south;
+//	!!always_move_north;
+	!!exploration::explore([n,s,e,w]);
 	.
--!always_move_south <- !!always_move_south.
+
     
 +!always_move_north
 	: True
