@@ -42,19 +42,19 @@
 //	//!!always_move_south.
 
 +default::actionID(0)
-	: True <- 
+	: true <- 
 //	!!always_move_north;
 	!!exploration::explore([n,s,e,w]);
 	.
 
     
-+!always_move_north
-	: True
-<-
-	!action::move(n);
-	!!always_move_north;
-	.
--!always_move_north <- !!always_move_north.
+//+!always_move_north
+//	: true
+//<-
+//	!action::move(n);
+//	!!always_move_north;
+//	.
+//-!always_move_north <- !!always_move_north.
 
 
 
