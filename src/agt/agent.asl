@@ -42,10 +42,34 @@
 //	//!!always_move_south.
 
 +default::actionID(0)
+	: .my_name(agent1) <- 
+//	!!always_move_north;
+	//!!identification::check_things;
+	!!exploration::explore([n,s,e,w]);
+	true
+	.
++default::actionID(0)
 	: True <- 
 //	!!always_move_north;
-	!!exploration::explore([n,s,e,w]);
+	//!!identification::check_things;
+	//!!exploration::explore([n,s,e,w]);
+	true
 	.
+
++default::actionID(_) : true <- true.
+//+default::step(_) : true <- !identification::check_things.
+	
+/*+default::actionID(_)
+	: True <- 
+//	!!always_move_north;
+	!!identification::check_things;
+	.*/
+/* 
++default::actionID(ID)
+	: True <- 
+//	!!always_move_north;
+	!!identification::check_things;
+	.*/
 
     
 +!always_move_north
