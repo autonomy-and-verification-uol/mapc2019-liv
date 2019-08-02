@@ -72,6 +72,7 @@ i_see_someone :-
 	-identification::go(Me);
 	.findall(see(X, Y, Kind, Name), default::thing(X, Y, Kind, Name), EverythingSeen);
 	!send_to_interested_ags(ID, Ags, Me, EverythingSeen);
+	-+sent(ID);
 	+identification::go(Me).
 
 /*+!identify : .my_name(Me) & i_see_someone & .all_names(Ags)
@@ -91,10 +92,13 @@ i_see_someone :-
 	.print("I do not see anyone around me.. Identification skipped");
 	+identification::go(Me).*/
 
- +default::agent_sees(ID, Name, EverythingSeen)[source(Name)] : true <- .wait(default::actionID(ID)); !agent_sees_plan(Name, EverythingSeen).
+ +default::agent_sees(ID, Name, EverythingSeen)[source(Name)] : true <- .wait(default::actionID(ID)); !agent_sees_plan(ID, Name, EverythingSeen).
+ 
+ +!agent_sees_plan(ID, Name, EverythingSeen) : sent(ID) <- !agent_sees_plan_aux(Name, EverythingSeen).
+ +!agent_sees_plan(ID, Name, EverythingSeen) : true <- !check_things(ID); !agent_sees_plan_aux(Name, EverythingSeen).
  
 //@agseen1[atomic]
-+!agent_sees_plan(Name, EverythingSeen) : 
++!agent_sees_plan_aux(Name, EverythingSeen) : 
 	.my_name(Me) & .all_names(Ags) & not(identification::agents_to_hear_from(_)) & 
 	default::team(Team) & default::thing(X, Y, entity, Team) & not(X = 0 & Y = 0)
 <- 
@@ -106,7 +110,7 @@ i_see_someone :-
 	.print("finish1").
 	//-+default::agent_sees(Name, EverythingSeen)[source(Name)].
 //@agseen2[atomic]
-+!agent_sees_plan(Name, EverythingSeen): 
++!agent_sees_plan_aux(Name, EverythingSeen): 
 	.all_names(Ags) & identification::agents_to_hear_from([Name]) &
 	default::team(Team) & default::thing(X, Y, entity, Team) & not(X = 0 & Y = 0)
 <-
@@ -124,7 +128,7 @@ i_see_someone :-
 	-action::reasoning_about_belief(identification);
 	.print("END TURN").
 //@agseen3[atomic]
-+!agent_sees_plan(Name, EverythingSeen): 
++!agent_sees_plan_aux(Name, EverythingSeen): 
 	identification::agents_to_hear_from(Ags) & 
 	default::team(Team) & default::thing(X, Y, entity, Team) & not(X = 0 & Y = 0)
 <- 
@@ -135,7 +139,7 @@ i_see_someone :-
 	//.print("agent_sees: ", AgentSees);
 	-+identification::agents_to_hear_from(Ags1);
 	.print("finish3").
-+!agent_sees_plan(Name, EverythingSeen): 
++!agent_sees_plan_aux(Name, EverythingSeen): 
 	.my_name(Me)
 <- 
 	.print("Send a skip to ", Name);
