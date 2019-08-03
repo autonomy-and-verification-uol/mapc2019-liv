@@ -23,13 +23,13 @@
 	!!exploration::explore([n,s,e,w]);
 	.
     
-+!always_move_north
-	: True
-<-
-	!action::move(n);
-	!!always_move_north;
-	.
--!always_move_north <- !!always_move_north.
+//+!always_move_north
+//	: true
+//<-
+//	!action::move(n);
+//	!!always_move_north;
+//	.
+//-!always_move_north <- !!always_move_north.
 
 
 
