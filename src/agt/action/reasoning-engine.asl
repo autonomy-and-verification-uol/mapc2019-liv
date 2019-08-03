@@ -169,6 +169,7 @@ action::current_token(0).
 <-
 	.print("Waiting for help request on ",ActionId);
 	.wait(1000);
+	.wait(not action::reasoning_about_belief(_)); 
 	.print("Time has gone on ",ActionId);
 	!send_action_to_server(ActionId);
 	.	
