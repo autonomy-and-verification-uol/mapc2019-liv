@@ -18,59 +18,10 @@
 	addServerName(Me,ServerMe);
 	.
 
-/*+default::actionID(0)
-	: .my_name(Me) & Me == agent1 <- 
-	+pippo(Me);
-	!action::connect(agentA2, 1, 0);
-	!action::move(e);
-	!action::move(e).
-	//!!always_move_south.
- +default::actionID(0)
-	: .my_name(Me) & Me == agent2<-
-	+pappo;
-	!action::connect(agentA1, -1, 0);
-	!action::detach(w);
-	!action::move(w).
-	//!!always_move_north.*/
-
-// Commented Angelo's agent detection for now
-//+default::actionID(_)
-//	: .my_name(Me) <- 
-//	!identification::check_things.
-//	//.random(N);
-//	//!random_move(N).
-//	//!!always_move_south.
-
 +default::actionID(0)
 	: true <- 
-//	!!always_move_north;
-	//!!identification::check_things;
 	!!exploration::explore([n,s,e,w]);
-	true
 	.
-/* +default::actionID(0)
-	: True <- 
-//	!!always_move_north;
-	//!!identification::check_things;
-	//!!exploration::explore([n,s,e,w]);
-	true
-	.*/
-
-+default::actionID(_) : true <- true.
-//+default::step(_) : true <- !identification::check_things.
-	
-/*+default::actionID(_)
-	: True <- 
-//	!!always_move_north;
-	!!identification::check_things;
-	.*/
-/* 
-+default::actionID(ID)
-	: True <- 
-//	!!always_move_north;
-	!!identification::check_things;
-	.*/
-
     
 +!always_move_north
 	: True
