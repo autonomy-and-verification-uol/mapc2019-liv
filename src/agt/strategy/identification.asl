@@ -37,8 +37,9 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	no_more_on_sight(L).
 
 
+@thing[atomic]
 +default::thing(X, Y, entity, Team)
-	: not(X == 0 & Y == 0) & default::team(Team) & not(action::reasoning_about_belief(identification)) & default::actionID(ID)
+	: not(X == 0 & Y == 0) & default::team(Team) & not(action::reasoning_about_belief(identification)) & default::actionID(ID) & identification::identified(List) & .all_names(Ags) & .length(Ags,NumberAgents) & not .length(List,NumberAgents-1)
 <-
 	+action::reasoning_about_belief(identification);
 	.print("I see another agent of my team at ", X, ",", Y);
