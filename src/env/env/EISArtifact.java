@@ -24,6 +24,7 @@ import cartago.Artifact;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.ObsProperty;
+import cartago.OpFeedbackParam;
 import eis.AgentListener;
 import eis.EnvironmentListener;
 import eis.exceptions.*;
@@ -40,7 +41,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private List<Literal> percs = new ArrayList<Literal>();
 	private List<Literal> signalList = new ArrayList<Literal>();
 	
-	private Map<Point, String>  map 	 	= new HashMap<Point, String>();
+	private Map<Point, String>  dispenser 	 	= new HashMap<Point, String>();
 	
 	private Point mypos = new Point(0,0);
 	
@@ -184,6 +185,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		Literal lastActionResult 	= null;
 		Literal lastActionParams	= null;
 		Literal actionID 			= null;
+		List<Literal> things 		= new ArrayList<Literal>();
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
 				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams")) { // really new perception 
@@ -199,7 +201,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 						if (percept.getName().equals("lastActionResult")) {
 							lastActionResult = literal;
 						} 
-//						else if (percept.getName().equals())
+						else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("dispenser")) { things.add(literal); }
 						else if (percept.getName().equals("lastAction")) { lastAction = literal; }
 						else if (percept.getName().equals("lastActionParams")) { lastActionParams = literal; }
 						else if (percept.getName().equals("actionID")) { actionID = literal; }
@@ -226,6 +228,18 @@ public class EISArtifact extends Artifact implements AgentListener {
 				else { mypos.x--; }
 				logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y);
 			}
+			for (Literal thing: things) {
+				int x = mypos.x + (int) ((NumberTerm) thing.getTerm(0)).solve();
+				int y = mypos.y + (int) ((NumberTerm) thing.getTerm(1)).solve();
+				
+				Point p = new Point(x,y);
+				
+				if (!dispenser.containsKey(p)) {
+					String type = thing.getTerm(3).toString();
+					dispenser.put(p,type);
+				}
+			}
+			things.clear();
 			defineObsProperty(step.getFunctor(), (Object[]) step.getTermsArray());
 			defineObsProperty(lastAction.getFunctor(), (Object[]) lastAction.getTermsArray());
 			defineObsProperty(lastActionResult.getFunctor(), (Object[]) lastActionResult.getTermsArray());
@@ -264,6 +278,25 @@ public class EISArtifact extends Artifact implements AgentListener {
 	@OPERATION
 	void stopReceiving() {
 		receiving = false;
+	}
+	
+//	
+	@OPERATION 
+	void getDispensers(OpFeedbackParam<Literal[]> dispensers){
+		List<Literal> things 		= new ArrayList<Literal>();
+		for (Map.Entry<Point, String> entry : dispenser.entrySet()) {
+//		    logger.info(entry.getKey() + " = " + entry.getValue());
+			Literal literal = ASSyntax.createLiteral("dispenser");
+			NumberTerm x = new NumberTermImpl(entry.getKey().x);
+			NumberTerm y = new NumberTermImpl(entry.getKey().y);
+			StringTerm type = new StringTermImpl(entry.getValue());
+			literal.addTerm(x);
+			literal.addTerm(y);
+			literal.addTerm(type);
+			things.add(literal);
+		}
+		Literal[] arraythings = things.toArray(new Literal[things.size()]);
+		dispensers.set(arraythings);
 	}
 
 	static Set<String> match_obs_prop = new HashSet<String>( Arrays.asList(new String[] {

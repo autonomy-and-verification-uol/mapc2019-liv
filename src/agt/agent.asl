@@ -4,6 +4,7 @@
 { include("action/actions.asl",action) }
 { include("strategy/identification.asl",identification) }
 { include("strategy/exploration.asl",exploration) }
+{ include("strategy/stock.asl",stock) }
 	
 +!register(E)
 	: .my_name(Me)
@@ -19,7 +20,8 @@
 	.
 
 +default::actionID(0)
-	: true <- 
+	: true 
+<- 
 	!!exploration::explore([n,s,e,w]);
 	.
     
