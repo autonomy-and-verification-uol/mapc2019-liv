@@ -88,9 +88,10 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	-identification::identified(OldList);  
 	+identification::identified([Ag|OldList]);
 //	.print("Adding new identified agent ",Ag);
-	!map::get_dispensers(List);
+//	!map::get_dispensers(DList);
+//	!map::get_goal(GList);
 	getMyPos(MyX,MyY);
-//	.print("@@@@@@@@@@@@@@@ ",List);
+//	.print("@@@@@@@@@@@@@@@ ",GList);
 //	mergeMaps(MyX,MyY,List);
 	+identification::merged;
 	!add_identified_ags(Ags,IdList);

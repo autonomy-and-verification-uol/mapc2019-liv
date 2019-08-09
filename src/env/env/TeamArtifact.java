@@ -96,20 +96,42 @@ public class TeamArtifact extends Artifact {
 	void getDispensers(String name, OpFeedbackParam<Literal[]> dispensers){
 		List<Literal> things 		= new ArrayList<Literal>();
 		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
-//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
-			StringTerm type = new StringTermImpl(entry.getKey());
-			for (Point p : entry.getValue()) {
-				Literal literal = ASSyntax.createLiteral("dispenser");
-				NumberTerm x = new NumberTermImpl(p.x);
-				NumberTerm y = new NumberTermImpl(p.y);
-				literal.addTerm(type);
-				literal.addTerm(x);
-				literal.addTerm(y);
-				things.add(literal);
+			if (!entry.getKey().equals("goal")) {
+	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
+				StringTerm type = new StringTermImpl(entry.getKey());
+				for (Point p : entry.getValue()) {
+					Literal literal = ASSyntax.createLiteral("dispenser");
+					NumberTerm x = new NumberTermImpl(p.x);
+					NumberTerm y = new NumberTermImpl(p.y);
+					literal.addTerm(type);
+					literal.addTerm(x);
+					literal.addTerm(y);
+					things.add(literal);
+				}
 			}
 		}
 		Literal[] arraythings = things.toArray(new Literal[things.size()]);
 		dispensers.set(arraythings);
+	}
+	
+	@OPERATION 
+	void getGoal(String name, OpFeedbackParam<Literal[]> goal){
+		List<Literal> things 		= new ArrayList<Literal>();
+		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
+			if (entry.getKey().equals("goal")) {
+	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
+				for (Point p : entry.getValue()) {
+					Literal literal = ASSyntax.createLiteral("goal");
+					NumberTerm x = new NumberTermImpl(p.x);
+					NumberTerm y = new NumberTermImpl(p.y);
+					literal.addTerm(x);
+					literal.addTerm(y);
+					things.add(literal);
+				}
+			}
+		}
+		Literal[] arraythings = things.toArray(new Literal[things.size()]);
+		goal.set(arraythings);
 	}
 	
 	@OPERATION
