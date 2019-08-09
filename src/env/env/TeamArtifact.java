@@ -93,6 +93,11 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION 
+	void getMapSize(String name, OpFeedbackParam<Integer> size){
+		size.set(agentmaps.get(name).values().stream().mapToInt(Set::size).sum());
+	}
+	
+	@OPERATION 
 	void getDispensers(String name, OpFeedbackParam<Literal[]> dispensers){
 		List<Literal> things 		= new ArrayList<Literal>();
 		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {

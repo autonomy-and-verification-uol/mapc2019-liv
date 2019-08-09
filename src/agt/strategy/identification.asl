@@ -40,7 +40,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	: not(X == 0 & Y == 0) & default::team(Team) & not(action::reasoning_about_belief(identification)) & default::actionID(ID) & identification::identified(List) & .all_names(Ags) & .length(Ags,NumberAgents) & not .length(List,NumberAgents-1)
 <-
 	+action::reasoning_about_belief(identification);
-	.print("I see another agent of my team at ", X, ",", Y);
+//	.print("I see another agent of my team at ", X, ",", Y);
 	.print("START TURN");
 	.broadcast(achieve, identification::request_information(ID));
 	.
@@ -88,12 +88,40 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	-identification::identified(OldList);  
 	+identification::identified([Ag|OldList]);
 //	.print("Adding new identified agent ",Ag);
-//	!map::get_dispensers(DList);
-//	!map::get_goal(GList);
+	!map::get_map_size(Size);
+	?identification::identified(IdListAux);
+	Identified = .length(IdListAux);
+	.send(Ag,tell,map::map_size(Size,Identified));
+	.wait(map::map_size(SizeOther,IdentifiedOther)[source(Ag)]);
+	-map::map_size(SizeOther,IdentifiedOther)[source(Ag)];
+	if (Size > SizeOther) {
+		.print("I am the origin!");
+	}
+	elif (Size == SizeOther) {
+		if (Identified > IdentifiedOther) {
+			.print("I am the origin (second try, known agents)!");	
+		}
+		elif (Identified == IdentifiedOther) {
+			.print("We dont know how to decide the origin, time to pick randomly.");
+			.all_names(AllAgents);
+			.my_name(Me);
+			.nth(Pos,AllAgents,Me);
+			.nth(PosOther,AllAgents,Ag);
+			if (Pos > PosOther) {
+				.print("I am the origin (third try, random)!");
+			}
+			else {
+				.print("I am not the origin (third try, random).");
+			}
+		}
+		else {
+			.print("I am not the origin (second try, known agents).");
+		}
+	}
+	else { .print("I am not the origin."); }
 	getMyPos(MyX,MyY);
-//	.print("@@@@@@@@@@@@@@@ ",GList);
 //	mergeMaps(MyX,MyY,List);
-	+identification::merged;
+//	+identification::merged;
 	!add_identified_ags(Ags,IdList);
 	.
 
