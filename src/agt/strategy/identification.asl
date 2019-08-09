@@ -52,6 +52,13 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 //	for (identification::agent_sees(see,Arg)[source(Name)]){
 //		.print("Everything seen by ",Name,": ",Arg);
 //	}
+	.print("I AM HERE!");
+	!!identify(Ags);
+	.
+	
++!identify(Ags)
+	: true
+<-
 	!check_all_agent_sees(Ags);
 	.abolish(identification::agent_sees(_,_)[source(_)]);
 	.print("END TURN");
@@ -91,7 +98,9 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	!map::get_map_size(Size);
 	?identification::identified(IdListAux);
 	Identified = .length(IdListAux);
+	.print("Sending map size to ",Ag);
 	.send(Ag,tell,map::map_size(Size,Identified));
+	.print("Waiting for map size from ",Ag);
 	.wait(map::map_size(SizeOther,IdentifiedOther)[source(Ag)]);
 	-map::map_size(SizeOther,IdentifiedOther)[source(Ag)];
 	if (Size > SizeOther) {
