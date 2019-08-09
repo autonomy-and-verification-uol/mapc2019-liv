@@ -1,6 +1,4 @@
 /* Initial beliefs and rules */
-identified([]).
-
 identify(WhatItSees, WhoX, WhoY) :-
 	.findall(Name,
 	(
@@ -51,12 +49,12 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 +agent_sees(_,_)[source(_)] 
 	: .all_names(Ags) & .length(Ags,NumberAgents) & .count(identification::agent_sees(_,_)[source(_)],NumberAgents-1)
 <-
-	.print("END TURN");
 //	for (identification::agent_sees(see,Arg)[source(Name)]){
 //		.print("Everything seen by ",Name,": ",Arg);
 //	}
 	!check_all_agent_sees(Ags);
 	.abolish(identification::agent_sees(_,_)[source(_)]);
+	.print("END TURN");
 	-action::reasoning_about_belief(identification);
 	.
 
@@ -83,7 +81,20 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 
 +!add_identified_ags([],IdList) : true <- true.
 +!add_identified_ags([Ag|Ags],IdList) : .member(Ag,IdList)  <- !add_identified_ags(Ags,IdList).
-+!add_identified_ags([Ag|Ags],IdList) : not .member(Ag,IdList) <- ?identification::identified(OldList); -identification::identified(OldList);  +identification::identified([Ag|OldList]); !add_identified_ags(Ags,IdList).
++!add_identified_ags([Ag|Ags],IdList) 
+	: not .member(Ag,IdList) //& not identification::merged
+<- 
+	?identification::identified(OldList); 
+	-identification::identified(OldList);  
+	+identification::identified([Ag|OldList]);
+//	.print("Adding new identified agent ",Ag);
+	!map::get_dispensers(List);
+	getMyPos(MyX,MyY);
+//	.print("@@@@@@@@@@@@@@@ ",List);
+//	mergeMaps(MyX,MyY,List);
+	+identification::merged;
+	!add_identified_ags(Ags,IdList);
+	.
 
 +!check_all_agent_sees([]) 
 	: .all_names(Ags)

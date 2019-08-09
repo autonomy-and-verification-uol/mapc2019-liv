@@ -1,14 +1,17 @@
 { include("common-cartago.asl") }
 { include("common-moise.asl") }
 { include("org-obedient.asl", org) }
-{ include("action/actions.asl",action) }
-{ include("strategy/identification.asl",identification) }
-{ include("strategy/exploration.asl",exploration) }
-{ include("strategy/stock.asl",stock) }
+{ include("action/actions.asl", action) }
+{ include("strategy/identification.asl", identification) }
+{ include("strategy/exploration.asl", exploration) }
+{ include("strategy/stock.asl", stock) }
+{ include("strategy/map.asl", map) }
+{ include("strategy/new-round.asl", newround) }
 	
 +!register(E)
 	: .my_name(Me)
 <- 
+	!newround::new_round;
     .print("Registering...");
     register(E);
 	.
