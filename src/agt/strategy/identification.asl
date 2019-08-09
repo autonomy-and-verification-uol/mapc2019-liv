@@ -39,22 +39,29 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 +default::thing(X, Y, entity, Team)
 	: not(X == 0 & Y == 0) & default::team(Team) & not(action::reasoning_about_belief(identification)) & default::actionID(ID) & identification::identified(List) & .all_names(Ags) & .length(Ags,NumberAgents) & not .length(List,NumberAgents-1)
 <-
-	+action::reasoning_about_belief(identification);
+//	+action::reasoning_about_belief(identification);
 //	.print("I see another agent of my team at ", X, ",", Y);
 	.print("START TURN");
 	.broadcast(achieve, identification::request_information(ID));
 	.
 
 @agentseesfinal[atomic]
-+agent_sees(_,_)[source(_)] 
-	: .all_names(Ags) & .length(Ags,NumberAgents) & .count(identification::agent_sees(_,_)[source(_)],NumberAgents-1)
++agent_sees(_,_)[source(Name)] 
+	: .all_names(Ags) & .length(Ags,NumberAgents) & count(NumberAgents-2)
 <-
-//	for (identification::agent_sees(see,Arg)[source(Name)]){
-//		.print("Everything seen by ",Name,": ",Arg);
-//	}
 	.print("I AM HERE!");
+	-count(_);
+	+count(0);
 	!!identify(Ags);
 	.
+@agentseesfinal2[atomic]
++agent_sees(_,_)[source(Name)] 
+	: count(N)
+<-
+	-count(N);
+	+count(N+1);
+	.
+
 	
 +!identify(Ags)
 	: true

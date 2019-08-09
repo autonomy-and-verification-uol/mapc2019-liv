@@ -4,4 +4,5 @@
 	+action::current_token(0);
 	+identification::identified([]);
 	+map::myMap(Me);
+	+identification::count(0);
 	.
