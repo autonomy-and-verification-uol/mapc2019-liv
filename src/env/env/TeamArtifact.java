@@ -20,6 +20,7 @@ import jason.asSyntax.NumberTerm;
 import jason.asSyntax.NumberTermImpl;
 import jason.asSyntax.StringTerm;
 import jason.asSyntax.StringTermImpl;
+import jason.asSyntax.Atom;
 
 
 public class TeamArtifact extends Artifact {
@@ -103,7 +104,7 @@ public class TeamArtifact extends Artifact {
 		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
 			if (!entry.getKey().equals("goal")) {
 	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
-				StringTerm type = new StringTermImpl(entry.getKey());
+				Atom type = new Atom(entry.getKey());
 				for (Point p : entry.getValue()) {
 					Literal literal = ASSyntax.createLiteral("dispenser");
 					NumberTerm x = new NumberTermImpl(p.x);

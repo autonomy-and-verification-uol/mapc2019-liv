@@ -14,8 +14,18 @@
 	: map::myMap(Me)
 <-
 	getMyPos(MyX,MyY);
-	updateMap(Me, Type, MyX+X, MyY+Y);
-	.
+	!map::get_dispensers(Dispensers);
+	!map::update_dispenser_in_map(Type, MyX+X, MyY+Y, Dispensers).
+
++!map::update_dispenser_in_map(Type, GlX, GlY, Dispensers) : 
+	.member(dispenser(Type, GlX, GlY), Dispensers) 
+<-
+	true.
++!map::update_dispenser_in_map(Type, GlX, GlY, Dispensers) : 
+	map::myMap(Me)
+<-
+	!stop::new_dispenser_trigger(Type, Dispensers);
+	updateMap(Me, Type,GlX, GlY).
 	
 +default::goal(X,Y)
 	: map::myMap(Me)
