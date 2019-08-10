@@ -69,10 +69,10 @@ remove_opposite(w,e) :- true.
 
 
 +!explore_until_obstacle(Dir)
-	: check_agent(Dir) & .delete(Dir,[n,s,e,w],DirList) 
+	: check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
 <-
-	.print("I see someone from my team, time to pick another direction.");
-	!!explore(DirList);
+	.print("I see someone from my team, time to *try* to go around it.");
+	!go_around(Dir,DirList);
 	.
 
 +!explore_until_obstacle(Dir)
@@ -87,16 +87,22 @@ remove_opposite(w,e) :- true.
 <-
 	!!explore(DirList);
 	.
+	
++!explore_until_obstacle_special(Dir)
+	: not exploration::special(_) 
+<-
+	!explore_until_obstacle(Dir);
+	.
 
 +!explore_until_obstacle_special(Dir)
-	: check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
+	: exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
 <-
 	.print("I see someone from my team, time to *try* to go around it.");
 	!go_around(Dir,DirList);
 	.
 
 +!explore_until_obstacle_special(Dir)
-	: not check_obstacle_special(Dir)
+	: exploration::special(_) & not check_obstacle_special(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle_special(Dir);
@@ -130,6 +136,13 @@ remove_opposite(w,e) :- true.
 	+avoid(1);
 	!action::move(Dir);
 	!!go_around(OldDir, Dir);
+	.
+	
++!go_around(OldDir,DirList)
+	: not exploration::avoid(_) & prune_direction(DirList,[],PrunedDirList)  & .empty(PrunedDirList)
+<-
+	!action::move(OldDir);
+	!!go_around(OldDir, DirList);
 	.
 	
 +!go_around(OldDir, Dir)
