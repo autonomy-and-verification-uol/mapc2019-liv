@@ -268,6 +268,12 @@ public class EISArtifact extends Artifact implements AgentListener {
 		x.set(mypos.x);
 		y.set(mypos.y);
 	}
+	
+	@OPERATION 
+	void updateMyPos(int x, int y){
+		mypos.x = x;
+		mypos.y = y;
+	}
 
 	static Set<String> match_obs_prop = new HashSet<String>( Arrays.asList(new String[] {
 		"name",

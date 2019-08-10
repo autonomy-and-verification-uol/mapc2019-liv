@@ -98,24 +98,26 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 +!add_identified_ags([Ag|Ags],IdList) 
 	: not .member(Ag,IdList) //& not identification::merged
 <- 
-	?identification::identified(OldList); 
-	-identification::identified(OldList);  
-	+identification::identified([Ag|OldList]);
+	?identification::identified(OldList);
+	Identified = .length(OldList);
 //	.print("Adding new identified agent ",Ag);
 	!map::get_map_size(Size);
-	?identification::identified(IdListAux);
-	Identified = .length(IdListAux);
 	.print("Sending map size to ",Ag);
-	.send(Ag,tell,map::map_size(Size,Identified));
+	getMyPos(MyX,MyY);
+	?identification::i_know(Ag,LocalX,LocalY);
+	?map::myMap(Map);
+	.send(Ag,tell,map::map_size(Size,Identified,MyX,MyY,LocalX,LocalY,Map,OldList));
 	.print("Waiting for map size from ",Ag);
-	.wait(map::map_size(SizeOther,IdentifiedOther)[source(Ag)]);
-	-map::map_size(SizeOther,IdentifiedOther)[source(Ag)];
+	.wait(map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)]);
+	-map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)];
 	if (Size > SizeOther) {
 		.print("I am the origin!");
+		!merge_id(OldListOther,Ag);
 	}
 	elif (Size == SizeOther) {
 		if (Identified > IdentifiedOther) {
-			.print("I am the origin (second try, known agents)!");	
+			.print("I am the origin (second try, known agents)!");
+			!merge_id(OldListOther,Ag);
 		}
 		elif (Identified == IdentifiedOther) {
 			.print("We dont know how to decide the origin, time to pick randomly.");
@@ -125,20 +127,81 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 			.nth(PosOther,AllAgents,Ag);
 			if (Pos > PosOther) {
 				.print("I am the origin (third try, random)!");
+				!merge_id(OldListOther,Ag);
 			}
 			else {
 				.print("I am not the origin (third try, random).");
+				!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
 			}
 		}
 		else {
 			.print("I am not the origin (second try, known agents).");
+			!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
 		}
 	}
-	else { .print("I am not the origin."); }
-	getMyPos(MyX,MyY);
-//	mergeMaps(MyX,MyY,List);
-//	+identification::merged;
+	else { 
+		.print("I am not the origin.");
+		!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
+	}
 	!add_identified_ags(Ags,IdList);
+	.
+
++!merge_id(OldListOther,AgSeen)
+	: .my_name(Me)
+<-
+	?identification::identified(OldListOld);
+	-identification::identified(OldListOld);
+	+identification::identified([AgSeen|OldListOld]);
+	for (.member(Ag,OldListOther)) {
+		?identification::identified(OldList);
+		-identification::identified(OldList);
+		+identification::identified([Ag|OldList]);
+	}
+	?identification::identified(FinalList);
+	for (.member(Ag,FinalList)) {
+		.send(Ag,achieve,identification::update_identified([Me|FinalList]));
+	}
+	.
+
+@updateid[atomic]
++!update_identified(List)[source(_)]
+	: .my_name(Me)
+<-
+	?identification::identified(OldList);
+	-identification::identified(OldList);
+	.delete(Me,List,NewList);
+	+identification::identified(NewList);
+	.
+	
++!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList)
+	: true
+<-
+	NewOriginX = (LocalXOther + OtherX) - MyX;
+	NewOriginY = (LocalYOther + OtherY) - MyY;
+	for (.member(Ag,OldList)) {
+		.send(Ag,achieve,identification::update_pos(NewOriginX,NewOriginY,MapOther));
+	}
+	updateMyPos(LocalXOther+OtherX,LocalYOther+OtherY);
+	!map::get_dispensers(DispList);
+	!map::get_goal(GoalList);
+	-map::myMap(Map);
+	+map::myMap(MapOther);
+	for (.member(dispenser(Type,DX,DY),DispList)) {
+		updateMap(MapOther,Type,NewOriginX+DX,NewOriginY+DY);
+	}
+	for (.member(goal(GX,GY),GoalList)) {
+		updateMap(MapOther,goal,NewOriginX+GX,NewOriginY+GY);
+	}
+	.
+
+@updatepos[atomic]
++!update_pos(OriginX,OriginY,MapOther)[source(_)]
+	: map::myMap(Map) & .my_name(Me)
+<-
+	-map::myMap(Map);
+	+map::myMap(MapOther);
+	getMyPos(MyX,MyY);
+	updateMyPos(MyX+OriginX,MyY+OriginY);
 	.
 
 +!check_all_agent_sees([]) 

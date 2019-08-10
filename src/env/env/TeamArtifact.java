@@ -3,7 +3,6 @@ package env;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -18,8 +17,6 @@ import jason.asSyntax.ASSyntax;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
 import jason.asSyntax.NumberTermImpl;
-import jason.asSyntax.StringTerm;
-import jason.asSyntax.StringTermImpl;
 import jason.asSyntax.Atom;
 
 
@@ -44,8 +41,6 @@ public class TeamArtifact extends Artifact {
 	private Map<String, Set<Point>>  map10 	 	= new HashMap<String, Set<Point>>();
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
-	
-
 	
 	void init(){
 		logger.info("Team Artifact has been created!");
@@ -139,14 +134,6 @@ public class TeamArtifact extends Artifact {
 		Literal[] arraythings = things.toArray(new Literal[things.size()]);
 		goal.set(arraythings);
 	}
-	
-	@OPERATION
-	void mergeMaps(int Ax, int Ay, String Adispensers) {
-//			, int Bx, int By, String[] Bdispensers) {
-		logger.info("Agent A dispensers "+Adispensers);
-//		logger.info("Agent B dispensers "+Bdispensers);
-	}
-	
 	
 	@OPERATION
 	void clearRound() {

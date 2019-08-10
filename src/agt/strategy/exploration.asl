@@ -1,17 +1,17 @@
-check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2) | default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
-check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2) | default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
-check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0) | default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
-check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0) | default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
+check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
+check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
+check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
+check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
 
 check_obstacle_special(n) :- default::obstacle(0,-1).
 check_obstacle_special(s) :- default::obstacle(0,1).
 check_obstacle_special(e) :- default::obstacle(1,0).
 check_obstacle_special(w) :- default::obstacle(-1,0).
 
-check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | default::thing(0, -2, entity, Team) | default::thing(0, -3, entity, Team) | default::thing(0, -4, entity, Team) | default::thing(0, -5, entity, Team)).
-check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | default::thing(0, 2, entity, Team) | default::thing(0, 3, entity, Team) | default::thing(0, 4, entity, Team) | default::thing(0, 5, entity, Team)).
-check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | default::thing(2, 0, entity, Team) | default::thing(3, 0, entity, Team) | default::thing(4, 0, entity, Team) | default::thing(5, 0, entity, Team)).
-check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | default::thing(-2, 0, entity, Team) | default::thing(-3, 0, entity, Team) | default::thing(-4, 0, entity, Team) | default::thing(-5, 0, entity, Team)).
+check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | default::thing(0, -2, entity, Team)). //| default::thing(0, -3, entity, Team) | default::thing(0, -4, entity, Team) | default::thing(0, -5, entity, Team)).
+check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | default::thing(0, 2, entity, Team)). //| default::thing(0, 3, entity, Team) | default::thing(0, 4, entity, Team) | default::thing(0, 5, entity, Team)).
+check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | default::thing(2, 0, entity, Team)). //| default::thing(3, 0, entity, Team) | default::thing(4, 0, entity, Team) | default::thing(5, 0, entity, Team)).
+check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | default::thing(-2, 0, entity, Team)). //| default::thing(-3, 0, entity, Team) | default::thing(-4, 0, entity, Team) | default::thing(-5, 0, entity, Team)).
 
 prune_direction([],PrunedDirListTemp,PrunedDirList) :- PrunedDirList = PrunedDirListTemp.
 prune_direction([Dir|L],PrunedDirListTemp,PrunedDirList) :- check_obstacle(Dir) & prune_direction(L,PrunedDirListTemp,PrunedDirList).
