@@ -21,14 +21,14 @@
 
 +!stop::update_blocks_count([]) : true <- true.
 +!stop::update_blocks_count([req(_, _, Type)|Blocks]) : 
-	stop::block_count(Type, Count) 
+	retrieve::block_count(Type, Count) 
 <-
-	-stop::block_count(Type, _);
+	-retrieve::block_count(Type, _);
 	Count1 = Count + 1;
-	+stop::block_count(Type, Count1);
+	+retrieve::block_count(Type, Count1);
 	!stop::update_blocks_count(Blocks).
 +!stop::update_blocks_count([req(_, _, Type)|Blocks]) : true <-
-	+stop::block_count(Type, 1);
+	+retrieve::block_count(Type, 1);
 	!stop::update_blocks_count(Blocks).
 	
 +!stop::conditional_stop(Blocks, NGoals, Dispensers, true) : 
