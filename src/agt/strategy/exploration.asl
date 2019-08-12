@@ -3,10 +3,10 @@ check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2). //| defaul
 check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
 check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
 
-check_obstacle_special(n) :- default::obstacle(0,-1) | (default::thing(0, -1, _, _) & not(default::attached(0, -1))).
-check_obstacle_special(s) :- default::obstacle(0,1)  | (default::thing(0, 1, _, _)& not(default::attached(0, 1))).
-check_obstacle_special(e) :- default::obstacle(1,0)  | (default::thing(1, 0, _, _)& not(default::attached(1, 0))).
-check_obstacle_special(w) :- default::obstacle(-1,0) | (default::thing(-1, 0, _, _)& not(default::attached(-1, 0))).
+check_obstacle_special(n) :- default::obstacle(0,-1) | (default::thing(0, -1, Type, _) & Type \== dispenser & not(default::attached(0, -1))).
+check_obstacle_special(s) :- default::obstacle(0,1)  | (default::thing(0, 1, Type, _) & Type \== dispenser & not(default::attached(0, 1))).
+check_obstacle_special(e) :- default::obstacle(1,0)  | (default::thing(1, 0, Type, _) & Type \== dispenser & not(default::attached(1, 0))).
+check_obstacle_special(w) :- default::obstacle(-1,0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & not(default::attached(-1, 0))).
 
 check_obstacle_special_1(n) :- default::obstacle(0,-2).
 check_obstacle_special_1(s) :- default::obstacle(0,2).
@@ -36,7 +36,7 @@ remove_opposite(s,n) :- true.
 remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
 
-+!explore(DirList) : stop::stop & (.my_name(agent1) | .my_name(agent3) | .my_name(agent5)) <- !!retrieve::retrieve_block.
++!explore(DirList) : stop::stop & (.my_name(agent1) | .my_name(agent2) | .my_name(agent3) | .my_name(agent4)) <- !!retrieve::retrieve_block.
 
 +!explore(DirList) 
 	: prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,Dir)
