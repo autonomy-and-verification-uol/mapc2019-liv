@@ -43,7 +43,7 @@
 	!action::commit_action(connect(Agent,X,Y));
 	.
 // Improve this failure to drop disjunction into two different plans
--!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_parameter)))] <- .print(Agent," is not in our team, or ",X," and ",Y," are not integers.").
+-!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_parameter)))] <- .print(Agent," is not in our team, or ",X," and ",Y," are not valid integers.").
 // Improve this failure to drop disjunction into two different plans
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_partner)))] <- .print("The other agent didn't send connect action, or failed randomly, or it had wrong parameters.").
 // Improve this failure to drop disjunction into two different plans
@@ -69,5 +69,11 @@
 // Improve this failure to drop disjunction into two different plans
 -!submit(Task)[code(.fail(action(Action),result(failed)))] <- .print("At least one block is missing, or the agent is not in a goal terrain.").
 
-
-		
+// ##### CLEAR ACTION #####
++!clear(X,Y)
+<-
+	!action::commit_action(clear(X,Y));
+	.
+-!clear(X,Y)[code(.fail(action(Action),result(failed_parameter)))] <- .print(X," and ",Y," are not valid integers.").
+-!clear(X,Y)[code(.fail(action(Action),result(failed_target)))] <- .print("Target location is not within the agent's vision or outside the grid.").
+-!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Energy is too low.").

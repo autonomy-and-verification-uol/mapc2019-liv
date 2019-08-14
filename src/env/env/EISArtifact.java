@@ -294,6 +294,8 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"goal",
 		"attached",
 		"lastActionParams",
+		"energy",
+		"disabled",
 //		"timestamp",
 //		"deadline",
 	}));
