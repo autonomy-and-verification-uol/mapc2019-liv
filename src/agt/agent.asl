@@ -26,6 +26,7 @@
 +default::actionID(0)
 	: true 
 <- 
+	.wait(1000);
 	!!exploration::explore([n,s,e,w]);
 	.
     

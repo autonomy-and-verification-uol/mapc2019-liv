@@ -92,59 +92,68 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.send(Name, tell, identification::agent_sees(skip,_));
 	.
  
-
+@addid1[atomic]
 +!add_identified_ags([],IdList) : true <- true.
+@addid2[atomic]
 +!add_identified_ags([Ag|Ags],IdList) : .member(Ag,IdList)  <- !add_identified_ags(Ags,IdList).
+@addid3[atomic]
 +!add_identified_ags([Ag|Ags],IdList) 
-	: not .member(Ag,IdList) //& not identification::merged
+	: not .member(Ag,IdList)
 <- 
-	?identification::identified(OldList);
-	Identified = .length(OldList);
-//	.print("Adding new identified agent ",Ag);
-	!map::get_map_size(Size);
-	.print("Sending map size to ",Ag);
-	getMyPos(MyX,MyY);
-	?identification::i_know(Ag,LocalX,LocalY);
-	?map::myMap(Map);
-	.send(Ag,tell,map::map_size(Size,Identified,MyX,MyY,LocalX,LocalY,Map,OldList));
-	.print("Waiting for map size from ",Ag);
-	.wait(map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)]);
-	-map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)];
-	if (Size > SizeOther) {
-		.print("I am the origin!");
-		!merge_id(OldListOther,Ag);
-	}
-	elif (Size == SizeOther) {
-		if (Identified > IdentifiedOther) {
-			.print("I am the origin (second try, known agents)!");
-			!merge_id(OldListOther,Ag);
-		}
-		elif (Identified == IdentifiedOther) {
-			.print("We dont know how to decide the origin, time to pick randomly.");
-			.all_names(AllAgents);
-			.my_name(Me);
-			.nth(Pos,AllAgents,Me);
-			.nth(PosOther,AllAgents,Ag);
-			if (Pos > PosOther) {
-				.print("I am the origin (third try, random)!");
-				!merge_id(OldListOther,Ag);
-			}
-			else {
-				.print("I am not the origin (third try, random).");
-				!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-			}
-		}
-		else {
-			.print("I am not the origin (second try, known agents).");
-			!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-		}
-	}
-	else { 
-		.print("I am not the origin.");
-		!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-	}
+	?identification::identified(OldList); 
+	-identification::identified(OldList);  
+	+identification::identified([Ag|OldList]);
 	!add_identified_ags(Ags,IdList);
 	.
+	
+	
+//	?identification::identified(OldList);
+//	Identified = .length(OldList);
+////	.print("Adding new identified agent ",Ag);
+//	!map::get_map_size(Size);
+//	.print("Sending map size to ",Ag);
+//	getMyPos(MyX,MyY);
+//	?identification::i_know(Ag,LocalX,LocalY);
+//	?map::myMap(Map);
+//	.send(Ag,tell,map::map_size(Size,Identified,MyX,MyY,LocalX,LocalY,Map,OldList));
+//	.print("Waiting for map size from ",Ag);
+//	.wait(map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)]);
+//	-map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)];
+//	if (Size > SizeOther) {
+//		.print("I am the origin!");
+//		!merge_id(OldListOther,Ag);
+//	}
+//	elif (Size == SizeOther) {
+//		if (Identified > IdentifiedOther) {
+//			.print("I am the origin (second try, known agents)!");
+//			!merge_id(OldListOther,Ag);
+//		}
+//		elif (Identified == IdentifiedOther) {
+//			.print("We dont know how to decide the origin, time to pick randomly.");
+//			.all_names(AllAgents);
+//			.my_name(Me);
+//			.nth(Pos,AllAgents,Me);
+//			.nth(PosOther,AllAgents,Ag);
+//			if (Pos > PosOther) {
+//				.print("I am the origin (third try, random)!");
+//				!merge_id(OldListOther,Ag);
+//			}
+//			else {
+//				.print("I am not the origin (third try, random).");
+//				!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
+//			}
+//		}
+//		else {
+//			.print("I am not the origin (second try, known agents).");
+//			!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
+//		}
+//	}
+//	else { 
+//		.print("I am not the origin.");
+//		!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
+//	}
+//	!add_identified_ags(Ags,IdList);
+//	.
 
 +!merge_id(OldListOther,AgSeen)
 	: .my_name(Me)
