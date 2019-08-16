@@ -1,7 +1,7 @@
-check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
-check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
-check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
-check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
+check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2) | default::thing(0,-1, marker, clear) | default::thing(0,-2, marker, clear). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
+check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2) | default::thing(0,1, marker, clear) | default::thing(0,2, marker, clear). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
+check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0)  | default::thing(1,0, marker, clear) | default::thing(2,0, marker, clear). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
+check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0) | default::thing(-1,0, marker, clear) | default::thing(-2,0, marker, clear). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
 
 check_obstacle_special(n) :- default::obstacle(0,-1).
 check_obstacle_special(s) :- default::obstacle(0,1).
