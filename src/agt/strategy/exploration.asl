@@ -118,6 +118,13 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
+	: exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & .empty(PrunedDirList) & not check_obstacle_special(NewDir)
+<-
+	!action::move(NewDir);
+	!!explore_until_obstacle_special(NewDir);
+	.
+	
++!explore_until_obstacle_special(Dir)
 	: exploration::special(second) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	-special(second);
