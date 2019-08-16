@@ -75,6 +75,6 @@ public class Cell {
 		else if(this.goal)
 			return "G ";
 		else
-			return "E ";
+			return "  ";
 	}
 }

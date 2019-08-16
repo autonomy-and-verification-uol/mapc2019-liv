@@ -2,7 +2,10 @@ package env.map;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
@@ -175,6 +178,39 @@ public class OurMap {
 		}
 	}
 	
+	//Auxiliary method for the method getSuccessors
+	private void addSuccessor(Coordinates succCoordinates, Cell cell, List<Coordinates> list) {
+		if(cell != null && cell.isSeen() && !cell.isWall())
+			list.add(succCoordinates);
+	}
+	
+	
+	//Returns the list of neighbouring cells that are not unseen or walls
+	public List<Coordinates> getSuccessors(Coordinates node){
+		Coordinates north = new Coordinates(node.getXCoordinate(), node.getYCoordinate() - 1);
+		Coordinates east = new Coordinates(node.getXCoordinate() + 1, node.getYCoordinate());
+		Coordinates south = new Coordinates(node.getXCoordinate(), node.getYCoordinate() + 1);
+		Coordinates west = new Coordinates(node.getXCoordinate() - 1, node.getYCoordinate());
+		List<Coordinates> resultingList = new LinkedList<Coordinates>();
+		
+		Cell tmpCell = getCell(north);
+		
+		addSuccessor(north, tmpCell, resultingList);
+		
+		tmpCell = getCell(east);
+		
+		addSuccessor(east, tmpCell, resultingList);
+		
+		tmpCell = getCell(south);
+		
+		addSuccessor(south, tmpCell, resultingList);
+		
+		tmpCell = getCell(west);
+		
+		addSuccessor(west, tmpCell, resultingList);
+		
+		return resultingList;
+	}
 	
 	//Method to return the cell in the map at some given coordinate. Returns null if the cell is not in the map
 	public Cell getCell(Coordinates coordinates) {
@@ -191,6 +227,46 @@ public class OurMap {
 		
 		return cell;
 	}
+	
+	
+	private int getManhattanDistance(Coordinates source, Coordinates destination) {
+		int horizontalSteps = Math.abs(source.getXCoordinate() - destination.getXCoordinate());
+		int verticalSteps = Math.abs(source.getYCoordinate() - destination.getYCoordinate());
+		return (horizontalSteps + verticalSteps);
+	}
+	
+	//A* algorithm for finding the shortest path from source to destination
+	public Path search(Coordinates source, Coordinates destination) {
+		PriorityQueue<Path> frontier = new PriorityQueue<Path>();
+		Set<Coordinates> visited = new HashSet<Coordinates>();
+		Path startingPath = new Path(source, this.getManhattanDistance(source, destination));
+		frontier.add(startingPath);
+		boolean pathFound = false;
+		Path resultingPath = null;
+		while(!frontier.isEmpty() && !pathFound) {
+			Path currentPath = frontier.poll();
+			if(!visited.contains(currentPath.getTerminalNode())) {
+				if(currentPath.getTerminalNode().equals(destination)) {
+					pathFound = true;
+					resultingPath = currentPath;
+					
+				} else {
+					List<Coordinates> successors = this.getSuccessors(currentPath.getTerminalNode());
+					int pathLength = currentPath.getLength();
+					visited.add(currentPath.getTerminalNode());
+					
+					for(Coordinates c : successors) 
+						frontier.add(currentPath.addSuccessor(c, pathLength + getManhattanDistance(c, destination)));
+				}
+			}
+		}
+		
+		if(pathFound)
+			return resultingPath;
+		
+		return null;
+	}
+	
 	
 	//Auxiliary method for printing the map
 	private void printRow(int minX, int maxX) {
