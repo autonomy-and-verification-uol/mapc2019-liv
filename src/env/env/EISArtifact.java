@@ -279,6 +279,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"name",
 		"steps",
 		"team",
+		"vision",
 	}));
 	
 	static Set<String> step_obs_prop = new HashSet<String>( Arrays.asList(new String[] {

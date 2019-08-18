@@ -1,6 +1,6 @@
 // test plan, should be removed later on
 +default::step(X)
-	: X \== 0 & X mod 100 = 0
+	: X \== 0 & X mod 25 = 0
 <-
 	!get_dispensers(DList);
 	!get_goal(GList);
