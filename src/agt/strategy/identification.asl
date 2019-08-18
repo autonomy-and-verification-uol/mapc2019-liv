@@ -138,7 +138,8 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	getMyPos(MyX,MyY);
 	updateMyPos(MyX+OriginX,MyY+OriginY);
 	.
-	
+
+@requestmerge[atomic]
 +!request_merge(MergeList,GlobalX,GlobalY)[source(_)]
 	: true
 <-
@@ -162,7 +163,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 
 @replyleaderme[atomic]
 +!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList)[source(Source)]
-	: .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
+	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
 <-
 	.send(Leader, achieve, identification::confirm_merge);
 	.wait(identification::merge_confirmed(IdListOther)[source(Leader)] | identification::merge_canceled[source(Leader)]);
