@@ -116,6 +116,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.delete(Me,List,AuxList);
 	.union(AuxList,[Ag],NewList);
 	+identification::identified(NewList);
+	!stop::new_dispenser_or_merge;
 	.
 @updateidother[atomic]
 +!update_identified(List,NewOriginX,NewOriginY)[source(Ag)]
@@ -127,6 +128,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.union(AuxList,[Ag],NewList);
 	+identification::identified(NewList);
 	!update_pos(Ag,NewOriginX,NewOriginY);
+	!stop::new_dispenser_or_merge;
 	.
 	
 @updatepos[atomic]
@@ -189,6 +191,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 		for (.member(Ag,IdListOther)) {
 			.send(Ag, achieve, identification::update_identified(NewList,NewOriginX,NewOriginY));
 		}
+		!stop::new_dispenser_or_merge;
 	}
 	else {
 		-identification::merge_canceled[source(Leader)];
@@ -211,6 +214,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.union(NewListAux2,[Ag],NewList);
 	+identification::identified(NewList);
 	!update_pos(Ag,NewOriginX,NewOriginY);
+	!stop::new_dispenser_or_merge;
 	.
 @cancelmerge[atomic]
 +!identification::confirm_merge[source(Ag)]
