@@ -74,9 +74,17 @@ remove_opposite(w,e) :- true.
 	.print("I see someone from my team, time to *try* to go around it.");
 	!go_around(Dir,DirList);
 	.
+	
++!explore_until_obstacle(Dir)
+	: action::out_of_bounds(Dir)
+<-
+	-action::out_of_bounds(Dir);
+	.delete(Dir,[n,s,e,w],DirList);
+	!!explore(DirList);
+	.
 
 +!explore_until_obstacle(Dir)
-	: not check_obstacle(Dir)
+	: not check_obstacle(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle(Dir);
@@ -100,9 +108,18 @@ remove_opposite(w,e) :- true.
 	.print("I see someone from my team, time to *try* to go around it.");
 	!go_around(Dir,DirList);
 	.
+	
++!explore_until_obstacle_special(Dir)
+	: exploration::special(S) & action::out_of_bounds(Dir)
+<-
+	-exploration::special(S);
+	-action::out_of_bounds(Dir);
+	.delete(Dir,[n,s,e,w],DirList);
+	!!explore(DirList);
+	.
 
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(_) & not check_obstacle_special(Dir)
+	: exploration::special(_) & not check_obstacle_special(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle_special(Dir);
