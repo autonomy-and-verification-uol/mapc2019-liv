@@ -16,14 +16,14 @@
 <-
 	getMyPos(MyX,MyY);
 	!map::get_dispensers(Dispensers);
-	!map::update_dispenser_in_map(Type, MyX+X, MyY+Y, Dispensers);
+	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
 
-+!map::update_dispenser_in_map(Type, GlX, GlY, Dispensers) : .member(dispenser(Type, GlX, GlY), Dispensers) <- true.
-+!map::update_dispenser_in_map(Type, GlX, GlY, Dispensers) 
++!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers) : .member(dispenser(Type, MyX+X, MyY+Y), Dispensers) <- true.
++!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers) 
 	: map::myMap(Leader)
 <-
-	.send(Leader, achieve, map::add_map(Type, GlX, GlY));
+	.send(Leader, achieve, map::add_map(Type, MyX, MyY, X, Y));
 	.
 
 @perceivegoal[atomic]
@@ -32,35 +32,54 @@
 <-
 	getMyPos(MyX,MyY);
 	!map::get_goal(Goals);
-	!map::update_goal_in_map(MyX+X, MyY+Y, Goals);
+	!map::update_goal_in_map(MyX, MyY, X, Y, Goals);
 	.
 	
-+!map::update_goal_in_map(GlX, GlY, Goals) : .member(goal(GlX, GlY), Goals) <- true.
-+!map::update_goal_in_map(GlX, GlY, Goals) 
++!map::update_goal_in_map(MyX, MyY, X, Y, Goals) : .member(goal(MyX+X, MyY+Y), Goals) <- true.
++!map::update_goal_in_map(MyX, MyY, X, Y, Goals) 
 	: map::myMap(Leader)
 <-
-	.send(Leader, achieve, map::add_map(goal, GlX, GlY));
+	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
 	.
 	
 @addmap[atomic]
-+!add_map(Type, GlX, GlY)
++!add_map(Type, MyX, MyY, X, Y)
 	: .my_name(Me) & map::myMap(Me)
 <-
-	!map::get_dispensers(Dispensers);
-	updateMap(Me, Type, GlX, GlY);
-	?identification::identified(IdList);
-	if (Type \== goal & not .member(dispenser(Type,_,_),Dispensers)) {
-		for (.member(Ag,IdList)) {
-			.send(Ag, achieve, stop::new_dispenser_or_merge);
+	updateMap(Me, Type, MyX+X, MyY+Y);
+	if (Type \== goal) {
+		!map::get_dispensers(Dispensers);
+		if (not .member(dispenser(Type,_,_),Dispensers)) {
+			?identification::identified(IdList);
+			for (.member(Ag,IdList)) {
+				.send(Ag, achieve, stop::new_dispenser_or_merge);
+			}
+			!stop::new_dispenser_or_merge;
 		}
-		!stop::new_dispenser_or_merge;
 	}
 	.
 @addmapnotme[atomic]
-+!add_map(Type, GlX, GlY)
-	: map::myMap(Leader)
++!add_map(Type, MyX, MyY, X, Y)[source(Ag)]
+	: true
 <-
-	.send(Leader, achieve, map::add_map(Type, GlX, GlY));
+	.send(Ag, achieve, exploration::try_again(Type, X, Y));
+	.
+
+@trygoal[atomic]
++!try_again(goal, X, Y)
+	: true
+<-
+	getMyPos(MyX,MyY);
+	!map::get_goal(Goals);
+	!map::update_goal_in_map(MyX, MyY, X, Y, Goals);
+	.
+@trydispenser[atomic]
++!try_again(Type, X, Y)
+	: true
+<-
+	getMyPos(MyX,MyY);
+	!map::get_dispensers(Dispensers);
+	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
 
 +!get_dispensers(List)
