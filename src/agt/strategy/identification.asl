@@ -39,7 +39,7 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 +default::thing(X, Y, entity, Team)
 	: not(X == 0 & Y == 0) & default::team(Team) & not(action::reasoning_about_belief(identification)) & default::actionID(ID) & identification::identified(List) & .all_names(Ags) & .length(Ags,NumberAgents) & not .length(List,NumberAgents-1)
 <-
-//	+action::reasoning_about_belief(identification);
+	+action::reasoning_about_belief(identification);
 //	.print("I see another agent of my team at ", X, ",", Y);
 	.print("START TURN");
 	.broadcast(achieve, identification::request_information(ID));
@@ -92,111 +92,48 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.send(Name, tell, identification::agent_sees(skip,_));
 	.
  
-
+@addid1[atomic]
 +!add_identified_ags([],IdList) : true <- true.
+@addid2[atomic]
 +!add_identified_ags([Ag|Ags],IdList) : .member(Ag,IdList)  <- !add_identified_ags(Ags,IdList).
+@addid3[atomic]
 +!add_identified_ags([Ag|Ags],IdList) 
-	: not .member(Ag,IdList) //& not identification::merged
+	: not .member(Ag,IdList)
 <- 
-	?identification::identified(OldList);
-	Identified = .length(OldList);
-//	.print("Adding new identified agent ",Ag);
-	!map::get_map_size(Size);
-	.print("Sending map size to ",Ag);
-	getMyPos(MyX,MyY);
+	?identification::merge(MergeOldList); 
+	-identification::merge(MergeOldList);
 	?identification::i_know(Ag,LocalX,LocalY);
-	?map::myMap(Map);
-	.send(Ag,tell,map::map_size(Size,Identified,MyX,MyY,LocalX,LocalY,Map,OldList));
-	.print("Waiting for map size from ",Ag);
-	.wait(map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)]);
-	-map::map_size(SizeOther,IdentifiedOther,OtherX,OtherY,LocalXOther,LocalYOther,MapOther,OldListOther)[source(Ag)];
-	if (Size > SizeOther) {
-		.print("I am the origin!");
-		!merge_id(OldListOther,Ag);
-	}
-	elif (Size == SizeOther) {
-		if (Identified > IdentifiedOther) {
-			.print("I am the origin (second try, known agents)!");
-			!merge_id(OldListOther,Ag);
-		}
-		elif (Identified == IdentifiedOther) {
-			.print("We dont know how to decide the origin, time to pick randomly.");
-			.all_names(AllAgents);
-			.my_name(Me);
-			.nth(Pos,AllAgents,Me);
-			.nth(PosOther,AllAgents,Ag);
-			if (Pos > PosOther) {
-				.print("I am the origin (third try, random)!");
-				!merge_id(OldListOther,Ag);
-			}
-			else {
-				.print("I am not the origin (third try, random).");
-				!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-			}
-		}
-		else {
-			.print("I am not the origin (second try, known agents).");
-			!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-		}
-	}
-	else { 
-		.print("I am not the origin.");
-		!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList);
-	}
+	+identification::merge([agent(Ag,LocalX,LocalY)|MergeOldList]);
 	!add_identified_ags(Ags,IdList);
 	.
-
-+!merge_id(OldListOther,AgSeen)
-	: .my_name(Me)
-<-
-	?identification::identified(OldListOld);
-	-identification::identified(OldListOld);
-	+identification::identified([AgSeen|OldListOld]);
-	for (.member(Ag,OldListOther)) {
-		?identification::identified(OldList);
-		-identification::identified(OldList);
-		+identification::identified([Ag|OldList]);
-	}
-	?identification::identified(FinalList);
-	for (.member(Ag,FinalList)) {
-		.send(Ag,achieve,identification::update_identified([Me|FinalList]));
-	}
-	.
-
-@updateid[atomic]
-+!update_identified(List)[source(_)]
+	
+@updateidmergeside[atomic]
++!update_identified(List)[source(Ag)]
 	: .my_name(Me)
 <-
 	?identification::identified(OldList);
 	-identification::identified(OldList);
-	.delete(Me,List,NewList);
+	.delete(Me,List,AuxList);
+	.union(AuxList,[Ag],NewList);
 	+identification::identified(NewList);
+	!stop::new_dispenser_or_merge;
+	.
+@updateidother[atomic]
++!update_identified(List,NewOriginX,NewOriginY)[source(Ag)]
+	: .my_name(Me)
+<-
+	?identification::identified(OldList);
+	-identification::identified(OldList);
+	.delete(Me,List,AuxList);
+	.union(AuxList,[Ag],NewList);
+	+identification::identified(NewList);
+	!update_pos(Ag,NewOriginX,NewOriginY);
+	!stop::new_dispenser_or_merge;
 	.
 	
-+!merge_map(Map,MapOther,LocalXOther,OtherX,LocalYOther,OtherY,MyX,MyY,OldList)
-	: true
-<-
-	NewOriginX = (LocalXOther + OtherX) - MyX;
-	NewOriginY = (LocalYOther + OtherY) - MyY;
-	for (.member(Ag,OldList)) {
-		.send(Ag,achieve,identification::update_pos(NewOriginX,NewOriginY,MapOther));
-	}
-	updateMyPos(LocalXOther+OtherX,LocalYOther+OtherY);
-	!map::get_dispensers(DispList);
-	!map::get_goal(GoalList);
-	-map::myMap(Map);
-	+map::myMap(MapOther);
-	for (.member(dispenser(Type,DX,DY),DispList)) {
-		updateMap(MapOther,Type,NewOriginX+DX,NewOriginY+DY);
-	}
-	for (.member(goal(GX,GY),GoalList)) {
-		updateMap(MapOther,goal,NewOriginX+GX,NewOriginY+GY);
-	}
-	.
-
 @updatepos[atomic]
-+!update_pos(OriginX,OriginY,MapOther)[source(_)]
-	: map::myMap(Map) & .my_name(Me)
++!update_pos(MapOther,OriginX,OriginY)
+	: map::myMap(Map)
 <-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
@@ -204,12 +141,107 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	updateMyPos(MyX+OriginX,MyY+OriginY);
 	.
 
+@requestmerge[atomic]
++!request_merge(MergeList,GlobalX,GlobalY)[source(_)]
+	: true
+<-
+	for (.member(agent(Ag,LocalX,LocalY),MergeList)) {
+		?identification::identified(IdList);
+		if (not .member(Ag,IdList)) {
+			.send(Ag, achieve, identification::request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY));
+		}
+	}
+	.
+
++!request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY)[source(Source)]
+	: map::myMap(Leader)
+<-
+	.print(Source," requested leader to merge with ",Ag);
+	!map::get_dispensers(DispList);
+	!map::get_goal(GoalList);
+	getMyPos(OtherX,OtherY);
+	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList));
+	.
+
+@replyleaderme[atomic]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList)[source(Source)]
+	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
+<-
+	.send(Leader, achieve, identification::confirm_merge);
+	.wait(identification::merge_confirmed(IdListOther)[source(Leader)] | identification::merge_canceled[source(Leader)]);
+	if (identification::merge_confirmed(IdListOther)[source(Leader)]) {
+		-identification::merge_confirmed(IdListOther)[source(Leader)];
+		NewOriginX = (GlobalX + LocalX) - OtherX;
+		NewOriginY = (GlobalY + LocalY) - OtherY;
+		for (.member(dispenser(Type,DX,DY),DispList)) {
+			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
+		}
+		for (.member(goal(GX,GY),GoalList)) {
+			updateMap(Me,goal,NewOriginX+GX,NewOriginY+GY);
+		}
+		?identification::identified(IdList);
+		-identification::identified(IdList);
+		.union(IdList,IdListOther,NewListAux);
+		.union(NewListAux,[Leader],NewList);
+		+identification::identified(NewList);
+		.send(Leader, tell, identification::merge_completed(NewList,NewOriginX,NewOriginY));
+		for (.member(Ag,IdList)) {
+			.send(Ag, achieve, identification::update_identified(NewList));
+		}
+		for (.member(Ag,IdListOther)) {
+			.send(Ag, achieve, identification::update_identified(NewList,NewOriginX,NewOriginY));
+		}
+		!stop::new_dispenser_or_merge;
+	}
+	else {
+		-identification::merge_canceled[source(Leader)];
+		.print("Merge has been canceled!");
+	}
+	.
+@replyleadernotme[atomic]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList)[source(Source)].
+
+@waitformerge[atomic]
++!identification::confirm_merge[source(Ag)]
+	: .my_name(Me) & map::myMap(Me)
+<-
+	?identification::identified(IdListOther);
+	.send(Ag, tell, identification::merge_confirmed(IdListOther));
+	.wait(identification::merge_completed(NewListAux,NewOriginX,NewOriginY)[source(Ag)]);
+	-identification::merge_completed(NewListAux,NewOriginX,NewOriginY)[source(Ag)];
+	-identification::identified(IdListOther);
+	.delete(Me,NewListAux,NewListAux2);
+	.union(NewListAux2,[Ag],NewList);
+	+identification::identified(NewList);
+	!update_pos(Ag,NewOriginX,NewOriginY);
+	!stop::new_dispenser_or_merge;
+	.
+@cancelmerge[atomic]
++!identification::confirm_merge[source(Ag)]
+	: true
+<-
+	.send(Ag, tell, identification::merge_canceled);
+	.
+
 +!check_all_agent_sees([]) 
-	: .all_names(Ags)
+	: .all_names(Ags) & .my_name(Me)
 <- 
 	.findall(Ag, (identification::i_know(Ag, _, _) & not(identification::doubts_on(Ag))), Iknow);
+	+merge([]);
 	?identification::identified(IdList);
 	!add_identified_ags(Iknow,IdList);
+	?merge(MergeList);
+	-merge(MergeList);
+	?map::myMap(Leader);
+	if (not .empty(MergeList)) {
+		getMyPos(MyX,MyY);
+		if (Me == Leader) {
+			!request_merge(MergeList,MyX,MyY);
+		}
+		else {
+			.send(Leader, achieve, identification::request_merge(MergeList,MyX,MyY));
+		}
+	}
 	.abolish(identification::i_know(_, _, _));
 	.abolish(identification::doubts_on(_));
 	.
@@ -224,7 +256,6 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 <- 
 	!check_all_agent_sees(Ags);
 	.
-
 
 +!check_agent_sees(Name, EverythingSeen)
 	: .findall(thing(X, Y, entity, Team), (default::thing(X, Y, entity, Team)), Things) & i_see_it(EverythingSeen, MyViewX, MyViewY) & identify(EverythingSeen, MyViewX, MyViewY)

@@ -221,7 +221,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 				else if (lastActionParams.getTerm(0).toString().contains("s")) { mypos.y++; }
 				else if (lastActionParams.getTerm(0).toString().contains("e")) { mypos.x++; }
 				else { mypos.x--; }
-				logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y);
+//				logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y);
 			}
 			defineObsProperty(step.getFunctor(), (Object[]) step.getTermsArray());
 			defineObsProperty(lastAction.getFunctor(), (Object[]) lastAction.getTermsArray());
@@ -279,6 +279,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"name",
 		"steps",
 		"team",
+		"vision",
 	}));
 	
 	static Set<String> step_obs_prop = new HashSet<String>( Arrays.asList(new String[] {
@@ -294,6 +295,8 @@ public class EISArtifact extends Artifact implements AgentListener {
 		"goal",
 		"attached",
 		"lastActionParams",
+		"energy",
+		"disabled",
 //		"timestamp",
 //		"deadline",
 	}));
