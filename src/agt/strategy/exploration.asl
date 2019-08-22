@@ -36,6 +36,11 @@ remove_opposite(s,n) :- true.
 remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
 
+relative_right(n,e) :- true.
+relative_right(s,w) :- true.
+relative_right(e,s) :- true.
+relative_right(w,n) :- true.
+
 +!explore(DirList) 
 	: check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
@@ -155,7 +160,7 @@ remove_opposite(w,e) :- true.
 	.
 
 +!go_around(OldDir,DirList)
-	: not exploration::avoid(_) & prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .concat(PrunedDirList,[OldDir],NewPrunedDirList) & .length(NewPrunedDirList,Length) & .random(Number) & random_dir(NewPrunedDirList,Length,Number,Dir)
+	: not exploration::avoid(_) & relative_right(OldDir, Dir) & not check_obstacle_special(Dir) // prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .concat(PrunedDirList,[OldDir],NewPrunedDirList) & .length(NewPrunedDirList,Length) & .random(Number) & random_dir(NewPrunedDirList,Length,Number,Dir)
 <-
 	+avoid(1);
 	!action::move(Dir);
@@ -163,10 +168,11 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!go_around(OldDir,DirList)
-	: not exploration::avoid(_) & prune_direction(DirList,[],PrunedDirList)  & .empty(PrunedDirList)
+	: not exploration::avoid(_)
 <-
+	+avoid(1);
 	!action::move(OldDir);
-	!!go_around(OldDir, DirList);
+	!!go_around(OldDir, Dir);
 	.
 	
 +!go_around(OldDir, Dir)
