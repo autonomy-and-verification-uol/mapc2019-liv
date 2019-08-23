@@ -1,6 +1,7 @@
 package env.map;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Path implements Comparable<Path>{
 	private LinkedList<Coordinates> path;
@@ -57,6 +58,27 @@ public class Path implements Comparable<Path>{
 		return newPath;
 	}
 
+	//Assumption: the two coordinates are adjacent
+	private String getDirection(Coordinates c1, Coordinates c2) {
+		if(c1.getXCoordinate() < c2.getXCoordinate())
+			return "e";
+		
+		if(c1.getXCoordinate() > c2.getXCoordinate())
+			return "w";
+		
+		if(c1.getYCoordinate() < c2.getYCoordinate())
+			return "s";
+		
+		return "n";
+	}
+	
+	public List<String> path2directions(){
+		List<String> directions = new LinkedList<String>();
+		for(int i = 0; i < this.getLength(); i++)
+			directions.add(this.getDirection(this.path.get(i), this.path.get(i + 1)));
+		return directions;
+	}
+	
 	public void print() {
 		for(int i = 0; i < this.path.size() - 1; i++)
 			System.out.print(this.path.get(i).toString() + " -> ");

@@ -86,7 +86,15 @@ public class Axis<T> {
 	//Assumption: the coordinate exists (checked by the map)
 	//Note: the coordinate are given without knowing where the origin is, but the value is adjusted in the method
 	public void update(T newValue, int coordinate) {
-		this.axis.set(coordinate + this.getOrigin(), newValue);
+		if(newValue instanceof Cell) {
+			Cell currentCell = (Cell)this.axis.get(coordinate + this.getOrigin());
+			Cell newCell = (Cell)newValue;
+			if(newCell.getStep() >= currentCell.getStep() && newCell.isSeen())
+				this.axis.set(coordinate + this.getOrigin(), newValue);
+		}
+		
+		else
+			this.axis.set(coordinate + this.getOrigin(), newValue);
 	}
 	
 	//Returns the value at coordinate `coordinate' after adjusting the coordinates

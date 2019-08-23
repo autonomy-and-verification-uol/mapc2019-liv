@@ -11,6 +11,7 @@ public class Cell {
 	private String dispenserType;
 	private boolean wall;
 	private boolean goal;
+	private int step;
 	
 	public Cell() {
 		this.seen = false;
@@ -18,6 +19,7 @@ public class Cell {
 		this.dispenserType = null;
 		this.wall = false;
 		this.goal = false;
+		this.step = -1;
 	}
 
 	//getters and setters
@@ -59,6 +61,14 @@ public class Cell {
 
 	public void setGoal(boolean goal) {
 		this.goal = goal;
+	}
+	
+	public int getStep() {
+		return this.step;
+	}
+	
+	public void setStep(int step) {
+		this.step = step;
 	}
 	
 	public void print() {

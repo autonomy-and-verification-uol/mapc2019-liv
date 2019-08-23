@@ -15,7 +15,6 @@ import java.util.Set;
  */
 public class OurMap {
 	private Set<String> knownAgents;
-	private Map<String,Coordinates> agents2coordinates;
 	private Set<String> knownDispenserTypes;
 	private Map<String,Set<Coordinates>> dispenserType2coordinate;
 	private Set<Coordinates> knownGoalPositions;
@@ -25,13 +24,10 @@ public class OurMap {
 	public OurMap(String agentName) {
 		this.knownAgents = new HashSet<String>();
 		this.knownAgents.add(agentName);
-		this.agents2coordinates = new HashMap<String, Coordinates>();
-		Coordinates startingCoordinate = new Coordinates();
-		this.agents2coordinates.put(agentName, startingCoordinate);
 		this.knownDispenserTypes = new HashSet<String>();
 		this.dispenserType2coordinate = new HashMap<String, Set<Coordinates>>();
 		this.knownGoalPositions = new HashSet<Coordinates>();
-		Axis<Cell> yAxis = new Axis<Cell>(CellFactory.getNewEmptyCell());
+		Axis<Cell> yAxis = new Axis<Cell>(CellFactory.getNewEmptyCell(0));
 		this.map = new Axis<Axis<Cell>>(yAxis);
 	}
 	
@@ -48,22 +44,16 @@ public class OurMap {
 		for(int i = -5; i <= 0; i++) {
 			int maxY = 5 - Math.abs(i);
 			for(int j = -maxY; j <= maxY; j++ )
-				this.updateCell(CellFactory.getNewEmptyCell(), new Coordinates(i, j));
+				this.updateCell(CellFactory.getNewEmptyCell(0), new Coordinates(i, j));
 		}
 		
 		for(int i = 1; i <= 5; i++) {
 			int maxY = 5 - Math.abs(i);
 			for(int j = -maxY; j <= maxY; j++ )
-				this.updateCell(CellFactory.getNewEmptyCell(), new Coordinates(i, j));
+				this.updateCell(CellFactory.getNewEmptyCell(0), new Coordinates(i, j));
 		}
 	}
 	
-	//return the coordinates of a specific agent. Returns null if the agent is not known
-	public Coordinates getAgentCoordinates(String agent) {
-		if(this.knownAgents.contains(agent))
-			return this.agents2coordinates.get(agent);
-		return null;
-	}
 	
 	//Returns the set of known agents
 	public Set<String> getAgents(){
@@ -75,11 +65,6 @@ public class OurMap {
 		return this.map;
 	}
 	
-	//Add an agent to the list of known agents and updates its coordinate (adds them if it wasn't there before)
-	public void updateAgentCoordinates(String agent, Coordinates coordinates) {
-		this.knownAgents.add(agent);
-		this.agents2coordinates.put(agent, coordinates);
-	}
 	
 	//Method used to add cells of some default value either to the head or to the tail of an axis
 	private <T> void add(T defaultValue, Axis<T> axis, boolean head) {
@@ -114,12 +99,12 @@ public class OurMap {
 		//Adds unseen cells to the head of the x axis if the coordinate is not in the map yet
 		if(coordinates.getXCoordinate() < 0) 
 			while(moduloX > this.map.getNegativeSize())
-				add(new Axis<Cell>(CellFactory.getNewUnseenCell()), this.map, true);
+				add(new Axis<Cell>(CellFactory.getNewUnseenCell(cell.getStep())), this.map, true);
 		
 		//Adds unseen cells to the tail of the x axis if the coordinate is not in the map yet
 		if(coordinates.getXCoordinate() > 0)
 			while(coordinates.getXCoordinate() > this.map.getPositiveSize())
-				add(new Axis<Cell>(CellFactory.getNewUnseenCell()), this.map, false);
+				add(new Axis<Cell>(CellFactory.getNewUnseenCell(cell.getStep())), this.map, false);
 		
 		
 		//Same thing for the corresponding y axis
@@ -127,11 +112,11 @@ public class OurMap {
 		
 		if(coordinates.getYCoordinate() < 0)
 			while(moduloY > yAxis.getNegativeSize())
-				add(CellFactory.getNewUnseenCell(), yAxis, true);
+				add(CellFactory.getNewUnseenCell(cell.getStep()), yAxis, true);
 		
 		if(coordinates.getYCoordinate() > 0)
 			while(coordinates.getYCoordinate() > yAxis.getPositiveSize())
-				add(CellFactory.getNewUnseenCell(), yAxis, false);
+				add(CellFactory.getNewUnseenCell(cell.getStep()), yAxis, false);
 		
 		//Once the map is guaranteed to contain the coordinates of the cell, update/add the cell
 		yAxis.update(cell, coordinates.getYCoordinate());
@@ -141,18 +126,16 @@ public class OurMap {
 	
 	//Merging another map containing agent2 to the current map containing agent1,
 	//where seenAgent2 represents the coordinates of agent2 w.r.t. agent1
-	public void mergeMaps(String agent1, Coordinates seenAgent2, OurMap map2, String agent2) {
+	public void mergeMaps(String a1, Coordinates a1Coordinates, Coordinates seenA2, OurMap map2, String a2, Coordinates a2Coordinates) {
 		//Step 1. Get the coordinates of agent1, and compute the coordinates of agent2 wrt the origin of map1
-		Coordinates agent1Coordinates = this.agents2coordinates.get(agent1);
 		
-		int agent2Map1X = agent1Coordinates.getXCoordinate() + seenAgent2.getXCoordinate();
-		int agent2Map1Y = agent1Coordinates.getYCoordinate() + seenAgent2.getYCoordinate();
+		int agent2Map1X = a1Coordinates.getXCoordinate() + seenA2.getXCoordinate();
+		int agent2Map1Y = a1Coordinates.getYCoordinate() + seenA2.getYCoordinate();
 		
-		Coordinates agent2Map2Coordinates = map2.getAgentCoordinates(agent2);
 		
 		//Step 2. Compute the coordinates of the origin of map2 wrt to map1
-		int map2OriginX = agent2Map1X - agent2Map2Coordinates.getXCoordinate();
-		int map2OriginY = agent2Map1Y - agent2Map2Coordinates.getYCoordinate();
+		int map2OriginX = agent2Map1X - a2Coordinates.getXCoordinate();
+		int map2OriginY = agent2Map1Y - a2Coordinates.getYCoordinate();
 		
 		//Step 3. Add all the cells in map2 to map1 (converting coordinates accordingly)
 		//NOTE: there is no need to go through the list of dispensers/goals in map2 as they
@@ -169,13 +152,8 @@ public class OurMap {
 		}
 		
 		//Add all the agents in map2 to map1 (updating their coordinates in the process)
-		Set<String> agentsInMap2 = map2.getAgents();
-		
-		for(String agent : agentsInMap2) {
-			Coordinates c = map2.getAgentCoordinates(agent);
-			Coordinates newCoordinates = new Coordinates(c.getXCoordinate() + map2OriginX, c.getYCoordinate() + map2OriginY);
-			this.updateAgentCoordinates(agent, newCoordinates);
-		}
+		for(String agent : map2.getAgents())
+			this.knownAgents.add(agent);
 	}
 	
 	//Auxiliary method for the method getSuccessors
@@ -235,8 +213,9 @@ public class OurMap {
 		return (horizontalSteps + verticalSteps);
 	}
 	
+		
 	//A* algorithm for finding the shortest path from source to destination
-	public Path search(Coordinates source, Coordinates destination) {
+	public List<String> search(Coordinates source, Coordinates destination) {
 		PriorityQueue<Path> frontier = new PriorityQueue<Path>();
 		Set<Coordinates> visited = new HashSet<Coordinates>();
 		Path startingPath = new Path(source, this.getManhattanDistance(source, destination));
@@ -262,7 +241,7 @@ public class OurMap {
 		}
 		
 		if(pathFound)
-			return resultingPath;
+			return resultingPath.path2directions();
 		
 		return null;
 	}
@@ -275,14 +254,6 @@ public class OurMap {
 		System.out.println("-");
 	}
 	
-	//returning the name of the agent at specific coordinates or null otherwise
-	private String agentAtCoordinates(Coordinates coordinates) {
-		for(String agent : this.knownAgents)
-			if(coordinates.equals(this.agents2coordinates.get(agent)))
-				return agent;
-		
-		return null;
-	}
 	
 	//You can guess
 	public void printMap() {
@@ -308,16 +279,11 @@ public class OurMap {
 		for(int i = minY; i <= maxY ; i++) {
 			for(int j = minX; j <= maxX; j++) {
 				System.out.print("|");
-				String agentName = agentAtCoordinates(new Coordinates(j, i)); 
-				if(agentName != null)
-					System.out.print(agentName);
-				else {
-					Cell cell = this.getCell(new Coordinates(j, i));
-					if(cell != null)
-						cell.print();
-					else
-						System.out.print("  ");
-				}
+				Cell cell = this.getCell(new Coordinates(j, i));
+				if(cell != null)
+					cell.print();
+				else
+					System.out.print("  ");
 			}
 			System.out.println("|");
 			this.printRow(minX, maxX);
@@ -325,10 +291,8 @@ public class OurMap {
 		
 		System.out.println();
 		System.out.println("Known Agents");
-		for(String agent : this.knownAgents) {
-			Coordinates c = this.agents2coordinates.get(agent);
-			System.out.println(agent + ": " + c.toString());
-		}
+		for(String agent : this.knownAgents)
+			System.out.println(agent);
 		System.out.println();
 		
 		System.out.println("Known Dispensers");
