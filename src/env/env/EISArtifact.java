@@ -160,7 +160,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	
 	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException {
 		for (Percept old: previousPercepts) {
-			if (step_obs_prop.contains(old.getName()) && !old.getName().equals("task")) {
+			if (step_obs_prop.contains(old.getName())) {
 				if (!percepts.contains(old) || old.getName().equals("lastAction") || old.getName().equals("lastActionResult") || old.getName().equals("lastActionParams") || old.getName().equals("goal") || old.getName().equals("thing")) { // not perceived anymore
 					Literal literal = Translator.perceptToLiteral(old);
 					try{				
@@ -184,10 +184,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 		Literal actionID 			= null;
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
-				if (agent.equals("agent4") && percept.getName().equals("task")) {
-					logger.info("@@@@@@@@@@@@ Percept"+percept);
-					logger.info("@@@@@@@@@@@@ Previous Percept"+previousPercepts);
-				}
 				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams") || percept.getName().equals("goal") || percept.getName().equals("thing")) { // really new perception 
 					Literal literal = Translator.perceptToLiteral(percept);
 					if (percept.getName().equals("step")) {
