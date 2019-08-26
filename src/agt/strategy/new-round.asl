@@ -5,4 +5,5 @@
 	+identification::identified([]);
 	+map::myMap(Me);
 	+identification::count(0);
+	+stop::stop;
 	.

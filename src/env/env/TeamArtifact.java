@@ -26,6 +26,8 @@ public class TeamArtifact extends Artifact {
 
 	private static Map<String, String>  agentNames 	 	= new HashMap<String, String>();
 	private static Map<String, String>  agentRoles 	 	= new HashMap<String, String>();
+	
+	private static Map<String, String>  agentAvailable 	 	= new HashMap<String, String>();
 
 	private static Map<Integer, Set<String>> actionsByStep   = new HashMap<Integer, Set<String>>();
 	
@@ -133,6 +135,31 @@ public class TeamArtifact extends Artifact {
 		}
 		Literal[] arraythings = things.toArray(new Literal[things.size()]);
 		goal.set(arraythings);
+	}
+	
+	@OPERATION
+	void addAvailableAgent(String name, String type) {
+		agentAvailable.put(name, type);
+	}
+	
+	@OPERATION
+	void removeAvailableAgent(String name) {
+		agentAvailable.remove(name);
+	}
+	
+	@OPERATION 
+	void getAvailableAgent(OpFeedbackParam<Literal[]> list){
+		List<Literal> agents 		= new ArrayList<Literal>();
+		for (Map.Entry<String, String> entry : agentAvailable.entrySet()) {
+			Literal literal = ASSyntax.createLiteral("agent");	
+			Atom name = new Atom(entry.getKey());
+			Atom type = new Atom(entry.getValue());
+			literal.addTerm(name);
+			literal.addTerm(type);
+			agents.add(literal);
+		}
+		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
+		list.set(arrayagents);
 	}
 	
 	@OPERATION
