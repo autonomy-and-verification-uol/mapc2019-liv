@@ -14,7 +14,7 @@
 	.drop_intention;
 	.
 +!commit_action(Action)
-	: default::actionID(Id) & action::action_sent(Id) & metrics::next_actions(C) & default::step(Step)
+	: default::actionID(Id) & action::action_sent(Id) & default::step(Step)
 <-
 	.print("I've already sent an action at step ",Step,", I cannot send a new one ", Action);
 	.wait({+default::actionID(_)}); 
@@ -33,6 +33,7 @@
 	
 	!!wait_request_for_help(Id);
 	chosenAction(Id);
+	
 	.wait({+default::actionID(_)}); 
 	.wait(not action::reasoning_about_belief(_)); 
 	
@@ -114,7 +115,7 @@
 	: ::action_sent(_)
 <-
 	!revogate_tokens;
-	!update_percepts;
+	!!update_percepts;
 	.
 @forgetCommitAction[atomic]
 +!forget_old_action

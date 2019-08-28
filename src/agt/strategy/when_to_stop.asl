@@ -1,7 +1,15 @@
++stop
+	: true
+<-
+	-exploration::explorer;
+	!action::forget_old_action;
+	!!default::always_skip;
+	.
+
 // trigger for new task addition 
 @trigger1[atomic]
-+default::task(ID, Deadline, Reward, Blocks) : 
-	not(stop::stop)
++default::task(ID, Deadline, Reward, Blocks) 
+	: not(stop::stop)
  <- 
  	!map::get_dispensers(Dispensers);
 	!stop::update_blocks_count(Blocks);
@@ -38,10 +46,12 @@
 
 @trigger2[atomic]
 +!stop::new_dispenser_or_merge[source(_)] 
-	: .findall(task(ID, Deadline, Reward, Blocks), default::task(ID, Deadline, Reward, Blocks), Tasks)
+	: not(stop::stop) & .findall(task(ID, Deadline, Reward, Blocks), default::task(ID, Deadline, Reward, Blocks), Tasks) & not .empty(Tasks)
 <-
 	!map::get_dispensers(Dispensers);
-	!stop::check_active_tasks(Tasks, Dispensers).
+	!stop::check_active_tasks(Tasks, Dispensers);
+	.
++!stop::new_dispenser_or_merge[source(_)].
 
 +!stop::check_active_tasks([], Dispensers) : not(stop::stop) <- .print("I cannot stop exploring yet..").
 +!stop::check_active_tasks([], Dispensers) : stop::stop <- .print("I can stop exploring now..").

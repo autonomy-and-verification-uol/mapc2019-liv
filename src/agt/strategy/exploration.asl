@@ -42,7 +42,7 @@ relative_right(e,s) :- true.
 relative_right(w,n) :- true.
 
 +!explore(DirList) 
-	: check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
+	: explorer & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
 	.print("There is a friendly agent in all possible directions, trying to move randomly.");
 	!action::move(Dir);
@@ -50,21 +50,21 @@ relative_right(w,n) :- true.
 	.
 
 +!explore(DirList) 
-	: prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,Dir)
+	: explorer & prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,Dir)
 <-
 	 !explore_until_obstacle(Dir);
 	 .
 	
 // special case	
 +!explore(Dirlist)
-	: prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir) 
+	: explorer & prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir) 
 <-
 	+special(first);
 	!explore_until_obstacle_special(FirstDir);
 	.
 
 +!explore(Dirlist)
-	: true
+	: explorer
 <-
 	.print("@@@@@ No movement options available. Should never happen!");
 	.
@@ -74,14 +74,14 @@ relative_right(w,n) :- true.
 
 
 +!explore_until_obstacle(Dir)
-	: check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
+	: explorer & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
 <-
 	.print("I see someone from my team, time to *try* to go around it.");
 	!go_around(Dir,DirList);
 	.
 	
 +!explore_until_obstacle(Dir)
-	: action::out_of_bounds(Dir)
+	: explorer & action::out_of_bounds(Dir)
 <-
 	-action::out_of_bounds(Dir);
 	.delete(Dir,[n,s,e,w],DirList);
@@ -89,33 +89,33 @@ relative_right(w,n) :- true.
 	.
 
 +!explore_until_obstacle(Dir)
-	: not check_obstacle(Dir) & not action::out_of_bounds(Dir)
+	: explorer & not check_obstacle(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle(Dir);
 	.
 	
 +!explore_until_obstacle(Dir)
-	: .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
+	: explorer & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	!!explore(DirList);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: not exploration::special(_) 
+	: explorer & not exploration::special(_) 
 <-
 	!explore_until_obstacle(Dir);
 	.
 
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
+	: explorer & exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
 <-
 	.print("I see someone from my team, time to *try* to go around it.");
 	!go_around(Dir,DirList);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(S) & action::out_of_bounds(Dir)
+	: explorer & exploration::special(S) & action::out_of_bounds(Dir)
 <-
 	-exploration::special(S);
 	-action::out_of_bounds(Dir);
@@ -124,14 +124,14 @@ relative_right(w,n) :- true.
 	.
 
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(_) & not check_obstacle_special(Dir) & not action::out_of_bounds(Dir)
+	: explorer & exploration::special(_) & not check_obstacle_special(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle_special(Dir);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,SecondDir)
+	: explorer & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,SecondDir)
 <-
 	!action::move(SecondDir);
 	-special(first);
@@ -140,27 +140,27 @@ relative_right(w,n) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & .empty(PrunedDirList) & not check_obstacle_special(NewDir)
+	: explorer & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & .empty(PrunedDirList) & not check_obstacle_special(NewDir)
 <-
 	!action::move(NewDir);
 	!!explore_until_obstacle_special(NewDir);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: exploration::special(second) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
+	: explorer & exploration::special(second) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	-special(second);
 	!!explore(DirList);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: true
+	: explorer
 <-
 	.print("@@@@@ No movement options available AT SPECIAL. Should never happen!");
 	.
 
 +!go_around(OldDir,DirList)
-	: not exploration::avoid(_) & relative_right(OldDir, Dir) & not check_obstacle_special(Dir) // prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .concat(PrunedDirList,[OldDir],NewPrunedDirList) & .length(NewPrunedDirList,Length) & .random(Number) & random_dir(NewPrunedDirList,Length,Number,Dir)
+	: explorer & not exploration::avoid(_) & relative_right(OldDir, Dir) & not check_obstacle_special(Dir) // prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .concat(PrunedDirList,[OldDir],NewPrunedDirList) & .length(NewPrunedDirList,Length) & .random(Number) & random_dir(NewPrunedDirList,Length,Number,Dir)
 <-
 	+avoid(1);
 	!action::move(Dir);
@@ -168,7 +168,7 @@ relative_right(w,n) :- true.
 	.
 	
 +!go_around(OldDir,DirList)
-	: not exploration::avoid(_)
+	: explorer & not exploration::avoid(_)
 <-
 	+avoid(1);
 	!action::move(OldDir);
@@ -176,7 +176,7 @@ relative_right(w,n) :- true.
 	.
 	
 +!go_around(OldDir, Dir)
-	: exploration::avoid(Av) & Av < 3
+	: explorer & exploration::avoid(Av) & Av < 3
 <-
 	-avoid(Av);
 	+avoid(Av+1);
@@ -185,7 +185,7 @@ relative_right(w,n) :- true.
 	.
 	
 +!go_around(OldDir, Dir)
-	: exploration::avoid(3) & OldDir \== Dir & remove_opposite(Dir,NewDir)
+	: explorer & exploration::avoid(3) & OldDir \== Dir & remove_opposite(Dir,NewDir)
 <-
 	-avoid(3);
 	!action::move(NewDir);
@@ -193,7 +193,7 @@ relative_right(w,n) :- true.
 	.
 	
 +!go_around(OldDir, Dir)
-	: exploration::avoid(3)
+	: explorer & exploration::avoid(3)
 <-
 	-avoid(3);
 	!action::move(OldDir);

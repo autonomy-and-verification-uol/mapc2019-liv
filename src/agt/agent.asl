@@ -29,6 +29,14 @@
 	.wait(1000);
 	!!exploration::explore([n,s,e,w]);
 	.
+	
++!always_skip
+	: true
+<-
+	!action::move(z);
+	!!always_skip;
+	.
+-!always_skip <- !!always_skip.
     
 //+!always_move_north
 //	: true
@@ -37,7 +45,3 @@
 //	!!always_move_north;
 //	.
 //-!always_move_north <- !!always_move_north.
-
-
-
-	
