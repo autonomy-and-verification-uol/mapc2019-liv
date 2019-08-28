@@ -66,7 +66,8 @@ relative_right(w,n) :- true.
 +!explore(Dirlist)
 	: explorer
 <-
-	.print("@@@@@ No movement options available. Should never happen!");
+	.print("@@@@@ No movement options available, sending skip forever");
+	!default::always_skip;
 	.
 
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
@@ -156,7 +157,8 @@ relative_right(w,n) :- true.
 +!explore_until_obstacle_special(Dir)
 	: explorer
 <-
-	.print("@@@@@ No movement options available AT SPECIAL. Should never happen!");
+	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
+	!default::always_skip;
 	.
 
 +!go_around(OldDir,DirList)
