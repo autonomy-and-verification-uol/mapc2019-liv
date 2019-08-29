@@ -57,6 +57,16 @@
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed)))] <- .print("Position is too far, or agents are already connected, or violates the attach limit.").
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled.").
 
+// ##### DISCONNECT ACTION #####
++!disconnect(X1,Y1,X2,Y2)
+<-
+	!action::commit_action(disconnect(X1,Y1,X2,Y2));
+	.
+-!disconnect(X1,Y1,X2,Y2)[code(.fail(action(Action),result(failed_parameter)))] <- .print(X1," and ",Y1," and ",X2," and ",Y2," are not valid integers.").
+// Improve this failure to drop disjunction into two different plans
+-!disconnect(X1,Y1,X2,Y2)[code(.fail(action(Action),result(failed_target)))] <- .print("Target locations are not attachments, or they are not attached to each other directly").
+-!disconnect(X1,Y1,X2,Y2)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled.").
+
 // ##### REQUEST BLOCK ACTION #####
 +!request(Direction)
 <-
