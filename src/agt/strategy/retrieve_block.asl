@@ -270,11 +270,9 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	+retrieve::fetching_block;
 	-retrieve::attach_completed;
 	while(not retrieve::attach_completed){
-		if(not default::thing(DispX, DispY, block, _)){
+		!action::request(Direction);
+		while(not default::lastActionResult(success)){
 			!action::request(Direction);
-			while(not default::thing(DispX, DispY, block, _)){
-				!action::request(Direction);
-			}
 		}
 		!action::attach(Direction);
 		if(default::lastActionResult(success) & default::attached(DispX, DispY)){

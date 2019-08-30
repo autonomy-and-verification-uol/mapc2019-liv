@@ -34,7 +34,7 @@
       },
       
       "events" : {
-        "chance" : 5,
+        "chance" : 10,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [5, 10]
