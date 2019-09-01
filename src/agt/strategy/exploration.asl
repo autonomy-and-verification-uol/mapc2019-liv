@@ -42,6 +42,20 @@ relative_right(e,s) :- true.
 relative_right(w,n) :- true.
 
 +!explore(DirList) 
+	: .findall(obstacle(X,Y), (default::obstacle(X,Y)  ), ObsList) & map::check_stuck(ObsList)
+<-
+	.print("My obs list: ", ObsList);
+	.print("I am stuck!")
+	.
+	
++!explore(DirList) 
+	: true
+<-
+	.print("I am not stuck!")
+	.
+
+
++!explore(DirList) 
 	: explorer & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
 	.print("There is a friendly agent in all possible directions, trying to move randomly.");

@@ -1,10 +1,10 @@
-+stop
-	: true
-<-
-	-exploration::explorer;
-	!action::forget_old_action;
-	!!default::always_skip;
-	.
+//+stop
+//	: true
+//<-
+//	-exploration::explorer;
+//	!action::forget_old_action;
+//	!!default::always_skip;
+//	.
 
 // trigger for new task addition 
 @trigger1[atomic]

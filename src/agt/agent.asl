@@ -4,6 +4,7 @@
 { include("action/actions.asl", action) }
 { include("strategy/identification.asl", identification) }
 { include("strategy/exploration.asl", exploration) }
+{ include("strategy/task.asl", task) }
 { include("strategy/when_to_stop.asl", stop) }
 { include("strategy/stock.asl", stock) }
 { include("strategy/map.asl", map) }
@@ -27,7 +28,8 @@
 	: true
 <- 
 	.wait(1000);
-	!!exploration::explore([n,s,e,w]);
+	!always_skip;
+//	!!exploration::explore([n,s,e,w]);
 	.
 	
 +!always_skip
@@ -38,10 +40,10 @@
 	.
 -!always_skip <- !!always_skip.
     
-//+!always_move_north
-//	: true
-//<-
-//	!action::move(n);
-//	!!always_move_north;
-//	.
-//-!always_move_north <- !!always_move_north.
++!always_move_north
+	: true
+<-
+	!action::move(n);
+	!!always_move_north;
+	.
+-!always_move_north <- !!always_move_north.

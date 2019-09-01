@@ -45,7 +45,8 @@
 // ##### CONNECT ACTION #####
 +!connect(Agent,X,Y)
 <-
-	!action::commit_action(connect(Agent,X,Y));
+	getServerName(Agent,AgentServer);
+	!action::commit_action(connect(AgentServer,X,Y));
 	.
 // Improve this failure to drop disjunction into two different plans
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_parameter)))] <- .print(Agent," is not in our team, or ",X," and ",Y," are not valid integers.").
