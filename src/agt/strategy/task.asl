@@ -12,6 +12,16 @@ sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) 
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X >= 0 & Y < 0 & sort_committed(CommitList, [agent(X-Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X < 0 & Y < 0 & sort_committed(CommitList, [agent(-X-Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
 
+check_pos(X,Y,NewX,NewY) :- not default::thing(X, Y-1, block, Type) & NewX = X & NewY = Y-1.
+check_pos(X,Y,NewX,NewY) :- not default::thing(X-1, Y, block, Type) & NewX = X-1 & NewY = Y.
+check_pos(X,Y,NewX,NewY) :- not default::thing(X, Y+1, block, Type) & NewX = X & NewY = Y+1.
+check_pos(X,Y,NewX,NewY) :- not default::thing(X+1, Y, block, Type) & NewX = X+1 & NewY = Y.
+
+where_is_my_block(X,Y,DetachPos) :- default::thing(0,1,block,_) & default::attached (0,1) & X = 0 & Y = 1 & DetachPos = s.
+where_is_my_block(X,Y,DetachPos) :- default::thing(0,-1,block,_) & default::attached (0,-1) & X = 0 & Y = -1 & DetachPos = n.
+where_is_my_block(X,Y,DetachPos) :- default::thing(1,0,block,_) & default::attached (1,0) & X = 1 & Y = 0 & DetachPos = e.
+where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::attached (-1,0) & X = -1 & Y = 0 & DetachPos = w.
+
 // this it to simulate when an agent arrives in distance 2 of the target goal position
 +default::step(0)
 	: default::goal(0,0) & default::attached(0,1) & default::thing(0,1, block, Type) & .my_name(agent4)
@@ -74,6 +84,24 @@ sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) 
 	.print("New commit list ",CommitListSort);
 	.
 	
++!perform_task_origin_next
+	: committed(Id,CommitListSort) & not .empty(CommitListSort)
+<-
+	.nth(0,CommitListSort,agent(Sum,Ag,TypeAg,X,Y));
+	.delete(0,CommitListSort,CommitListSortNew);
+	!update_commitlist(CommitListSortNew);
+	getMyPos(MyX,MyY);
+	?check_pos(X,Y,NewX,NewY);
+	.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+	!default::always_skip;
+	.
++!perform_task_origin_next
+	: committed(Id,CommitListSort)
+<-
+	!action::submit(Id);
+	!default::always_skip;
+	.
+	
 +!perform_task_origin(0,1)
 	: default::attached(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
 <-
@@ -83,7 +111,7 @@ sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) 
 	!update_commitlist(CommitListSortNewNew);
 	getMyPos(MyX,MyY);
 	+connect(0,1);
-	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1));
+	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
 	.
 +!perform_task_origin
 	: default::attached(0,1) & default::thing(0,1, block, Type)
@@ -114,58 +142,92 @@ sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) 
 	.print(ConX-MyX);
 	.print(ConY-MyY);
 	+connect(ConX-MyX,ConY-MyY);
-	!default::always_skip;
+	!perform_task_origin_next;
 	.
 	
-+!perform_task(Type,X,Y)[source(Origin)]
++!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
 	: default::attached(0,1) & default::thing(0,1, block, Type)
 <-
 //	.print("@@@@ Received order for new task");
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y);
+	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
-	.send(Origin, achieve, task::help_connect(MyXNew+0,MyYNew+1));
-	!action::connect(Origin,0,1);
-	!action::detach(s);
+	?where_is_my_block(BlockX,BlockY,DetachPos);
+	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
+	!action::connect(Origin,BlockX,BlockY);
+	!action::detach(DetachPos);
 	!default::always_move_north;
 	.
-	
-+!get_to_pos_vert(MyX,MyY,MyX,MyY).
-+!get_to_pos_vert(MyX,MyY,X,MyY)
+
++!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) : .print(MyX)  & .print(LocalX) & .print(MyX-LocalX) & .print(MyY) & .print(LocalY) & .print(MyY-LocalY) & default::thing(LocalX-MyX,LocalY-MyY, block, Type).	
++!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) 
+	: not default::thing(MyX-LocalX,MyY-LocalY, block, Type)
+<-
+	!action::rotate(ccw);
+	!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY);
+	.
++!get_to_pos_vert(MyX,MyY,X,MyY,LocalX,LocalY)
 	: true
 <-	
-	!get_to_pos_horiz(MyX,MyY,X,MyY);
+	!get_to_pos_horiz(MyX,MyY,X,MyY,LocalX,LocalY);
 	.
-+!get_to_pos_vert(MyX,MyY,X,Y)
++!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY)
 	: true
 <-	
 	if ( Y - MyY > 0 ) {
-		!action::move(s);
+		if (not default::thing(0,-1,block,_)) {
+			!action::move(s);
+		}
+		else {
+			// go around
+		}
 	}
 	else {
-		!action::move(n);
+		if ( not default::thing(0,2,block,_) ) {
+			!action::move(n);
+		}
+		else {
+			// go around
+		}
 	}
 	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_horiz(MyXNew,MyYNew,X,Y);
+	!get_to_pos_horiz(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.
 	
-+!get_to_pos_horiz(MyX,MyY,MyX,MyY).
-+!get_to_pos_horiz(MyX,MyY,MyX,Y)
-	: true
-<-	
-	!get_to_pos_vert(MyX,MyY,MyX,Y);
++!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY) : .print(MyX)  & .print(LocalX) & .print(MyX-LocalX) & .print(MyY) & .print(LocalY) & .print(MyY-LocalY) & default::thing(LocalX-MyX,LocalY-MyY, block, Type).
++!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY) 
+	: not default::thing(MyX-LocalX,MyY-LocalY, block, Type)
+<-
+	!action::rotate(ccw);
+	!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY);
 	.
-+!get_to_pos_horiz(MyX,MyY,X,Y)
++!get_to_pos_horiz(MyX,MyY,MyX,Y,LocalX,LocalY)
 	: true
 <-	
-	if ( X - MyX > 0 ) {
-		!action::move(e);
+	!get_to_pos_vert(MyX,MyY,MyX,Y,LocalX,LocalY);
+	.
++!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY)
+	: true
+<-	
+	if ( X - MyX > 0  ) {
+		if (not default::thing(1,0,block,_)) {
+			!action::move(e);
+		}
+		else {
+			!action::move(n);
+			!action::rotate(ccw);
+		}
 	}
 	else {
-		!action::move(w);
+		if ( not default::thing(-1,0,block,_) ) {
+			!action::move(w);
+		}
+		else {
+			// go around
+		}
 	}
 	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_vert(MyXNew,MyYNew,X,Y);
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.
 	
