@@ -12,15 +12,20 @@ sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) 
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X >= 0 & Y < 0 & sort_committed(CommitList, [agent(X-Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X < 0 & Y < 0 & sort_committed(CommitList, [agent(-X-Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
 
-check_pos(X,Y,NewX,NewY) :- not default::thing(X, Y-1, block, Type) & NewX = X & NewY = Y-1.
-check_pos(X,Y,NewX,NewY) :- not default::thing(X-1, Y, block, Type) & NewX = X-1 & NewY = Y.
-check_pos(X,Y,NewX,NewY) :- not default::thing(X, Y+1, block, Type) & NewX = X & NewY = Y+1.
-check_pos(X,Y,NewX,NewY) :- not default::thing(X+1, Y, block, Type) & NewX = X+1 & NewY = Y.
+check_pos(X,Y,NewX,NewY) :- not (default::thing(X, Y-1, Thing, _) & (Thing == entity | Thing == block)) & NewX = X & NewY = Y-1.
+check_pos(X,Y,NewX,NewY) :- not (default::thing(X-1, Y, Thing, _) & (Thing == entity | Thing == block)) & NewX = X-1 & NewY = Y.
+check_pos(X,Y,NewX,NewY) :- not (default::thing(X, Y+1, Thing, _) & (Thing == entity | Thing == block)) & NewX = X & NewY = Y+1.
+check_pos(X,Y,NewX,NewY) :- not (default::thing(X+1, Y, Thing, _) & (Thing == entity | Thing == block)) & NewX = X+1 & NewY = Y.
 
 where_is_my_block(X,Y,DetachPos) :- default::thing(0,1,block,_) & default::attached (0,1) & X = 0 & Y = 1 & DetachPos = s.
 where_is_my_block(X,Y,DetachPos) :- default::thing(0,-1,block,_) & default::attached (0,-1) & X = 0 & Y = -1 & DetachPos = n.
 where_is_my_block(X,Y,DetachPos) :- default::thing(1,0,block,_) & default::attached (1,0) & X = 1 & Y = 0 & DetachPos = e.
 where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::attached (-1,0) & X = -1 & Y = 0 & DetachPos = w.
+
+get_direction(0,-1,Dir) :- Dir = n.
+get_direction(0,1,Dir) :- Dir = s.
+get_direction(1,0,Dir) :- Dir = e.
+get_direction(-1,0,Dir) :- Dir = w.
 
 // this it to simulate when an agent arrives in distance 2 of the target goal position
 +default::step(0)
@@ -57,7 +62,7 @@ where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::atta
 //		getMyPos(MyX,MyY);
 		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
 			if (Me \== Ag) {
-				if (not task::helper(_) & not .empty(ReqListNew)) {
+				if (not task::helper(_) & .empty(ReqListNew)) {
 					+helper(Ag);
 				}
 //				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
@@ -92,13 +97,20 @@ where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::atta
 	!update_commitlist(CommitListSortNew);
 	getMyPos(MyX,MyY);
 	?check_pos(X,Y,NewX,NewY);
-	.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+	if (task::no_block) {
+		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
+	}
+	else {
+		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+	}
 	!default::always_skip;
 	.
 +!perform_task_origin_next
-	: committed(Id,CommitListSort)
+	: committed(Id,CommitListSort) & connect(X,Y)
 <-
 	!action::submit(Id);
+	-committed(Id,CommitListSort);
+	-connect(X,Y);
 	!default::always_skip;
 	.
 	
@@ -119,7 +131,8 @@ where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::atta
 	!action::forget_old_action(default,always_skip);
 	!action::rotate(cw);
 	!action::rotate(cw);
-	!default::always_skip;
+	+no_block;
+	!perform_task_origin_next;
 	.
 +!perform_task_origin(X,Y)
 	: default::attached(0,1) & default::thing(0,1, block, Type) & helper(Ag)
@@ -130,6 +143,18 @@ where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::atta
 	!action::rotate(cw);
 	!action::rotate(cw);
 	!default::always_skip;
+	.
+
++!help_attach(ConX,ConY)[source(Help)]
+	: no_block
+<-
+	getMyPos(MyX,MyY);
+	!action::forget_old_action(default,always_skip);
+	?get_direction(ConX-MyX, ConY-MyY, Dir)
+	!action::attach(Dir);
+	-no_block;
+	+connect(ConX-MyX,ConY-MyY);
+	!perform_task_origin_next;
 	.
 	
 +!help_connect(ConX,ConY)[source(Help)]
@@ -143,6 +168,21 @@ where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::atta
 	.print(ConY-MyY);
 	+connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
+	.
+	
++!perform_task(Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
+	: default::attached(0,1) & default::thing(0,1, block, Type)
+<-
+//	.print("@@@@ Received order for new task");
+	!action::forget_old_action(default,always_skip);
+	getMyPos(MyX,MyY);
+	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
+	getMyPos(MyXNew,MyYNew);
+	?where_is_my_block(BlockX,BlockY,DetachPos);
+	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
+//	!action::connect(Origin,BlockX,BlockY);
+	!action::detach(DetachPos);
+	!default::always_move_north;
 	.
 	
 +!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]

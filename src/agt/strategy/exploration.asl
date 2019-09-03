@@ -8,10 +8,15 @@ check_obstacle_special(s) :- default::obstacle(0,1).
 check_obstacle_special(e) :- default::obstacle(1,0).
 check_obstacle_special(w) :- default::obstacle(-1,0).
 
-check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | default::thing(0, -2, entity, Team)). //| default::thing(0, -3, entity, Team) | default::thing(0, -4, entity, Team) | default::thing(0, -5, entity, Team)).
-check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | default::thing(0, 2, entity, Team)). //| default::thing(0, 3, entity, Team) | default::thing(0, 4, entity, Team) | default::thing(0, 5, entity, Team)).
-check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | default::thing(2, 0, entity, Team)). //| default::thing(3, 0, entity, Team) | default::thing(4, 0, entity, Team) | default::thing(5, 0, entity, Team)).
-check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | default::thing(-2, 0, entity, Team)). //| default::thing(-3, 0, entity, Team) | default::thing(-4, 0, entity, Team) | default::thing(-5, 0, entity, Team)).
+check_obstacle_all(n) :- default::obstacle(0,-1) | default::thing(0, -1, Thing, _) & (Thing == entity | Thing == block).
+check_obstacle_all(s) :- default::obstacle(0,1) | default::thing(0, 1, Thing, _) & (Thing == entity | Thing == block).
+check_obstacle_all(e) :- default::obstacle(1,0) | default::thing(1, 0, Thing, _) & (Thing == entity | Thing == block).
+check_obstacle_all(w) :- default::obstacle(-1,0) | default::thing(-1, 0, Thing, _) & (Thing == entity | Thing == block).
+
+check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | (default::thing(0, -1, block, _) & default::attached(0,-1) & default::thing(0, -2, entity, Team))). //| default::thing(0, -3, entity, Team) | default::thing(0, -4, entity, Team) | default::thing(0, -5, entity, Team)).
+check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | (default::thing(0, 1, block, _) & default::attached(0,1) & default::thing(0, 2, entity, Team))). //| default::thing(0, 3, entity, Team) | default::thing(0, 4, entity, Team) | default::thing(0, 5, entity, Team)).
+check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | (default::thing(1, 0, block, _) & default::attached(1,0) & default::thing(2, 0, entity, Team))). //| default::thing(3, 0, entity, Team) | default::thing(4, 0, entity, Team) | default::thing(5, 0, entity, Team)).
+check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | (default::thing(-1, 0, block, _) & default::attached(-1,0) & default::thing(-2, 0, entity, Team))). //| default::thing(-3, 0, entity, Team) | default::thing(-4, 0, entity, Team) | default::thing(-5, 0, entity, Team)).
 
 check_agent_special(n) :- default::team(Team) & default::thing(0, -1, entity, Team).
 check_agent_special(s) :- default::team(Team) & default::thing(0, 1, entity, Team).
@@ -35,11 +40,6 @@ remove_opposite(n,s) :- true.
 remove_opposite(s,n) :- true.
 remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
-
-relative_right(n,e) :- true.
-relative_right(s,w) :- true.
-relative_right(e,s) :- true.
-relative_right(w,n) :- true.
 
 +!explore(DirList) 
 	: .findall(obstacle(X,Y), (default::obstacle(X,Y)  ), ObsList) & map::check_stuck(ObsList)
@@ -88,12 +88,12 @@ relative_right(w,n) :- true.
 // TODO what about a block?
 
 
-+!explore_until_obstacle(Dir)
-	: explorer & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
-<-
-	.print("I see someone from my team, time to *try* to go around it.");
-	!go_around(Dir,DirList);
-	.
+//+!explore_until_obstacle(Dir)
+//	: explorer & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
+//<-
+//	.print("I see someone from my team, time to *try* to go around it.");
+//	!go_around(Dir,DirList);
+//	.
 	
 +!explore_until_obstacle(Dir)
 	: explorer & action::out_of_bounds(Dir)
@@ -122,12 +122,12 @@ relative_right(w,n) :- true.
 	!explore_until_obstacle(Dir);
 	.
 
-+!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
-<-
-	.print("I see someone from my team, time to *try* to go around it.");
-	!go_around(Dir,DirList);
-	.
+//+!explore_until_obstacle_special(Dir)
+//	: explorer & exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
+//<-
+//	.print("I see someone from my team, time to *try* to go around it.");
+//	!go_around(Dir,DirList);
+//	.
 	
 +!explore_until_obstacle_special(Dir)
 	: explorer & exploration::special(S) & action::out_of_bounds(Dir)
@@ -173,46 +173,5 @@ relative_right(w,n) :- true.
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
 	!default::always_skip;
-	.
-
-+!go_around(OldDir,DirList)
-	: explorer & not exploration::avoid(_) & relative_right(OldDir, Dir) & not check_obstacle_special(Dir) // prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .concat(PrunedDirList,[OldDir],NewPrunedDirList) & .length(NewPrunedDirList,Length) & .random(Number) & random_dir(NewPrunedDirList,Length,Number,Dir)
-<-
-	+avoid(1);
-	!action::move(Dir);
-	!!go_around(OldDir, Dir);
-	.
-	
-+!go_around(OldDir,DirList)
-	: explorer & not exploration::avoid(_)
-<-
-	+avoid(1);
-	!action::move(OldDir);
-	!!go_around(OldDir, Dir);
-	.
-	
-+!go_around(OldDir, Dir)
-	: explorer & exploration::avoid(Av) & Av < 3
-<-
-	-avoid(Av);
-	+avoid(Av+1);
-	!action::move(OldDir);
-	!!go_around(OldDir, Dir);
-	.
-	
-+!go_around(OldDir, Dir)
-	: explorer & exploration::avoid(3) & OldDir \== Dir & remove_opposite(Dir,NewDir)
-<-
-	-avoid(3);
-	!action::move(NewDir);
-	!!explore_until_obstacle_special(OldDir);
-	.
-	
-+!go_around(OldDir, Dir)
-	: explorer & exploration::avoid(3)
-<-
-	-avoid(3);
-	!action::move(OldDir);
-	!!explore_until_obstacle_special(OldDir);
 	.
 	

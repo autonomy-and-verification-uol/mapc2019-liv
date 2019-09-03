@@ -8,6 +8,7 @@
 { include("strategy/when_to_stop.asl", stop) }
 { include("strategy/stock.asl", stock) }
 { include("strategy/map.asl", map) }
+{ include("strategy/common-plans.asl", common) }
 { include("strategy/new-round.asl", newround) }
 	
 +!register(E)

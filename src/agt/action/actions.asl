@@ -2,6 +2,12 @@
 
 // ##### MOVE ACTION #####
 +!move(Direction)
+	: exploration::check_agent(Direction) 
+<-
+	!common::go_around(Direction);
+	!action::commit_action(move(Direction));
+	.
++!move(Direction)
 <-
 	!action::commit_action(move(Direction));
 	.
