@@ -1,0 +1,13 @@
+{
+  "scenario": "assemble2019",
+  "host": "agentcontest1.in.tu-clausthal.de",
+  "port": 12300,
+  "scheduling": false,
+  "timeout": 40000,
+  "times": false,
+  "notifications": false,
+  "queued": true,
+  "entities": [
+    {"name": "connectionA1", "username": "agent-LFC1", "password": "fg2Pf9", "print-iilang": false, "print-json": false}
+  ]
+}
