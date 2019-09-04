@@ -9,7 +9,7 @@ relative_right(w,n) :- true.
 	+avoid(1);
 	.print("First avoid, no obstacles");
 	!action::move(Dir);
-	!!go_around(OldDir, Dir);
+	!go_around(OldDir, Dir);
 	.
 	
 +!go_around(OldDir)
@@ -18,7 +18,7 @@ relative_right(w,n) :- true.
 	+avoid(1);
 	.print("First avoid, with obstacles");
 	!action::move(OldDir);
-	!!go_around(OldDir, Dir);
+	!go_around(OldDir, OldDir);
 	.
 	
 +!go_around(OldDir, Dir)
@@ -27,7 +27,7 @@ relative_right(w,n) :- true.
 	-avoid(Av);
 	+avoid(Av+1);
 	!action::move(OldDir);
-	!!go_around(OldDir, Dir);
+	!go_around(OldDir, Dir);
 	.
 	
 +!go_around(OldDir, Dir)
