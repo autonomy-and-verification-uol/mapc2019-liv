@@ -7,6 +7,7 @@ relative_right(w,n) :- true.
 	: not common::avoid(_) & relative_right(OldDir, Dir) & not exploration::check_obstacle_all(Dir)
 <-
 	+avoid(1);
+	.print("First avoid, no obstacles");
 	!action::move(Dir);
 	!!go_around(OldDir, Dir);
 	.
@@ -15,6 +16,7 @@ relative_right(w,n) :- true.
 	: not common::avoid(_)
 <-
 	+avoid(1);
+	.print("First avoid, with obstacles");
 	!action::move(OldDir);
 	!!go_around(OldDir, Dir);
 	.
