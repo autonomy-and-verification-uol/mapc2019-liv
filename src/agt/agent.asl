@@ -25,9 +25,10 @@
 	addServerName(Me,ServerMe);
 	.
 
-+default::actionID(0)
-	: true
++default::actionID(_)
+	: not start
 <- 
+	+start;
 	.wait(1000);
 	!always_skip;
 //	!!exploration::explore([n,s,e,w]);
