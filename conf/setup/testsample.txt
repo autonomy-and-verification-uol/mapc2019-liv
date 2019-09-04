@@ -14,7 +14,7 @@ add 32 32 block b1
 attach 32 31 32 32
 
 move 34 32 agentA4
-add 34 33 block b2
+add 34 33 block b0
 attach 34 32 34 33
 
 

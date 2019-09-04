@@ -48,30 +48,52 @@ get_direction(-1,0,Dir) :- Dir = w.
 	.print("I can commit to ",CommitListTemp);
 	.print("New req list ",ReqListNew);
 	getAvailableAgent(AgList);
-	?evaluate_task(ReqListNew, AgList, CommitListTemp, CommitList);
+	?evaluate_task(ReqListNew, AgList, [], CommitList);
 	.print("New task required length ",.length(ReqList));
 	.print("Committed length ",.length(CommitList));
-	if (.length(ReqList) == .length(CommitList)) {
-		?sort_committed(CommitList,[],NewCommitList);
+	if (.length(ReqList) == .length(CommitList) + .length(CommitListTemp)) {
+		if (not .empty(CommitListTemp)) {
+			.concat(CommitList,CommitListTemp,CommitListConcat);
+			?sort_committed(CommitListConcat,[],NewCommitList);
+			if (not .member(agent(Me,Type,0,1),CommitListTemp)) {
+				+help;
+			}
+		}
+		else {
+			?sort_committed(CommitList,[],NewCommitList);
+		}
 		.sort(NewCommitList,CommitListSort);
-		+committed(Id,CommitListSort);
-		.print("New commit list sorted ",CommitListSort);
+		if (task::help) {
+			-help;
+			.print("New commit list sorted ",CommitListSort);
+			.nth(Pos,CommitListSort,agent(Sum,Me,Type,MyX,MyY));
+			+help(MyX,MyY);
+			.nth(Pos-1,CommitListSort,agent(_,Helper,_,_,_));
+			.send(Helper,tell,task::help);
+			.delete(Pos,CommitListSort,CommitListSortDelete);
+			.sort([agent(Sum,Helper,Type,MyX,MyY)|CommitListSortDelete],CommitListSortNew);
+		}
+		else {
+			CommitListSortNew = CommitListSort;
+		}
+		+committed(Id,CommitListSortNew);
+		.print("New commit list sorted ",CommitListSortNew);
 		.print("Task ",Id," with deadline ",Deadline," , reward ",Reward," and requirements ",ReqList," is eligible to be performed");
 		.print("Agents committed: ",CommitList);
 		.print("Agent list used: ",AgList);
 //		getMyPos(MyX,MyY);
 		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
-			if (Me \== Ag) {
-				if (not task::helper(_) & .empty(ReqListNew)) {
-					+helper(Ag);
-				}
+//			if (Me \== Ag) {
+//				if (not task::helper(_) & not .member(agent(Me,Type,0,1),CommitListTemp)) {
+//					+helper(Ag);
+//				}
 //				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
 				removeAvailableAgent(Ag);
-			}
+//			}
 		}
 		getAvailableAgent(AgListNew);
 		.print("Remaining agent list: ",AgListNew);
-		if (.member(agent(Me,Type,X,Y), CommitList)) {
+		if (.member(agent(_,Me,Type,X,Y), CommitListSortNew)) {
 			!!perform_task_origin(X,Y);
 		}
 		else {
@@ -101,7 +123,14 @@ get_direction(-1,0,Dir) :- Dir = w.
 		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
 	}
 	else {
-		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
+			-help(HelpX,HelpY);
+			.send(Ag,achieve,task::collect_block(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,MyX-1,MyY-1));
+			!action::detach(n);
+		}
+		else {
+			.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+		}
 	}
 	!default::always_skip;
 	.
@@ -111,7 +140,15 @@ get_direction(-1,0,Dir) :- Dir = w.
 	!action::submit(Id);
 	-committed(Id,CommitListSort);
 	-connect(X,Y);
+	!verify_block;
 	!default::always_skip;
+	.
+
+// Update this plan after adding the belief for attached blocks
++!verify_block
+	: true
+//<-
+	
 	.
 	
 +!perform_task_origin(0,1)
@@ -139,9 +176,10 @@ get_direction(-1,0,Dir) :- Dir = w.
 <-
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	.send(Ag, tell, task::help_requested(MyX+X,MyY+Y));
+	//.send(Ag, tell, task::help_requested(MyX+X,MyY+Y));
 	!action::rotate(cw);
 	!action::rotate(cw);
+	+no_block;
 	!default::always_skip;
 	.
 
@@ -182,7 +220,9 @@ get_direction(-1,0,Dir) :- Dir = w.
 	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
 //	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
-	!default::always_move_north;
+	if (not task::help) {
+		!default::always_move_north;
+	}
 	.
 	
 +!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
@@ -197,10 +237,32 @@ get_direction(-1,0,Dir) :- Dir = w.
 	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
 	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
+	if (not task::help) {
+		!default::always_move_north;
+	}
+	.
+	
++!collect_block(Type,X,Y,LocalX,LocalY,CollectX,CollectY)[source(Origin)]
+	: true
+<-
+//	.print("@@@@ Received order for new task");
+//	!action::forget_old_action(default,always_skip);
+	getMyPos(MyX,MyY);
+	!get_to_pos_vert(MyX,MyY,CollectX,CollectY,CollectX+1,CollectY);
+	!action::attach(e);
+	!action::rotate(cw);
+	getMyPos(MyXNew,MyYNew);
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	getMyPos(MyXNewNew,MyYNewNew);
+	?where_is_my_block(BlockX,BlockY,DetachPos);
+	.send(Origin, achieve, task::help_connect(MyXNewNew+BlockX,MyYNewNew+BlockY));
+	!action::connect(Origin,BlockX,BlockY);
+	!action::detach(DetachPos);
+	-help[source(_)];
 	!default::always_move_north;
 	.
 
-+!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) : .print(MyX)  & .print(LocalX) & .print(MyX-LocalX) & .print(MyY) & .print(LocalY) & .print(MyY-LocalY) & default::thing(LocalX-MyX,LocalY-MyY, block, Type).	
++!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) : default::thing(LocalX-MyX,LocalY-MyY, block, Type).	
 +!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) 
 	: not default::thing(MyX-LocalX,MyY-LocalY, block, Type)
 <-
@@ -235,7 +297,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 	!get_to_pos_horiz(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.
 	
-+!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY) : .print(MyX)  & .print(LocalX) & .print(MyX-LocalX) & .print(MyY) & .print(LocalY) & .print(MyY-LocalY) & default::thing(LocalX-MyX,LocalY-MyY, block, Type).
++!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY) : default::thing(LocalX-MyX,LocalY-MyY, block, Type).
 +!get_to_pos_horiz(MyX,MyY,MyX,MyY,LocalX,LocalY) 
 	: not default::thing(MyX-LocalX,MyY-LocalY, block, Type)
 <-
