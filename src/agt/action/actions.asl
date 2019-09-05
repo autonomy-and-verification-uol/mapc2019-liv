@@ -1,12 +1,16 @@
 { include("reasoning-engine.asl") }
 
 // ##### MOVE ACTION #####
+// Avoid clear markers 
+
+// Go around a friendly agent
 +!move(Direction)
 	: exploration::check_agent(Direction) & not common::avoid(_)
 <-
 	!common::go_around(Direction);
 	!action::commit_action(move(Direction));
 	.
+// Default move behaviour
 +!move(Direction)
 <-
 	!action::commit_action(move(Direction));
