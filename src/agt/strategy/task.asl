@@ -29,7 +29,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 
 // this it to simulate when an agent arrives in distance 2 of the target goal position
 +default::step(0)
-	: default::goal(0,0) & default::attached(0,1) & default::thing(0,1, block, Type) & .my_name(agent4)
+	: default::goal(0,0) & .my_name(agent4)
 <-
 	+origin;
 	.
@@ -41,7 +41,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
-	: task::origin & not task::committed(Id2,_) & default::attached(0,1) & default::thing(0,1, block, Type) & .my_name(Me)
+	: task::origin & not task::committed(Id2,_) & .my_name(Me)
 <-
 	.print("@@@@@@@@@@@@@@@@@@ ", Id, "  ",Deadline);
 	?can_contribute(ReqList,CommitListTemp,ReqListNew);
@@ -55,7 +55,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		if (not .empty(CommitListTemp)) {
 			.concat(CommitList,CommitListTemp,CommitListConcat);
 			?sort_committed(CommitListConcat,[],NewCommitList);
-			if (not .member(agent(Me,Type,0,1),CommitListTemp)) {
+			if (not .member(agent(Me,Type,0,1),CommitListTemp) & not .empty(CommitListTemp)) {
 				+help;
 			}
 		}
@@ -93,7 +93,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		}
 		getAvailableAgent(AgListNew);
 		.print("Remaining agent list: ",AgListNew);
-		if (.member(agent(_,Me,Type,X,Y), CommitListSortNew)) {
+		if (.member(agent(Me,Type,X,Y), CommitListTemp)) {
 			!!perform_task_origin(X,Y);
 		}
 		else {
@@ -146,10 +146,12 @@ get_direction(-1,0,Dir) :- Dir = w.
 
 // Update this plan after adding the belief for attached blocks
 +!verify_block
-	: true
-//<-
-	
+	: default::attached(0,-1) & default::thing(0,-1, block, Type)
+<-
+	!action::rotate(cw);
+	!action::rotate(cw);
 	.
++!verify_block.	
 	
 +!perform_task_origin(0,1)
 	: default::attached(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
@@ -171,16 +173,21 @@ get_direction(-1,0,Dir) :- Dir = w.
 	+no_block;
 	!perform_task_origin_next;
 	.
-+!perform_task_origin(X,Y)
-	: default::attached(0,1) & default::thing(0,1, block, Type) & helper(Ag)
++!perform_task_origin
+	: true
 <-
 	!action::forget_old_action(default,always_skip);
-	getMyPos(MyX,MyY);
-	//.send(Ag, tell, task::help_requested(MyX+X,MyY+Y));
+	+no_block;
+	!perform_task_origin_next;
+	.
++!perform_task_origin(X,Y)
+	: default::attached(0,1) & default::thing(0,1, block, Type) & help(X,Y)
+<-
+	!action::forget_old_action(default,always_skip);
 	!action::rotate(cw);
 	!action::rotate(cw);
 	+no_block;
-	!default::always_skip;
+	!perform_task_origin_next;
 	.
 
 +!help_attach(ConX,ConY)[source(Help)]
@@ -280,16 +287,24 @@ get_direction(-1,0,Dir) :- Dir = w.
 	if ( Y - MyY > 0 ) {
 		if (not default::thing(0,-1,block,_)) {
 			!action::move(s);
+			if (default::lastActionResult(failed_path)) {
+				!action::move(s);
+			}
 		}
 		else {
+			.print("@@@@@@@ Obstacle at south");
 			// go around
 		}
 	}
 	else {
 		if ( not default::thing(0,2,block,_) ) {
 			!action::move(n);
+			if (default::lastActionResult(failed_path)) {
+				!action::move(n);
+			}
 		}
 		else {
+			.print("@@@@@@@ Obstacle at north");
 			// go around
 		}
 	}
@@ -315,17 +330,24 @@ get_direction(-1,0,Dir) :- Dir = w.
 	if ( X - MyX > 0  ) {
 		if (not default::thing(1,0,block,_)) {
 			!action::move(e);
+			if (default::lastActionResult(failed_path)) {
+				!action::move(e);
+			}
 		}
 		else {
-			!action::move(n);
-			!action::rotate(ccw);
+			.print("@@@@@@@ Obstacle at east");
+			// go around
 		}
 	}
 	else {
 		if ( not default::thing(-1,0,block,_) ) {
 			!action::move(w);
+			if (default::lastActionResult(failed_path)) {
+				!action::move(w);
+			}
 		}
 		else {
+			.print("@@@@@@@ Obstacle at west");
 			// go around
 		}
 	}
