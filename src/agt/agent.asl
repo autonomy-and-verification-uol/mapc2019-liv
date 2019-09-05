@@ -5,7 +5,7 @@
 { include("strategy/identification.asl", identification) }
 { include("strategy/exploration.asl", exploration) }
 { include("strategy/when_to_stop.asl", stop) }
-{ include("strategy/stock.asl", stock) }
+{ include("strategy/stock.asl", retrieve) }
 { include("strategy/map.asl", map) }
 { include("strategy/new-round.asl", newround) }
 	

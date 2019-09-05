@@ -1,22 +1,35 @@
-check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2) | default::thing(0,-1, marker, clear) | default::thing(0,-2, marker, clear). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
-check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2) | default::thing(0,1, marker, clear) | default::thing(0,2, marker, clear). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
-check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0)  | default::thing(1,0, marker, clear) | default::thing(2,0, marker, clear). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
-check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0) | default::thing(-1,0, marker, clear) | default::thing(-2,0, marker, clear). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
+check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
+check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
+check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
+check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
 
-check_obstacle_special(n) :- default::obstacle(0,-1).
-check_obstacle_special(s) :- default::obstacle(0,1).
-check_obstacle_special(e) :- default::obstacle(1,0).
-check_obstacle_special(w) :- default::obstacle(-1,0).
+check_obstacle_special(n) :- default::obstacle(0,-1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(0, -1))).
+check_obstacle_special(s) :- default::obstacle(0,1)  | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(0, 1))).
+check_obstacle_special(e) :- default::obstacle(1,0)  | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(1, 0))).
+check_obstacle_special(w) :- default::obstacle(-1,0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(-1, 0))).
+
+check_obstacle_special_1(n) :- default::attached(0, -1) & (default::obstacle(0, -2) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(n) :- not(default::attached(0, -1)) & (default::obstacle(0, -1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(s) :- default::attached(0, 1) & (default::obstacle(0, 2) | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(s) :- not(default::attached(0, 1)) & (default::obstacle(0, 1) | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(w) :- default::attached(-1, 0) & (default::obstacle(-2, 0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(w) :- not(default::attached(-1, 0)) & (default::obstacle(-1, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(e) :- default::attached(1, 0) & (default::obstacle(2, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(e) :- not(default::attached(1, 0)) & (default::obstacle(1, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker)).
 
 check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | default::thing(0, -2, entity, Team)). //| default::thing(0, -3, entity, Team) | default::thing(0, -4, entity, Team) | default::thing(0, -5, entity, Team)).
 check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | default::thing(0, 2, entity, Team)). //| default::thing(0, 3, entity, Team) | default::thing(0, 4, entity, Team) | default::thing(0, 5, entity, Team)).
 check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | default::thing(2, 0, entity, Team)). //| default::thing(3, 0, entity, Team) | default::thing(4, 0, entity, Team) | default::thing(5, 0, entity, Team)).
 check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | default::thing(-2, 0, entity, Team)). //| default::thing(-3, 0, entity, Team) | default::thing(-4, 0, entity, Team) | default::thing(-5, 0, entity, Team)).
 
-check_agent_special(n) :- default::team(Team) & default::thing(0, -1, entity, Team).
-check_agent_special(s) :- default::team(Team) & default::thing(0, 1, entity, Team).
-check_agent_special(e) :- default::team(Team) & default::thing(1, 0, entity, Team).
-check_agent_special(w) :- default::team(Team) & default::thing(-1, 0, entity, Team).
+check_agent_special(n) :- default::attached(0, -1) & default::team(Team) & default::thing(0, -2, entity, Team).
+check_agent_special(n) :- (not default::attached(0, -1)) & default::team(Team) & default::thing(0, -1, entity, Team).
+check_agent_special(s) :- default::attached(0, 1) & default::team(Team) & default::thing(0, 2, entity, Team).
+check_agent_special(s) :- (not default::attached(0, 1)) & default::team(Team) & default::thing(0, 1, entity, Team).
+check_agent_special(e) :- default::attached(1, 0) & default::team(Team) & default::thing(2, 0, entity, Team).
+check_agent_special(e) :- (not default::attached(0, -1)) & default::team(Team) & default::thing(1, 0, entity, Team).
+check_agent_special(w) :- default::attached(-1, 0) & default::team(Team) & default::thing(-2, 0, entity, Team).
+check_agent_special(w) :- (not default::attached(-1, 0)) & default::team(Team) & default::thing(-1, 0, entity, Team).
 
 prune_direction([],PrunedDirListTemp,PrunedDirList) :- PrunedDirList = PrunedDirListTemp.
 prune_direction([Dir|L],PrunedDirListTemp,PrunedDirList) :- check_obstacle(Dir) & prune_direction(L,PrunedDirListTemp,PrunedDirList).
@@ -67,7 +80,7 @@ relative_right(w,n) :- true.
 	: explorer
 <-
 	.print("@@@@@ No movement options available, sending skip forever");
-	!default::always_skip;
+	//!default::always_skip;
 	.
 
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
@@ -158,7 +171,7 @@ relative_right(w,n) :- true.
 	: explorer
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
-	!default::always_skip;
+	//!default::always_skip;
 	.
 
 +!go_around(OldDir,DirList)
