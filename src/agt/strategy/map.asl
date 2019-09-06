@@ -34,12 +34,6 @@
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
 	!map::update_goal_in_map(MyX, MyY, X, Y, Clusters);
-	/*if(exploration::explorer){
-		-exploration::explorer;
-		!action::forget_old_action;
-		+map::evaluating_cluster;
-		!!map::visit_goal_cluster(X, Y);
-	}*/
 	.
 
 +!map::visit_goal_cluster(X, Y) :
@@ -67,7 +61,7 @@
 <- 
 	-map::evaluating_cluster;
 	+exploration::explorer;
-	!action::forget_old_action;
+	//!action::forget_old_action;
 	!!exploration::explore([n,s,e,w]).
 
 	
@@ -76,6 +70,12 @@
 	: map::myMap(Leader)
 <-
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
+	if(exploration::explorer){
+		-exploration::explorer;
+		!action::forget_old_action;
+		+map::evaluating_cluster;
+		!!map::visit_goal_cluster(X, Y);
+	}
 	.
 
 @addmap[atomic]

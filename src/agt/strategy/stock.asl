@@ -353,7 +353,8 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	!retrieve::create_and_attach_block(Direction);
 	getTargetGoal(Ag, GoalX, GoalY);
 	.print("Chosen Goal position: ", GoalX, GoalY);
-	if(stop::first_to_stop[source(Me)]){
+	if(stop::first_to_stop(Me)){
+		.print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa");
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
@@ -372,6 +373,12 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			getMyPos(MyX1,MyY1);
+			if(MyX == MyX1 & MyY == MyY1){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
+			}
 			.print("OBSTACLE AVOIDED");
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction, Res);
@@ -552,7 +559,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	.
 	
 +!retrieve::move_to_goal_aux(MyX, MyY) :
-	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop[source(Me)]) & retrieve::target(TargetX, TargetY) &
+	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY) &
 	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
 <-
@@ -569,31 +576,6 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	-+retrieve::target(NewTargetX, NewTargetY)
 	!retrieve::move_to_goal_aux(MyX, MyY);
 	.
- /*+!retrieve::move_to_goal_aux(MyX, MyY) :
-	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop[source(Me)]) & retrieve::target(TargetX, TargetY) &
-	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 5
-	//default::thing(TargetX-MyX, TargetY-MyY, Type, _) & Type \== dispenser
-<-
-	if((math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) >= 3){
-		!default::always_skip;
-	} else{
-		-retrieve::target(_, _);
-		.random(R1);
-		if(R1 < 0.5){
-			NewTargetX = TargetX+1;
-		} else{
-			NewTargetX = TargetX-1;
-		}
-		//.random(R2);
-		//if(R2 < 0.5){
-		//	NewTargetY = TargetY+1;
-		//} else{
-			NewTargetY = TargetY-1;
-		//}
-		+retrieve::target(NewTargetX, NewTargetY); 
-		!retrieve::move_to_goal;
-	}
-	.*/
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 
@@ -603,7 +585,13 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	if (exploration::check_obstacle_special_1(Direction)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE");
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1);
+			getMyPos(MyX1,MyY1);
+			if(MyX == MyX1 & MyY == MyY1){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
+			}
 			.print("OBSTACLE AVOIDED");
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction, Res);

@@ -15,15 +15,15 @@
 
 @stop1[atomic]
 +stop
-	: exploration::explorer & not stop::first_to_stop & .my_name(Me) // first to stop
+	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	!map::get_clusters(Clusters);
 	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	.length(GoalList, N);
 	if(N > 5){
-		.broadcast(tell, stop::first_to_stop);
-		+stop::first_to_stop[source(Me)];
+		.broadcast(tell, stop::first_to_stop(Me));
+		+stop::first_to_stop(Me);
 		.print("Removing explorer");
 		-exploration::explorer;
 		!action::forget_old_action;
@@ -39,7 +39,7 @@
 	.
 @stop2[atomic]
 +stop
-	: exploration::explorer & stop::first_to_stop[source(Ag)] & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
+	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	.print("Removing explorer");
 	-exploration::explorer;
@@ -51,32 +51,33 @@
 +stop: true <- -stop::stop.
 
 @first_to_stop1[atomic]
-+stop::first_to_stop[source(Ag)] :
-	.my_name(Me) & stop::first_to_stop[source(Me)] &
++stop::first_to_stop(Ag) :
+	retrieve::retriever & .my_name(Me) & stop::first_to_stop(Me) &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Ag) & PosOther < Pos
 <-
 	.print("Removing retriever");
 	-retrieve::retriever;
+	-stop::first_to_stop(Me);
 	!action::forget_old_action;
 	.print("Adding explorer");
 	+exploration::explorer;
 	!!exploration::explore([n,s,e,w]);
 	.
 @first_to_stop2[atomic]
-+stop::first_to_stop[source(Ag1)] :
-	not retrieve::retriever &  stop::first_to_stop[source(Ag2)] & Ag1 \== Ag2 &
++stop::first_to_stop(Ag1) :
+	stop::first_to_stop(Ag2) & Ag1 \== Ag2 &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Ag1) & .nth(PosOther,AllAgents,Ag2)
 <-
 	if(Pos < PosOther){
-		-stop::first_to_stop[source(Ag2)];
+		-stop::first_to_stop(Ag2);
 	} else{
-		-stop::first_to_stop[source(Ag1)];
+		-stop::first_to_stop(Ag1);
 	}
 	.
 //@check_join_group[atomic]
 +!stop::check_join_group
-	: not retrieve::retriever & 
-	stop::first_to_stop[source(Ag)] & // send a message to the one that stopped asking who the leader is, and you check if you have the same
+	: exploration::explorer & 
+	stop::first_to_stop(Ag) & // send a message to the one that stopped asking who the leader is, and you check if you have the same
 	map::myMap(Leader)
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
