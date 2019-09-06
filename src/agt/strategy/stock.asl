@@ -381,8 +381,8 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 			}
 			.print("OBSTACLE AVOIDED");
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction, Res);
-			if(Res == 0){
+			!retrieve::smart_clear(Direction);
+			if(retrieve::res(0)){
 				!retrieve::go_around_obstacle(Direction, 20);
 			}
 		} else{
@@ -525,8 +525,8 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	true
 <-
 	if(default::energy(Energy) & Energy >= 30){
-		!retrieve::smart_clear(DirectionObstacle, Res);
-		if(Res == 0){
+		!retrieve::smart_clear(DirectionObstacle);
+		if(retrieve::res(0)){
 			!action::move(z);
 			!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 		}
@@ -602,8 +602,8 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 			}
 			.print("OBSTACLE AVOIDED");
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction, Res);
-			if(Res == 0){
+			!retrieve::smart_clear(Direction);
+			if(retrieve::res(0)){
 				!retrieve::go_around_obstacle(Direction, 20);
 			}
 		} else{
@@ -652,9 +652,10 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 
 -!retrieve::move_to_goal : retrieve::retriever <- !!retrieve::move_to_goal.
 	
-+!retrieve::smart_clear(Direction, Res) :
++!retrieve::smart_clear(Direction) :
 	default::energy(Energy) & Energy >= 30
 <-
+	-res(_);
 	.print("CLEAR1");
 	if(Direction == n){
 		if(default::attached(0, -1)){
@@ -684,7 +685,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 			ClearX = 2 ClearY = 0
 		}
 	}
-	for(.range(I, 1, 3) & not .ground(Res)){
+	for(.range(I, 1, 3) & not retrieve::res(Res)){
 		if(not default::thing(ClearX, ClearY, block, _) & 
 			not default::thing(ClearX-1, ClearY, block, _) &
 			not default::thing(ClearX+1, ClearY, block, _) &
@@ -693,14 +694,14 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		){
 			!action::clear(ClearX, ClearY);
 		} else{
-			Res = 0;
+			+res(0);
 		}
 	}
-	if(not .ground(Res)){
+	if(not retrieve::res(Res)){
 		if(not default::lastActionResult(success)){
-			Res = 0;
+			+res(0);
 		} else{
-			Res = 1;
+			+res(1);
 		}
 	}
 	.
