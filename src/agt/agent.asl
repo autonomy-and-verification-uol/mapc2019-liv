@@ -34,11 +34,6 @@
 	!!exploration::explore([n,s,e,w]);
 	.
 	
-+default::thing(0,0,marker,Type)
-<-
-	.print("@@@@@@@@@@ New marker of type ",Type);
-	.
-	
 +!always_skip
 	: true
 <-

@@ -1,6 +1,15 @@
 { include("reasoning-engine.asl") }
 
 // ##### MOVE ACTION #####
+// Check if you can get out of a clear immediate (<= 2 steps)
+
+// Get out of a clear marker
++!move(Direction)
+	: default::thing(0,0,marker,clear) & not common::escape
+<-
+	!common::escape;
+	!move(Direction);
+	.
 // Avoid clear markers moving north
 +!move(n)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
