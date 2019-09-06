@@ -44,6 +44,11 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
+	private int pos = 10;
+	private String goalAgent;
+	private Integer targetGoalX;
+	private Integer targetGoalY;
+	
 	void init(){
 		logger.info("Team Artifact has been created!");
 		agentmaps.put("agent1",map1);
@@ -56,6 +61,26 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
+	}
+	
+	@OPERATION
+	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y){
+		if(goalAgent == null) {
+			return;
+		}
+		agent.set(goalAgent);
+		x.set(targetGoalX);
+		y.set(targetGoalY);
+	}
+	
+	@OPERATION
+	void setTargetGoal(int pos, String agent, int x, int y){
+		if(pos <= this.pos) {
+			goalAgent = agent;
+			targetGoalX = x;
+			targetGoalY = y;
+			this.pos = pos;
+		}
 	}
 		
 	@OPERATION
@@ -78,16 +103,85 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
+	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> newClusterGenerated) {
+		Point p = new Point(x, y);
+		logger.info("Try to add point (" + x + ", " + y + ")");
+		double minDistance = 5;
+		String myCluster = null;
+		int id = 0;
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_")) {
+				double distance = 0;
+				for(Point pp : agentmaps.get(name).get(key)) {
+					if(p.x == pp.x && p.y == pp.y) {
+						return;
+					}
+					distance += Math.abs(p.x-pp.x) + Math.abs(p.y-pp.y);
+					//System.out.println("Point (" + p.x + ", " + p.y + ") distance from (" + pp.x + ", " + pp.y + "):" + (Math.abs(p.x-pp.x) + Math.abs(p.y-pp.y)));
+				}
+				distance = distance / agentmaps.get(name).get(key).size();
+				if(distance < minDistance) {
+					minDistance = distance;
+					myCluster = key;
+				}
+				id++;
+			}
+		}
+		if(myCluster == null) {
+			//logger.info("ID: " + id);
+			Set<Point> set = new HashSet<Point>();
+			set.add(new OriginPoint(x, y));
+			agentmaps.get(name).put("goal_" + id, set);
+			newClusterGenerated.set("goal_" + id);
+			//logger.info("[" + name + "]" + " added point (" + p.x + ", " + p.y + ") to cluster " + agentmaps.get(name).get("goal_" + id) + " because distance is: " + minDistance);
+		} else {
+			//logger.info("[" + name + "]" + " added point (" + p.x + ", " + p.y + ") to cluster " + agentmaps.get(name).get(myCluster) + " because distance is: " + minDistance);
+			for(Point pp : agentmaps.get(name).get(myCluster)) {
+				if(pp instanceof OriginPoint) {
+					if(p.y < pp.y) {
+						agentmaps.get(name).get(myCluster).remove(pp);
+						agentmaps.get(name).get(myCluster).add(new Point(pp.x, pp.y));
+						agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y));
+					} else {
+						agentmaps.get(name).get(myCluster).add(p);
+					}
+					return;
+				}
+			}
+		}
+	}
+	
+	@OPERATION
 	void updateMap(String name, String type, int x, int y) {
 		Point p = new Point(x, y);
-		if (!agentmaps.get(name).containsKey(type)) {
-			Set<Point> set = new HashSet<Point>();
-			set.add(p);
-			agentmaps.get(name).put(type, set);
+		if(!type.startsWith("goal_")) {
+			if (!agentmaps.get(name).containsKey(type)) {
+				Set<Point> set = new HashSet<Point>();
+				set.add(p);
+				agentmaps.get(name).put(type, set);
+			}
+			else {
+				agentmaps.get(name).get(type).add(p);
+			}
 		}
-		else {
-			agentmaps.get(name).get(type).add(p);
+	}
+	
+	/*@OPERATION
+	void addOriginToCluster(String name, String type, int x, int y) {
+		Point p = new Point(x, y);
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_") && agentmaps.get(name).get(key).contains(p)) {
+				agentmaps.get(name).get(key).remove(p);
+				agentmaps.get(name).get(key).add(new OriginPoint(x, y));
+			}
 		}
+	}*/
+	
+	private static class OriginPoint extends Point{
+		public OriginPoint(int x, int y) {
+			super(x, y);
+		}
+		// nothing different to add for now
 	}
 	
 	@OPERATION 
@@ -97,9 +191,9 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION 
 	void getDispensers(String name, OpFeedbackParam<Literal[]> dispensers){
-		List<Literal> things 		= new ArrayList<Literal>();
+		List<Literal> things = new ArrayList<Literal>();
 		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
-			if (!entry.getKey().equals("goal")) {
+			if (!entry.getKey().startsWith("goal_")) {
 	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
 				Atom type = new Atom(entry.getKey());
 				for (Point p : entry.getValue()) {
@@ -118,23 +212,53 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION 
-	void getGoal(String name, OpFeedbackParam<Literal[]> goal){
+	void getGoalClusters(String name, OpFeedbackParam<Literal[]> clusters){
 		List<Literal> things 		= new ArrayList<Literal>();
 		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
-			if (entry.getKey().equals("goal")) {
+			if (entry.getKey().startsWith("goal_")) {
 	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
+				Literal cluster = ASSyntax.createLiteral("cluster");
+				cluster.addTerm(ASSyntax.createAtom(entry.getKey()));
+				List<Literal> goals = new ArrayList<Literal>();
 				for (Point p : entry.getValue()) {
-					Literal literal = ASSyntax.createLiteral("goal");
+					Literal literal = null;
+					if(p instanceof OriginPoint) {
+						literal = ASSyntax.createLiteral("origin");
+					} else {
+						literal = ASSyntax.createLiteral("goal");
+					}
 					NumberTerm x = new NumberTermImpl(p.x);
 					NumberTerm y = new NumberTermImpl(p.y);
 					literal.addTerm(x);
 					literal.addTerm(y);
-					things.add(literal);
+					goals.add(literal);
 				}
+				cluster.addTerm(ASSyntax.createList(goals.toArray(new Literal[goals.size()])));
+				things.add(cluster);
 			}
 		}
 		Literal[] arraythings = things.toArray(new Literal[things.size()]);
-		goal.set(arraythings);
+		clusters.set(arraythings);
+	}
+	
+	@OPERATION 
+	void getGoals(String name, String cluster, OpFeedbackParam<Literal[]> goals){
+		List<Literal> things 		= new ArrayList<Literal>();
+		for(Point p : agentmaps.get(name).get(cluster)) {
+			Literal literal = null;
+			if(p instanceof OriginPoint) {
+				literal = ASSyntax.createLiteral("origin");
+			} else {
+				literal = ASSyntax.createLiteral("goal");
+			}
+			NumberTerm x = new NumberTermImpl(p.x);
+			NumberTerm y = new NumberTermImpl(p.y);
+			literal.addTerm(x);
+			literal.addTerm(y);
+			things.add(literal);
+		}
+		Literal[] arraythings = things.toArray(new Literal[things.size()]);
+		goals.set(arraythings);
 	}
 	
 	@OPERATION

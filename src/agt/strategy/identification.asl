@@ -33,6 +33,9 @@ no_more_on_sight([]) :- true.
 no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	not(i_see_it(EverythingSeen, _, _)) &
 	no_more_on_sight(L).
+	
+i_met_new_agent(Iknow, IdList) :-
+	.member(Ag, Iknow) & not .member(Ag, IdList).
 
 
 @thing[atomic]
@@ -117,6 +120,9 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	.union(AuxList,[Ag],NewList);
 	+identification::identified(NewList);
 	!stop::new_dispenser_or_merge;
+	if(not retrieve::retriever){
+		!stop::check_join_group;
+	}
 	.
 @updateidother[atomic]
 +!update_identified(List,NewOriginX,NewOriginY)[source(Ag)]
@@ -129,16 +135,29 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 	+identification::identified(NewList);
 	!update_pos(Ag,NewOriginX,NewOriginY);
 	!stop::new_dispenser_or_merge;
+	if(not retrieve::retriever){
+		!stop::check_join_group;
+	}
 	.
 	
 @updatepos[atomic]
 +!update_pos(MapOther,OriginX,OriginY)
-	: map::myMap(Map)
+	: map::myMap(Map) & .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
 	getMyPos(MyX,MyY);
 	updateMyPos(MyX+OriginX,MyY+OriginY);
+	if(retrieve::target(TargetX, TargetY)){
+		-+retrieve::target(TargetX+OriginX,TargetY+OriginY);
+	}
+	if(Map \== MapOther){
+		getTargetGoal(GoalAgent, GoalX, GoalY);
+		.term2string(Me, Me1);
+		if(GoalAgent == Me1){
+			setTargetGoal(Pos, Me, OriginX+GoalX, OriginY+GoalY);
+		}
+	}
 	.
 
 @requestmerge[atomic]
@@ -158,13 +177,13 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 <-
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
-	!map::get_goal(GoalList);
+	!map::get_clusters(Clusters);
 	getMyPos(OtherX,OtherY);
-	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList));
+	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters));
 	.
 
 @replyleaderme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList)[source(Source)]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList)[source(Source)]
 	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
 <-
 	.send(Leader, achieve, identification::confirm_merge);
@@ -176,8 +195,14 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 		for (.member(dispenser(Type,DX,DY),DispList)) {
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
-		for (.member(goal(GX,GY),GoalList)) {
-			updateMap(Me,goal,NewOriginX+GX,NewOriginY+GY);
+		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
+			for (.member(goal(GX,GY),GoalList)) {
+				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
+			}
+			for (.member(origin(GX,GY),GoalList)) {
+				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
+			}
+			//!retrieve::update_target;
 		}
 		?identification::identified(IdList);
 		-identification::identified(IdList);
@@ -192,6 +217,9 @@ no_more_on_sight([agent_sees(Agent, EverythingSeen)|L]) :-
 			.send(Ag, achieve, identification::update_identified(NewList,NewOriginX,NewOriginY));
 		}
 		!stop::new_dispenser_or_merge;
+		if(not retrieve::retriever){
+			!stop::check_join_group;
+		}
 	}
 	else {
 		-identification::merge_canceled[source(Leader)];
