@@ -34,7 +34,42 @@
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
 	!map::update_goal_in_map(MyX, MyY, X, Y, Clusters);
+	/*if(exploration::explorer){
+		-exploration::explorer;
+		!action::forget_old_action;
+		+map::evaluating_cluster;
+		!!map::visit_goal_cluster(X, Y);
+	}*/
 	.
+
++!map::visit_goal_cluster(X, Y) :
+	X > 0 & not default::obstacle(1, 0)
+<- 
+	!action::move(e);
+	!map::visit_goal_cluster(X-1, Y).
++!map::visit_goal_cluster(X, Y) :
+	X < 0 & not default::obstacle(-1, 0)
+<- 
+	!action::move(w);
+	!map::visit_goal_cluster(X+1, Y).
++!map::visit_goal_cluster(X, Y) :
+	Y > 0 & not default::obstacle(0, 1)
+<- 
+	!action::move(s);
+	!map::visit_goal_cluster(X, Y-1).
++!map::visit_goal_cluster(X, Y) :
+	Y < 0 & not default::obstacle(0, -1)
+<- 
+	!action::move(n);
+	!map::visit_goal_cluster(X, Y+1).
++!map::visit_goal_cluster(X, Y) :
+	true
+<- 
+	-map::evaluating_cluster;
+	+exploration::explorer;
+	!action::forget_old_action;
+	!!exploration::explore([n,s,e,w]).
+
 	
 +!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) : .member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList) | .member(origin(MyX+X, MyY+Y), GoalList)) <- true.
 +!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) 

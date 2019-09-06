@@ -15,31 +15,31 @@
 
 @stop1[atomic]
 +stop
-	: not stop::first_to_stop & .my_name(Me) // first to stop
+	: exploration::explorer & not stop::first_to_stop & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	!map::get_clusters(Clusters);
 	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	.length(GoalList, N);
 	if(N > 5){
-	.broadcast(tell, stop::first_to_stop);
-	+stop::first_to_stop[source(Me)];
-	.print("Removing explorer");
-	-exploration::explorer;
-	!action::forget_old_action;
-	.print("Adding retriever");
-	+retrieve::retriever;
-	.print("Call first time setTargetGoal");
-	.member(origin(GoalX, GoalY), GoalList);
-	setTargetGoal(Pos, Me, GoalX, GoalY);
-	!!retrieve::retrieve_block;
+		.broadcast(tell, stop::first_to_stop);
+		+stop::first_to_stop[source(Me)];
+		.print("Removing explorer");
+		-exploration::explorer;
+		!action::forget_old_action;
+		.print("Adding retriever");
+		+retrieve::retriever;
+		.print("Call first time setTargetGoal");
+		.member(origin(GoalX, GoalY), GoalList);
+		setTargetGoal(Pos, Me, GoalX, GoalY);
+		!!retrieve::retrieve_block;
 	} else{
 		-stop::stop;
 	}
 	.
 @stop2[atomic]
 +stop
-	: stop::first_to_stop[source(Ag)] & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
+	: exploration::explorer & stop::first_to_stop[source(Ag)] & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	.print("Removing explorer");
 	-exploration::explorer;
@@ -48,6 +48,7 @@
 	+retrieve::retriever;
 	!!retrieve::retrieve_block;
 	.
++stop: true <- -stop::stop.
 
 @first_to_stop1[atomic]
 +stop::first_to_stop[source(Ag)] :
@@ -63,7 +64,7 @@
 	.
 @first_to_stop2[atomic]
 +stop::first_to_stop[source(Ag1)] :
-	exploration::explorer & stop::first_to_stop[source(Ag2)] & Ag1 \== Ag2 &
+	not retrieve::retriever &  stop::first_to_stop[source(Ag2)] & Ag1 \== Ag2 &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Ag1) & .nth(PosOther,AllAgents,Ag2)
 <-
 	if(Pos < PosOther){

@@ -65,6 +65,9 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION
 	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y){
+		if(goalAgent == null) {
+			return;
+		}
 		agent.set(goalAgent);
 		x.set(targetGoalX);
 		y.set(targetGoalY);

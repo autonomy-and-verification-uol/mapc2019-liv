@@ -174,6 +174,31 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, e) :-
 neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	MyX == (TargetX+1) & MyY == TargetY.
 
++!retrieve::generate_helpers_position(origin(X, Y), 
+	[
+		pos(X-9, Y-9),
+		pos(X-6, Y-9),
+		pos(X-3, Y-9),
+		pos(X, Y-9),
+		pos(X+3, Y-9),
+		pos(X+6, Y-9),
+		pos(X+9, Y-9),
+		pos(X-9, Y-6),
+		pos(X-6, Y-6),
+		pos(X-3, Y-6),
+		pos(X, Y-6),
+		pos(X+3, Y-6),
+		pos(X+6, Y-6),
+		pos(X+9, Y-6),
+		pos(X-9, Y-3),
+		pos(X-6, Y-3),
+		pos(X-3, Y-3),
+		pos(X, Y-3),
+		pos(X+3, Y-3),
+		pos(X+6, Y-3),
+		pos(X+9, Y-3)
+	]).
+
 +!retrieve::retrieve_block :
 	true
 <-
@@ -289,15 +314,30 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		}
 	}
 	-retrieve::fetching_block.
-
+/*
+@update_target[atomic]
 +!retrieve::update_target :
-	true
+	.my_name(Me) & map::myMap(Leader)
 <- 
-	!map::get_clusters(Clusters);
-	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
-	.member(origin(GoalX, GoalY), GoalList);
-	setTargetGoal(Pos, Me, GoalX, GoalY);
+	getTargetGoal(Ag, _, _);
+	if(.ground(Ag)){
+		!map::get_clusters(Clusters);
+		!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
+		.member(origin(GoalX, GoalY), GoalList);
+		setTargetGoal(0, Me, GoalX, GoalY);
+		.broadcast(achieve, retrieve::update_target_aux(Leader));
+	}
 	.
+@update_target1[atomic]
++!retrieve::update_target_aux(Leader)[source(Ag)] :
+	map::myMap(Leader) & .my_name(Me) & Me \== Ag
+<-
+	getTargetGoal(_, GoalX, GoalY);
+	-+retrieve::target(GoalX, GoalY);
+	.
+@update_target2[atomic]
++!retrieve::update_target_aux(_)[source(Ag)].
+*/
 
 +!retrieve::fetch_block_to_goal : 
 	retrieve::retriever
@@ -307,12 +347,20 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever &
 	retrieve::target(TargetX, TargetY) &
-	neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, Direction)
+	neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, Direction) &
+	.my_name(Me)
 <-
 	!retrieve::create_and_attach_block(Direction);
 	getTargetGoal(Ag, GoalX, GoalY);
 	.print("Chosen Goal position: ", GoalX, GoalY);
-	-+retrieve::target(GoalX, GoalY);
+	if(stop::first_to_stop[source(Me)]){
+		MyGoalX = GoalX; MyGoalY = GoalY;
+	} else{
+		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
+		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
+		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
+	}
+	-+retrieve::target(MyGoalX, MyGoalY);
 	!retrieve::move_to_goal.
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever &
@@ -491,17 +539,37 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 <-
 	if(default::attached(0, -1)){
 		!action::rotate(cw);
+		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(default::attached(-1, 0)){
 		!action::rotate(ccw);
+		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(default::attached(1, 0)){
 		!action::rotate(cw);
+		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
-		!action::move(z);
+		!default::always_skip;
 	}
-	!retrieve::move_to_goal_aux(TargetX, TargetY);
 	.
-	//!retrieve::move_to_goal_aux(TargetX, TargetY, TargetX, TargetY).
- +!retrieve::move_to_goal_aux(MyX, MyY) :
+	
++!retrieve::move_to_goal_aux(MyX, MyY) :
+	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop[source(Me)]) & retrieve::target(TargetX, TargetY) &
+	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
+	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
+<-
+	getTargetGoal(_, GoalX, GoalY);
+	!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
+	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
+	.length(HelpersPos, NHelpersPos);
+	if(Pos == (NHelpersPos-1)){
+		Pos1 = 0;
+	} else{
+		Pos1 = Pos + 1;
+	}
+	.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
+	-+retrieve::target(NewTargetX, NewTargetY)
+	!retrieve::move_to_goal_aux(MyX, MyY);
+	.
+ /*+!retrieve::move_to_goal_aux(MyX, MyY) :
 	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop[source(Me)]) & retrieve::target(TargetX, TargetY) &
 	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 5
 	//default::thing(TargetX-MyX, TargetY-MyY, Type, _) & Type \== dispenser
@@ -525,7 +593,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		+retrieve::target(NewTargetX, NewTargetY); 
 		!retrieve::move_to_goal;
 	}
-	.
+	.*/
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 
