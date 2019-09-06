@@ -27,18 +27,6 @@ get_direction(0,1,Dir) :- Dir = s.
 get_direction(1,0,Dir) :- Dir = e.
 get_direction(-1,0,Dir) :- Dir = w.
 
-// this it to simulate when an agent arrives in distance 2 of the target goal position
-+default::step(0)
-	: default::goal(0,0) & .my_name(agent4)
-<-
-	+origin;
-	.
-+default::step(0)
-	: default::attached(0,1) & default::thing(0,1, block, Type) & .my_name(Me)
-<-
-	addAvailableAgent(Me,Type);
-	.
-
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
 	: task::origin & not task::committed(Id2,_) & .my_name(Me)
@@ -228,7 +216,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 //	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	if (not task::help) {
-		!default::always_move_north;
+		!retrieve::retrieve_block;
 	}
 	.
 	
@@ -245,7 +233,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	if (not task::help) {
-		!default::always_move_north;
+		!retrieve::retrieve_block;
 	}
 	.
 	
@@ -266,7 +254,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	-help[source(_)];
-	!default::always_move_north;
+	!retrieve::retrieve_block;
 	.
 
 +!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) : default::thing(LocalX-MyX,LocalY-MyY, block, Type).	

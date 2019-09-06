@@ -66,14 +66,14 @@
 		}
 	}
 	.
-+!commit_action(Action)
-	: default::actionID(Id) & action::action(Id,ChosenAction) & .current_intention(intention(IntentionId,_))
-<-
-	.print("I've already picked an action ",ChosenAction," for ",Id," trying ",Action," next. I am ",IntentionId);
-	.drop_all_intentions;
-	.print("WE HAVE A BUG");
-	.drop_intention;
-	.
+//+!commit_action(Action)
+//	: default::actionID(Id) & action::action(Id,ChosenAction) & .current_intention(intention(IntentionId,_))
+//<-
+//	.print("I've already picked an action ",ChosenAction," for ",Id," trying ",Action," next. I am ",IntentionId);
+//	.drop_all_intentions;
+//	.print("WE HAVE A BUG");
+//	.drop_intention;
+//	.
 +!commit_action(Action)
 	: default::actionID(Id) & action::action(Id,ChosenAction) 
 <-

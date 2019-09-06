@@ -1,12 +1,3 @@
-+stop
-	: true
-<-
-	-exploration::explorer;
-	!action::forget_old_action;
-	!!default::always_skip;
-	.
-
-
 +!stop::choose_the_biggest_cluster([], cluster(_, [])).
 +!stop::choose_the_biggest_cluster([cluster(Id1, GoalList1)|Clusters], Cluster) :
 	true
@@ -59,7 +50,7 @@
 +stop: true <- -stop::stop.
 
 @first_to_stop1[atomic]
-+stop::first_to_stop(Ag) :
++stop::first_to_stop(Ag)[source(_)] :
 	retrieve::retriever & .my_name(Me) & stop::first_to_stop(Me) &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Ag) & PosOther < Pos
 <-
@@ -72,14 +63,14 @@
 	!!exploration::explore([n,s,e,w]);
 	.
 @first_to_stop2[atomic]
-+stop::first_to_stop(Ag1) :
-	stop::first_to_stop(Ag2) & Ag1 \== Ag2 &
++stop::first_to_stop(Ag1)[source(_)] :
+	stop::first_to_stop(Ag2)[source(_)] & Ag1 \== Ag2 &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Ag1) & .nth(PosOther,AllAgents,Ag2)
 <-
 	if(Pos < PosOther){
-		-stop::first_to_stop(Ag2);
+		-stop::first_to_stop(Ag2)[source(_)];
 	} else{
-		-stop::first_to_stop(Ag1);
+		-stop::first_to_stop(Ag1)[source(_)];
 	}
 	.
 //@check_join_group[atomic]

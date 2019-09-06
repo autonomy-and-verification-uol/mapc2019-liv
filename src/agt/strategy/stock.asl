@@ -554,6 +554,14 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		!action::rotate(cw);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
+		.my_name(Me);
+		if  (stop::first_to_stop(Me)) {
+			+task::origin;
+		}
+		else {
+			?default::thing(0,1,block,Type);
+			addAvailableAgent(Me,Type);
+		}
 		!default::always_skip;
 	}
 	.
