@@ -202,6 +202,7 @@ i_met_new_agent(Iknow, IdList) :-
 			for (.member(origin(GX,GY),GoalList)) {
 				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
 			}
+			.broadcast(achieve, retrieve::update_target);
 			//!retrieve::update_target;
 		}
 		?identification::identified(IdList);

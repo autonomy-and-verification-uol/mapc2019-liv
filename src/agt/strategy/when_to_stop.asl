@@ -15,13 +15,13 @@
 
 @stop1[atomic]
 +stop
-	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) // first to stop
+	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) & Me == agent1  // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	!map::get_clusters(Clusters);
 	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	.length(GoalList, N);
-	if(N > 5){
+	//if(N > 5){
 		.broadcast(tell, stop::first_to_stop(Me));
 		+stop::first_to_stop(Me);
 		.print("Removing explorer");
@@ -33,13 +33,13 @@
 		.member(origin(GoalX, GoalY), GoalList);
 		setTargetGoal(Pos, Me, GoalX, GoalY);
 		!!retrieve::retrieve_block;
-	} else{
-		-stop::stop;
-	}
+	//} else{
+	//	-stop::stop;
+	//}
 	.
 @stop2[atomic]
 +stop
-	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
+	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) & Ag == agent1 // someone else stopped already and my map is his map
 <-
 	.print("Removing explorer");
 	-exploration::explorer;
@@ -48,7 +48,6 @@
 	+retrieve::retriever;
 	!!retrieve::retrieve_block;
 	.
-+stop: true <- -stop::stop.
 
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag) :
@@ -78,7 +77,7 @@
 +!stop::check_join_group
 	: exploration::explorer & 
 	stop::first_to_stop(Ag) & // send a message to the one that stopped asking who the leader is, and you check if you have the same
-	map::myMap(Leader)
+	map::myMap(Leader) & .my_name(Agg) & (Agg == agent2 | Agg == agent3)
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
 	.print("Leader: ", Leader, " Leader1: ", Leader1);

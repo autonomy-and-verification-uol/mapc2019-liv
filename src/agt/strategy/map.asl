@@ -84,6 +84,7 @@
 <-
 	if(Type == goal){
 		updateGoalMap(Me, MyX+X, MyY+Y, NewCluster);
+		.broadcast(achieve, retrieve::update_target);
 		//!retrieve::update_target;
 	} else{
 		!map::get_dispensers(Dispensers);

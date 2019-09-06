@@ -314,26 +314,38 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		}
 	}
 	-retrieve::fetching_block.
-/*
-@update_target[atomic]
+
+@update_target1[atomic]
 +!retrieve::update_target :
-	.my_name(Me) & map::myMap(Leader)
+	.my_name(Me) & stop::first_to_stop(Me) & .nth(Pos,AllAgents,Me)
 <- 
 	getTargetGoal(Ag, _, _);
 	if(.ground(Ag)){
 		!map::get_clusters(Clusters);
 		!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 		.member(origin(GoalX, GoalY), GoalList);
-		setTargetGoal(0, Me, GoalX, GoalY);
-		.broadcast(achieve, retrieve::update_target_aux(Leader));
+		setTargetGoal(Pos, Me, GoalX, GoalY);
+		//.broadcast(achieve, retrieve::update_target_aux(Leader));
 	}
 	.
+	
+@update_target2[atomic]
++!retrieve::update_target.
+
+/* 
 @update_target1[atomic]
 +!retrieve::update_target_aux(Leader)[source(Ag)] :
 	map::myMap(Leader) & .my_name(Me) & Me \== Ag
 <-
 	getTargetGoal(_, GoalX, GoalY);
-	-+retrieve::target(GoalX, GoalY);
+	if(stop::first_to_stop(Me)){
+		MyGoalX = GoalX; MyGoalY = GoalY;
+	} else{
+		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
+		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
+		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
+	}
+	-+retrieve::target(MyGoalX, MyGoalY);
 	.
 @update_target2[atomic]
 +!retrieve::update_target_aux(_)[source(Ag)].
@@ -354,7 +366,6 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	getTargetGoal(Ag, GoalX, GoalY);
 	.print("Chosen Goal position: ", GoalX, GoalY);
 	if(stop::first_to_stop(Me)){
-		.print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa");
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
@@ -536,6 +547,38 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 		!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 	}.
 
++!retrieve::wait_to_help_building(OriginX, OriginY) :
+	 .my_name(Me) & stop::first_to_stop(Me) & retrieve::target(TargetX, TargetY)
+<- 	
+	.print(origin(OriginX, OriginY));
+	.print(target(TargetX, TargetY));
+	if(OriginX \== TargetX | OriginY \== TargetY){
+		MyGoalX = OriginX; MyGoalY = OriginY;
+		-+retrieve::target(MyGoalX, MyGoalY);
+		!retrieve::move_to_goal;
+	} else{
+		!action::move(z);
+		getTargetGoal(_, UpdatedOriginX, UpdatedOriginY);
+		!retrieve::wait_to_help_building(UpdatedOriginX, UpdatedOriginY);
+	}
+	.
+
++!retrieve::wait_to_help_building(OriginX, OriginY) :
+	 .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY)
+<- 	
+	!retrieve::generate_helpers_position(origin(OriginX, OriginY), HelpersPos);
+	if(.member(pos(TargetX, TargetY), HelpersPos)){
+		!action::move(z);
+		getTargetGoal(_, UpdatedOriginX, UpdatedOriginY);
+		!retrieve::wait_to_help_building(UpdatedOriginX, UpdatedOriginY);
+	} else{
+		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
+		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
+		-+retrieve::target(MyGoalX, MyGoalY);
+		!retrieve::move_to_goal;
+	}
+	.
+
 +!retrieve::move_to_goal : 
 	retrieve::retriever
 <- 
@@ -546,16 +589,15 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 <-
 	if(default::attached(0, -1)){
 		!action::rotate(cw);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(default::attached(-1, 0)){
 		!action::rotate(ccw);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(default::attached(1, 0)){
 		!action::rotate(cw);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
-		!default::always_skip;
+		getTargetGoal(_, OriginX, OriginY);
+		!retrieve::wait_to_help_building(OriginX, OriginY);
 	}
+	!retrieve::move_to_goal_aux(TargetX, TargetY);
 	.
 	
 +!retrieve::move_to_goal_aux(MyX, MyY) :
