@@ -1,6 +1,51 @@
 { include("reasoning-engine.asl") }
 
 // ##### MOVE ACTION #####
+// Check if you can get out of a clear immediate (<= 2 steps)
+
+// Get out of a clear marker
++!move(Direction)
+	: default::thing(0,0,marker,clear) & not common::escape
+<-
+	!common::escape;
+	!move(Direction);
+	.
+// Avoid clear markers moving north
++!move(n)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(n);
+	.
+// Avoid clear markers moving south
++!move(s)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(s);
+	.
+// Avoid clear markers moving east
++!move(e)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(e);
+	.
+// Avoid clear markers moving west
++!move(e)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(w);
+	.	
+// Go around a friendly agent
++!move(Direction)
+	: exploration::check_agent(Direction) & not common::avoid(_)
+<-
+	!common::go_around(Direction);
+	!action::commit_action(move(Direction));
+	.
+// Default move behaviour
 +!move(Direction)
 <-
 	!action::commit_action(move(Direction));
@@ -45,12 +90,13 @@
 // ##### CONNECT ACTION #####
 +!connect(Agent,X,Y)
 <-
-	!action::commit_action(connect(Agent,X,Y));
+	getServerName(Agent,AgentServer);
+	!action::commit_action(connect(AgentServer,X,Y));
 	.
 // Improve this failure to drop disjunction into two different plans
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_parameter)))] <- .print(Agent," is not in our team, or ",X," and ",Y," are not valid integers.").
 // Improve this failure to drop disjunction into two different plans
--!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_partner)))] <- .print("The other agent didn't send connect action, or failed randomly, or it had wrong parameters.").
+-!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_partner)))] <- .print("The other agent didn't send connect action, or failed randomly, or it had wrong parameters. Trying again."); !connect(Agent,X,Y).
 // Improve this failure to drop disjunction into two different plans
 -!connect(Agent,X,Y)[code(.fail(action(Action),result(failed_target)))] <- .print("No blocks at given position, or not attached to the agent, or already attached to the other agent").
 // Improve this failure to drop disjunction into two different plans

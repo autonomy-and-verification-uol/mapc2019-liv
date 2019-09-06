@@ -1,6 +1,79 @@
 # simple setup file for testing
-
 stop    # stops further setup execution
+
+move 36 27 agentA1
+add 36 28 block b1
+attach 36 27 36 28
+
+move 34 25 agentA2
+add 34 26 block b0
+attach 34 25 34 26
+
+move 32 27 agentA3
+add 32 28 block b1
+attach 32 27 32 28
+
+move 34 28 agentA4
+
+
+
+# case 1
+move 36 27 agentA1
+add 36 28 block b0
+attach 36 27 36 28
+
+move 34 28 agentA4
+add 34 29 block b1
+attach 34 28 34 29
+
+# case 2
+move 36 27 agentA1
+add 36 28 block b1
+attach 36 27 36 28
+
+move 34 28 agentA4
+add 34 29 block b2
+attach 34 28 34 29
+
+# case 3
+move 36 27 agentA1
+add 34 29 block b1
+attach 34 28 34 29
+
+move 34 28 agentA4
+add 34 29 block b0
+attach 34 28 34 29
+
+# case 4
+move 34 28 agentA4
+
+
+move 33 19 agentA1
+terrain 32 19 obstacle
+terrain 35 19 obstacle
+terrain 37 18 obstacle
+terrain 36 18 obstacle
+terrain 35 17 obstacle
+terrain 34 17 obstacle
+terrain 33 17 obstacle
+terrain 32 17 obstacle
+terrain 31 17 obstacle
+terrain 30 18 obstacle
+terrain 30 19 obstacle
+terrain 30 20 obstacle
+terrain 31 21 obstacle
+terrain 32 21 obstacle
+terrain 33 21 obstacle
+terrain 34 21 obstacle
+terrain 35 21 obstacle
+terrain 36 20 obstacle
+
+
+move 8 32 agentA5
+add 8 33 block b1
+attach 8 32 8 33
+
+
 
 move 3 3 agentA1
 move 6 3 agentA2

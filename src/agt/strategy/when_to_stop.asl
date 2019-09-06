@@ -1,3 +1,11 @@
++stop
+	: true
+<-
+	-exploration::explorer;
+	!action::forget_old_action;
+	!!default::always_skip;
+	.
+
 
 +!stop::choose_the_biggest_cluster([], cluster(_, [])).
 +!stop::choose_the_biggest_cluster([cluster(Id1, GoalList1)|Clusters], Cluster) :

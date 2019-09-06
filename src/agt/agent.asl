@@ -4,9 +4,11 @@
 { include("action/actions.asl", action) }
 { include("strategy/identification.asl", identification) }
 { include("strategy/exploration.asl", exploration) }
+//{ include("strategy/task.asl", task) }
 { include("strategy/when_to_stop.asl", stop) }
 { include("strategy/stock.asl", retrieve) }
 { include("strategy/map.asl", map) }
+{ include("strategy/common-plans.asl", common) }
 { include("strategy/new-round.asl", newround) }
 	
 +!register(E)
@@ -28,6 +30,7 @@
 <- 
 	+start;
 	.wait(1000);
+//	!always_skip;
 	!!exploration::explore([n,s,e,w]);
 	.
 	
@@ -39,10 +42,10 @@
 	.
 -!always_skip <- !!always_skip.
     
-//+!always_move_north
-//	: true
-//<-
-//	!action::move(n);
-//	!!always_move_north;
-//	.
-//-!always_move_north <- !!always_move_north.
++!always_move_north
+	: true
+<-
+	!action::move(n);
+	!!always_move_north;
+	.
+-!always_move_north <- !!always_move_north.
