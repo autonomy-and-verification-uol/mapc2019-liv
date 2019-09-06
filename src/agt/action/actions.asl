@@ -1,8 +1,34 @@
 { include("reasoning-engine.asl") }
 
 // ##### MOVE ACTION #####
-// Avoid clear markers 
-
+// Avoid clear markers moving north
++!move(n)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(n);
+	.
+// Avoid clear markers moving south
++!move(s)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(s);
+	.
+// Avoid clear markers moving east
++!move(e)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(e);
+	.
+// Avoid clear markers moving west
++!move(e)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))
+<-
+	!action::commit_action(move(z));
+	!move(w);
+	.	
 // Go around a friendly agent
 +!move(Direction)
 	: exploration::check_agent(Direction) & not common::avoid(_)

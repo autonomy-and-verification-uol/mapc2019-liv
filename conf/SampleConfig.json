@@ -59,7 +59,7 @@
       },
       
       "events" : {
-        "chance" : 0,
+        "chance" : 15,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [-3, 1],

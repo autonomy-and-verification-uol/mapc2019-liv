@@ -6,5 +6,5 @@
 	+map::myMap(Me);
 	+identification::count(0);
 	+exploration::explorer;
-	+stop::stop;
+//	+stop::stop;
 	.

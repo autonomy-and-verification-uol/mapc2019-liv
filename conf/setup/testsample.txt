@@ -1,5 +1,5 @@
 # simple setup file for testing
-
+stop    # stops further setup execution
 
 move 36 27 agentA1
 add 36 28 block b1
@@ -16,7 +16,7 @@ attach 32 27 32 28
 move 34 28 agentA4
 
 
-stop    # stops further setup execution
+
 # case 1
 move 36 27 agentA1
 add 36 28 block b0

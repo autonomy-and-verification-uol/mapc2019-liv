@@ -4,7 +4,7 @@
 { include("action/actions.asl", action) }
 { include("strategy/identification.asl", identification) }
 { include("strategy/exploration.asl", exploration) }
-{ include("strategy/task.asl", task) }
+//{ include("strategy/task.asl", task) }
 { include("strategy/when_to_stop.asl", stop) }
 { include("strategy/stock.asl", stock) }
 { include("strategy/map.asl", map) }
@@ -30,8 +30,13 @@
 <- 
 	+start;
 	.wait(1000);
-	!always_skip;
-//	!!exploration::explore([n,s,e,w]);
+//	!always_skip;
+	!!exploration::explore([n,s,e,w]);
+	.
+	
++default::thing(0,0,marker,Type)
+<-
+	.print("@@@@@@@@@@ New marker of type ",Type);
 	.
 	
 +!always_skip
