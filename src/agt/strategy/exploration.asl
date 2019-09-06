@@ -89,12 +89,13 @@ remove_opposite(w,e) :- true.
 // TODO what about a block?
 
 
-//+!explore_until_obstacle(Dir)
-//	: explorer & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
-//<-
-//	.print("I see someone from my team, time to *try* to go around it.");
-//	!go_around(Dir,DirList);
-//	.
++!explore_until_obstacle(Dir)
+	: explorer & check_agent(Dir)
+<-
+	.print("I see someone from my team, time to *try* to go around it.");
+	!common::go_around(Dir);
+	!explore_until_obstacle(Dir);
+	.
 	
 +!explore_until_obstacle(Dir)
 	: explorer & action::out_of_bounds(Dir)
@@ -123,12 +124,13 @@ remove_opposite(w,e) :- true.
 	!explore_until_obstacle(Dir);
 	.
 
-//+!explore_until_obstacle_special(Dir)
-//	: explorer & exploration::special(_) & check_agent(Dir) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,OppDir) & .delete(OppDir,DirAux,DirList) 
-//<-
-//	.print("I see someone from my team, time to *try* to go around it.");
-//	!go_around(Dir,DirList);
-//	.
++!explore_until_obstacle_special(Dir)
+	: explorer & exploration::special(_) & check_agent(Dir)
+<-
+	.print("I see someone from my team, time to *try* to go around it.");
+	!common::go_around(Dir);
+	!explore_until_obstacle_special(Dir);
+	.
 	
 +!explore_until_obstacle_special(Dir)
 	: explorer & exploration::special(S) & action::out_of_bounds(Dir)
