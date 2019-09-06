@@ -15,7 +15,7 @@
 
 @stop1[atomic]
 +stop
-	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) & Me == agent1  // first to stop
+	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	!map::get_clusters(Clusters);
@@ -39,7 +39,7 @@
 	.
 @stop2[atomic]
 +stop
-	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) & Ag == agent1 // someone else stopped already and my map is his map
+	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	.print("Removing explorer");
 	-exploration::explorer;
@@ -77,7 +77,7 @@
 +!stop::check_join_group
 	: exploration::explorer & 
 	stop::first_to_stop(Ag) & // send a message to the one that stopped asking who the leader is, and you check if you have the same
-	map::myMap(Leader) & .my_name(Agg) & (Agg == agent2 | Agg == agent3)
+	map::myMap(Leader) & .my_name(Agg)
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
 	.print("Leader: ", Leader, " Leader1: ", Leader1);

@@ -317,7 +317,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 
 @update_target1[atomic]
 +!retrieve::update_target :
-	.my_name(Me) & stop::first_to_stop(Me) & .nth(Pos,AllAgents,Me)
+	.my_name(Me) & stop::first_to_stop(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <- 
 	getTargetGoal(Ag, _, _);
 	if(.ground(Ag)){
