@@ -281,6 +281,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		}
 		else {
 			.print("@@@@@@@ Obstacle at south");
+			!action::move(z);
 			// go around
 		}
 	}
@@ -293,6 +294,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		}
 		else {
 			.print("@@@@@@@ Obstacle at north");
+			!action::move(z);
 			// go around
 		}
 	}
@@ -324,6 +326,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		}
 		else {
 			.print("@@@@@@@ Obstacle at east");
+			!action::move(z);
 			// go around
 		}
 	}
@@ -336,6 +339,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 		}
 		else {
 			.print("@@@@@@@ Obstacle at west");
+			!action::move(z);
 			// go around
 		}
 	}
