@@ -647,7 +647,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 +!retrieve::move_to_goal_aux(MyX, MyY) :
 	not i_have_attached_block
 <-
-	!retrieve::fetch_block_to_goal;
+	!retrieve::retrieve_block;
 	.
 
 -!retrieve::move_to_goal : retrieve::retriever <- !!retrieve::move_to_goal.
