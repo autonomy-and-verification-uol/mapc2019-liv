@@ -173,6 +173,9 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, e) :-
 	MyX == (TargetX-1) & MyY == TargetY.
 neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	MyX == (TargetX+1) & MyY == TargetY.
+	
+most_needed_type(Dispensers, AgList, Type) :-
+	.member(dispenser(Type, _, _), Dispensers) & not .member(agent(_, Type), AgList).
 
 +!retrieve::generate_helpers_position(origin(X, Y), 
 	[
@@ -216,10 +219,17 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 +!retrieve::decide_block_type_flat(Type) : 
 	true
 <-
+	getAvailableAgent(AgList);
 	!map::get_dispensers(Dispensers);
-	.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
-	.shuffle(Types1, Types);
+	.setof(Type1, retrieve::most_needed_type(Dispensers, AgList, Type1), MostNeededTypes);
+	if(MostNeededTypes == []){
+		.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
+		.shuffle(Types1, Types);
+	} else{
+		.shuffle(MostNeededTypes, Types);
+	}
 	.nth(0, Types, Type);
+	
 	.
 
 +!retrieve::decide_block_type(Type) : 
@@ -378,7 +388,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
 <-		
 	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
-	if (exploration::check_obstacle_special_1(Direction)) {
+	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
@@ -513,7 +523,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	.print("here1");
 	true.
 +!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, OppositeDirection, Count) :
-	not(exploration::check_obstacle(DirectionObstacle)) & not(exploration::check_agent(DirectionObstacle)) &
+	not(exploration::check_obstacle_special_1(DirectionObstacle, 2)) & not(exploration::check_agent(DirectionObstacle)) &
 	opposite_direction(DirectionToGo, OppositeDirection)
 <-
 	.print("here2");
@@ -524,7 +534,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	}
 	.
 +!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count) :
-	 Attempts < Threshold & not(exploration::check_obstacle_special_1(DirectionToGo))
+	 Attempts < Threshold & not(exploration::check_obstacle_special_1(DirectionToGo, 1))
 <-
 	.print("here3");
 	!retrieve::smart_move(DirectionToGo);
@@ -599,7 +609,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	i_have_attached_block
 <-
 	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
-	if (exploration::check_obstacle_special_1(Direction)) {
+	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE");
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1);

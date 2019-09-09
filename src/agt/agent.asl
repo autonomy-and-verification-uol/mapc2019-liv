@@ -34,6 +34,28 @@
 	!!exploration::explore([n,s,e,w]);
 	.
 	
+	
++!always_skip :
+	not task::origin & default::attached(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
+<-
+	!action::rotate(cw);
+	while(not default::lastActionResult(success)){
+		!action::rotate(cw);
+	}
+	!action::rotate(cw);
+	while(not default::lastActionResult(success)){
+		!action::rotate(cw);
+	}
+	!action::rotate(cw);
+	while(not default::lastActionResult(success)){
+		!action::rotate(cw);
+	}
+	!action::rotate(cw);
+	while(not default::lastActionResult(success)){
+		!action::rotate(cw);
+	}
+	!!always_skip;
+	.
 +!always_skip
 	: true
 <-
