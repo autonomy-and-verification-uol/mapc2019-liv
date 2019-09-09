@@ -20,7 +20,7 @@
 	!map::get_clusters(Clusters);
 	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	.length(GoalList, N);
-	if(N > 5){
+//	if(N > 5){
 		.broadcast(tell, stop::first_to_stop(Me));
 		+stop::first_to_stop(Me);
 		.print("Removing explorer");
@@ -32,9 +32,9 @@
 		.member(origin(GoalX, GoalY), GoalList);
 		setTargetGoal(Pos, Me, GoalX, GoalY);
 		!!retrieve::retrieve_block;
-	} else{
-		-stop::stop;
-	}
+//	} else{
+//		-stop::stop;
+//	}
 	.
 @stop2[atomic]
 +stop
