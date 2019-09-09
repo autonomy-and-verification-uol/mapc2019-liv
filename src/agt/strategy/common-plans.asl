@@ -72,12 +72,18 @@ find_empty_position(X,Y,5,Vision) :- (not (default::thing(0,-5,Thing,_) & Thing 
 find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X,Y,Count+1,Vision). 
 
 +!go_around(OldDir)
-	: not common::avoid(_) & relative_right(OldDir, Dir) & not exploration::check_obstacle_all(Dir)
+	: not common::avoid(_) & relative_right(OldDir, Dir) & not exploration::check_obstacle_special(Dir)
 <-
 	+avoid(1);
 	.print("First avoid, no obstacles, direction ",Dir);
-	!action::move(Dir);
+	!retrieve::smart_move(Dir);
+//	!action::move(Dir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(Dir);
+//		!action::move(Dir);
+	}
 	!go_around(OldDir, Dir);
+	
 	.
 	
 +!go_around(OldDir)
@@ -85,8 +91,61 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	+avoid(1);
 	.print("First avoid, with obstacles");
-	!action::move(OldDir);
+	!retrieve::smart_move(OldDir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(OldDir);
+//		!action::move(OldDir);
+	}
 	!go_around(OldDir, OldDir);
+	.
+	
++!go_around(n, Dir)
+	: common::avoid(Av) & Av < 3 & default::thing(0,-1,block,_)
+<-
+	!retrieve::smart_move(Dir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(Dir);
+//		!action::move(OldDir);
+	}
+	!go_around(n, Dir);
+	.
+	
++!go_around(s, Dir)
+	: common::avoid(Av) & Av < 3 & default::thing(1,0,block,_)
+<-
+	!retrieve::smart_move(Dir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(Dir);
+//		!action::move(OldDir);
+	}
+	!go_around(s, Dir);
+	.
+	
++!go_around(e, Dir)
+	: common::avoid(Av) & Av < 3 & default::thing(1,0,block,_)
+<-
+	!retrieve::smart_move(Dir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(Dir);
+//		!action::move(OldDir);
+	}
+	!go_around(e, Dir);
+	.
+	
++!go_around(w, Dir)
+	: common::avoid(Av) & Av < 3 & default::thing(-1,0,block,_)
+<-
+	!retrieve::smart_move(Dir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(Dir);
+//		!action::move(OldDir);
+	}
+	!go_around(w, Dir);
 	.
 	
 +!go_around(OldDir, Dir)
@@ -94,7 +153,12 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	-avoid(Av);
 	+avoid(Av+1);
-	!action::move(OldDir);
+	!retrieve::smart_move(OldDir);
+//	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(OldDir);
+//		!action::move(OldDir);
+	}
 	!go_around(OldDir, Dir);
 	.
 	
@@ -102,8 +166,13 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: common::avoid(3) & OldDir \== Dir & exploration::remove_opposite(Dir,NewDir)
 <-
 	-avoid(3);
-	.print("@@@@@@@@@@ Finished go around");
-	!action::move(NewDir);
+	.print("@@@@@@@@@@ Finished go around no obstacle");
+	!retrieve::smart_move(NewDir);
+//	!action::move(NewDir);
+	if (default::lastActionResult(failed_path)) {
+		!retrieve::smart_move(NewDir);
+//		!action::move(NewDir);
+	}
 	.
 	
 +!go_around(OldDir, Dir)
@@ -112,6 +181,9 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	-avoid(3);
 	.print("@@@@@@@@@@ Finished go around");
 	!action::move(OldDir);
+	if (default::lastActionResult(failed_path)) {
+		!action::move(OldDir);
+	}
 	.
 	
 +!escape

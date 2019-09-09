@@ -49,7 +49,7 @@
 	if ( Result == unknown_action){
 		.print("My action ",LastAction," was unknown to the server. This should never happen!");
 	}	
-	if (LastAction == no_action | Result == failed_random){
+	if (Result == failed_random){
 		.print("My action failed due to random failure, sending it again.");
 		!commit_action(Action); // repeat the previous action
 	}else{

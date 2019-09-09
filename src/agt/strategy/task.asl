@@ -209,7 +209,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 //	.print("@@@@ Received order for new task");
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
+	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
@@ -226,7 +226,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 //	.print("@@@@ Received order for new task");
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
+	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
@@ -243,11 +243,11 @@ get_direction(-1,0,Dir) :- Dir = w.
 //	.print("@@@@ Received order for new task");
 //	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	!get_to_pos_vert(MyX,MyY,CollectX,CollectY,CollectX+1,CollectY);
+	!get_to_pos_horiz(MyX,MyY,CollectX,CollectY,CollectX+1,CollectY);
 	!action::attach(e);
 	!action::rotate(cw);
 	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	!get_to_pos_horiz(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	getMyPos(MyXNewNew,MyYNewNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_connect(MyXNewNew+BlockX,MyYNewNew+BlockY));
@@ -256,6 +256,14 @@ get_direction(-1,0,Dir) :- Dir = w.
 	-help[source(_)];
 	!retrieve::retrieve_block;
 	.
+	
++!rotate_back
+	: not default::attached(0,1)
+<-
+	!action::rotate(cw);
+	!rotate_back;
+	.
++!rotate_back.
 
 +!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) : default::thing(LocalX-MyX,LocalY-MyY, block, Type).	
 +!get_to_pos_vert(MyX,MyY,MyX,MyY,LocalX,LocalY) 
@@ -275,28 +283,32 @@ get_direction(-1,0,Dir) :- Dir = w.
 	if ( Y - MyY > 0 ) {
 		if (not default::thing(0,-1,block,_)) {
 			!action::move(s);
-			if (default::lastActionResult(failed_path)) {
-				!action::move(s);
+			if (default::thing(0,-1,entity,_)) {
+				!common::go_around(s);
+				!rotate_back;
+//				!action::move(s);
 			}
 		}
-		else {
-			.print("@@@@@@@ Obstacle at south");
-			!action::move(z);
-			// go around
-		}
+//		else {
+//			.print("@@@@@@@ Obstacle at south");
+//			!action::move(z);
+//			// go around
+//		}
 	}
 	else {
 		if ( not default::thing(0,2,block,_) ) {
 			!action::move(n);
-			if (default::lastActionResult(failed_path)) {
-				!action::move(n);
+			if (default::thing(0,1,entity,_)) {
+				!common::go_around(n);
+				!rotate_back;
+//				!action::move(n);
 			}
 		}
-		else {
-			.print("@@@@@@@ Obstacle at north");
-			!action::move(z);
-			// go around
-		}
+//		else {
+//			.print("@@@@@@@ Obstacle at north");
+//			!action::move(z);
+//			// go around
+//		}
 	}
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_horiz(MyXNew,MyYNew,X,Y,LocalX,LocalY);
@@ -320,28 +332,32 @@ get_direction(-1,0,Dir) :- Dir = w.
 	if ( X - MyX > 0  ) {
 		if (not default::thing(1,0,block,_)) {
 			!action::move(e);
-			if (default::lastActionResult(failed_path)) {
-				!action::move(e);
+			if (default::thing(1,0,entity,_)) {
+				!common::go_around(e);
+				!rotate_back;
+//				!action::move(e);
 			}
 		}
-		else {
-			.print("@@@@@@@ Obstacle at east");
-			!action::move(z);
-			// go around
-		}
+//		else {
+//			.print("@@@@@@@ Obstacle at east");
+//			!action::move(z);
+//			// go around
+//		}
 	}
 	else {
 		if ( not default::thing(-1,0,block,_) ) {
 			!action::move(w);
-			if (default::lastActionResult(failed_path)) {
-				!action::move(w);
+			if (default::thing(-1,0,entity,_)) {
+				!common::go_around(w);
+				!rotate_back;
+//				!action::move(w);
 			}
 		}
-		else {
-			.print("@@@@@@@ Obstacle at west");
-			!action::move(z);
-			// go around
-		}
+//		else {
+//			.print("@@@@@@@ Obstacle at west");
+//			!action::move(z);
+//			// go around
+//		}
 	}
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
