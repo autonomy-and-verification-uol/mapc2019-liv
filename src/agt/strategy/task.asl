@@ -27,6 +27,11 @@ get_direction(0,1,Dir) :- Dir = s.
 get_direction(1,0,Dir) :- Dir = e.
 get_direction(-1,0,Dir) :- Dir = w.
 
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX-1,TargetY,block,_) & X = TargetX-1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX+1,TargetY,block,_) & X = TargetX+1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY-1,block,_) & X = TargetX & Y = TargetY-1.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,block,_) & X = TargetX & Y = TargetY+1.
+
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
 	: task::origin & not task::committed(Id2,_) & .my_name(Me)
@@ -123,11 +128,11 @@ get_direction(-1,0,Dir) :- Dir = w.
 	!default::always_skip;
 	.
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) & connect(X,Y)
+	: committed(Id,CommitListSort) //& connect(X,Y)
 <-
 	!action::submit(Id);
 	-committed(Id,CommitListSort);
-	-connect(X,Y);
+//	-connect(X,Y);
 	!verify_block;
 	!default::always_skip;
 	.
@@ -149,7 +154,7 @@ get_direction(-1,0,Dir) :- Dir = w.
 	.delete(0,CommitListSortNew,CommitListSortNewNew);
 	!update_commitlist(CommitListSortNewNew);
 	getMyPos(MyX,MyY);
-	+connect(0,1);
+//	+connect(0,1);
 	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
 	.
 +!perform_task_origin
@@ -186,20 +191,21 @@ get_direction(-1,0,Dir) :- Dir = w.
 	?get_direction(ConX-MyX, ConY-MyY, Dir)
 	!action::attach(Dir);
 	-no_block;
-	+connect(ConX-MyX,ConY-MyY);
+//	+connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
 	.
 	
 +!help_connect(ConX,ConY)[source(Help)]
-	: connect(X,Y) & default::attached(X,Y) & default::thing(X,Y, block, Type)
+//	:  connect(X,Y) & default::attached(X,Y) & default::thing(X,Y, block, Type)
 <-
+	getMyPos(MyX,MyY);
+	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
 	!action::connect(Help,X,Y);
-	-connect(X,Y);
-	getMyPos(MyX,MyY);
-	.print(ConX-MyX);
-	.print(ConY-MyY);
-	+connect(ConX-MyX,ConY-MyY);
+//	-connect(X,Y);
+//	.print(ConX-MyX);
+//	.print(ConY-MyY);
+//	+connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
 	.
 	
