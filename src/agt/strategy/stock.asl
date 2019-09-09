@@ -373,7 +373,6 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getTargetGoal(Ag, GoalX, GoalY);
 	.print("Chosen Goal position: ", GoalX, GoalY);
 	if(stop::first_to_stop(Me)){
-		.print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa");
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
@@ -412,7 +411,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	!retrieve::fetch_block_to_goal.
 	
--retrieve::fetch_block_to_goal : retrieve::retriever <- !!retrieve::fetch_block_to_goal.
+-!retrieve::fetch_block_to_goal : retrieve::retriever <- !!retrieve::fetch_block_to_goal.
 
 +!retrieve::smart_move(Direction) :
 	true

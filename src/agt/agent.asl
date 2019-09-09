@@ -34,25 +34,36 @@
 	!!exploration::explore([n,s,e,w]);
 	.
 	
-	
+
++!always_skip :
+	not task::origin & 
+	not default::attached(0, 1)
+<-
+	!!retrieve::retrieve_block;
+	.
 +!always_skip :
 	not task::origin & default::attached(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
 <-
-	!action::rotate(cw);
-	while(not default::lastActionResult(success)){
+	if(not default::obstacle(-1, 0)){
 		!action::rotate(cw);
-	}
-	!action::rotate(cw);
-	while(not default::lastActionResult(success)){
+		while(not default::lastActionResult(success)){
+			!action::rotate(cw);
+		}
+		!action::move(z);
+		!action::rotate(ccw);
+		while(not default::lastActionResult(success)){
+			!action::rotate(ccw);
+		}
+	} elif(not default::obstacle(1, 0)){
+		!action::rotate(ccw);
+		while(not default::lastActionResult(success)){
+			!action::rotate(ccw);
+		}
+		!action::move(z);
 		!action::rotate(cw);
-	}
-	!action::rotate(cw);
-	while(not default::lastActionResult(success)){
-		!action::rotate(cw);
-	}
-	!action::rotate(cw);
-	while(not default::lastActionResult(success)){
-		!action::rotate(cw);
+		while(not default::lastActionResult(success)){
+			!action::rotate(cw);
+		}
 	}
 	!!always_skip;
 	.

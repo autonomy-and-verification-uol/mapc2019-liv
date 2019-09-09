@@ -66,6 +66,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::visit_goal_cluster(X, Y) :
 	true
 <- 
+	!map::evaluate_cluster;
 	-map::evaluating_cluster;
 	+exploration::explorer;
 	//!action::forget_old_action;
@@ -77,12 +78,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	: map::myMap(Leader)
 <-
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
+	/*
 	if(exploration::explorer){
 		-exploration::explorer;
 		!action::forget_old_action;
 		+map::evaluating_cluster;
 		!!map::visit_goal_cluster(X, Y);
 	}
+	*/
 	.
 
 @addmap[atomic]
@@ -91,6 +94,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	if(Type == goal){
 		updateGoalMap(Me, MyX+X, MyY+Y, NewCluster);
+		/*if(.ground(NewCluster)){
+			.send(Ag, achieve, map::visit_goal_cluster(X, Y));
+		}*/
 		//!retrieve::update_target;
 	} else{
 		!map::get_dispensers(Dispensers);
@@ -113,7 +119,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.send(Ag, achieve, exploration::try_again(Type, X, Y));
 	.	
 	
-@evaluate_goal1[atomic]
+
+/*@evaluate_goal1[atomic]
 +!map::evaluate_cluster(Cluster) :
 	.my_name(Me)
 <-
@@ -213,7 +220,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	!map::move_to_goal_to_evaluate(NewX, NewY, Goal);
 	.
-
+*/
 @trygoal[atomic]
 +!try_again(goal, X, Y)
 	: true

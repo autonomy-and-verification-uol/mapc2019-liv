@@ -102,6 +102,17 @@ public class TeamArtifact extends Artifact {
 		return agentRoles.get(agent);
 	}
 	
+	/*
+	@OPERATION
+	void evaluateCluster(String name, String cluster, boolean evaluated) {
+		for(Point p : agentmaps.get(name).get(cluster)) {
+			if(p instanceof OriginPoint) {
+				((OriginPoint) p).evaluated = evaluated;
+				return;
+			}
+		}
+	}*/
+	
 	@OPERATION
 	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> newClusterGenerated) {
 		Point p = new Point(x, y);
@@ -142,6 +153,7 @@ public class TeamArtifact extends Artifact {
 						agentmaps.get(name).get(myCluster).remove(pp);
 						agentmaps.get(name).get(myCluster).add(new Point(pp.x, pp.y));
 						agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y));
+						//agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y, ((OriginPoint) pp).evaluated));
 					} else {
 						agentmaps.get(name).get(myCluster).add(p);
 					}
@@ -178,9 +190,14 @@ public class TeamArtifact extends Artifact {
 	}*/
 	
 	private static class OriginPoint extends Point{
+		//private Boolean evaluated = null;
 		public OriginPoint(int x, int y) {
 			super(x, y);
 		}
+		/*public OriginPoint(int x, int y, Boolean evaluated) {
+			super(x, y);
+			this.evaluated = evaluated;
+		}*/
 		// nothing different to add for now
 	}
 	
@@ -224,6 +241,15 @@ public class TeamArtifact extends Artifact {
 					Literal literal = null;
 					if(p instanceof OriginPoint) {
 						literal = ASSyntax.createLiteral("origin");
+						/*Atom evaluated;
+						if(((OriginPoint) p).evaluated == null) {
+							evaluated = ASSyntax.createAtom("none");
+						} else if(((OriginPoint) p).evaluated == true) {
+							evaluated = ASSyntax.createAtom("true");
+						} else {
+							evaluated = ASSyntax.createAtom("false");
+						}
+						literal.addTerm(evaluated);	*/
 					} else {
 						literal = ASSyntax.createLiteral("goal");
 					}
@@ -248,6 +274,15 @@ public class TeamArtifact extends Artifact {
 			Literal literal = null;
 			if(p instanceof OriginPoint) {
 				literal = ASSyntax.createLiteral("origin");
+				/*Atom evaluated;
+				if(((OriginPoint) p).evaluated == null) {
+					evaluated = ASSyntax.createAtom("none");
+				} else if(((OriginPoint) p).evaluated == true) {
+					evaluated = ASSyntax.createAtom("true");
+				} else {
+					evaluated = ASSyntax.createAtom("false");
+				}
+				literal.addTerm(evaluated);	*/
 			} else {
 				literal = ASSyntax.createLiteral("goal");
 			}

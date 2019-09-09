@@ -24,7 +24,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 	
       "steps" : 500,
-      "randomSeed" : 17,
+      "randomSeed" : 18,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
@@ -59,7 +59,7 @@
       },
       
       "events" : {
-        "chance" : 0,
+        "chance" : 10,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [-3, 1],

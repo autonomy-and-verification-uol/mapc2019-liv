@@ -7,7 +7,9 @@
 +!move(Direction)
 	: default::thing(0,0,marker,clear) & not common::escape
 <-
+	getMyPos(MyX, MyY);
 	!common::escape;
+	!common::move_to_pos(MyX, MyY); 
 	!move(Direction);
 	.
 // Avoid clear markers moving north

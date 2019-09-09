@@ -196,6 +196,12 @@ i_met_new_agent(Iknow, IdList) :-
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
 		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
+			/*if (.member(origin(Evaluated, GX,GY),GoalList)) {
+				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, NewCluster);
+				if(Evaluated \== 'none' & .ground(NewCluster)){
+					evaluateCluster(Me, NewCluster, Evaluated)
+				}
+			}*/
 			for (.member(goal(GX,GY),GoalList)) {
 				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
 			}
