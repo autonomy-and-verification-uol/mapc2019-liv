@@ -202,7 +202,7 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 +!retrieve::retrieve_block :
 	true
 <-
-	!retrieve::decide_block_type(Type); .print("I decided to get block type: ", Type);
+	!retrieve::decide_block_type_flat(Type); .print("I decided to get block type: ", Type);
 	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
 	-retrieve::target(_, _);
@@ -212,6 +212,15 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 
 -!retrieve::retrieve_block : retrieve::retriever <- !!retrieve::retrieve_block.
 -!retrieve::retrieve_block : true <- true.
+
++!retrieve::decide_block_type_flat(Type) : 
+	true
+<-
+	!map::get_dispensers(Dispensers);
+	.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
+	.shuffle(Types1, Types);
+	.nth(0, Types, Type);
+	.
 
 +!retrieve::decide_block_type(Type) : 
 	true
