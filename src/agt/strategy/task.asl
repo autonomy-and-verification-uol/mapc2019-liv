@@ -304,7 +304,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	else {
 		if ( not default::thing(0,2,block,_) ) {
 			!action::move(n);
-			if (default::thing(0,1,entity,_)) {
+			if (default::thing(0,2,entity,_)) {
 				!common::go_around(n);
 				!rotate_back;
 //				!action::move(n);
