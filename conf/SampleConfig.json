@@ -24,7 +24,11 @@
 	  "setup" : "conf/setup/testsample.txt",
 	
       "steps" : 500,
+<<<<<<< HEAD
       "randomSeed" : 17,
+=======
+      "NOrandomSeed" : 18,
+>>>>>>> branch 'master' of https://github.com/autonomy-and-verification-uol/mapc2019-liv.git
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
@@ -59,7 +63,7 @@
       },
       
       "events" : {
-        "chance" : 10,
+        "chance" : 0,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [-3, 1],

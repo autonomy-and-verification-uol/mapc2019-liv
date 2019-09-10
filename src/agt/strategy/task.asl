@@ -316,6 +316,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 <-	
 	if ( Y - MyY > 0 ) {
 		if (not default::thing(0,-1,block,_)) {
+			if (default::obstacle(0,-1)) {
+				!action::clear(0,-2);
+				!action::clear(0,-2);
+				!action::clear(0,-2);
+			}
 			!action::move(s);
 			if (default::thing(0,-1,entity,_)) {
 				!common::go_around(s);
@@ -331,6 +336,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	}
 	else {
 		if ( not default::thing(0,2,block,_) ) {
+			if (default::obstacle(0,2)) {
+				!action::clear(0,3);
+				!action::clear(0,3);
+				!action::clear(0,3);
+			}
 			!action::move(n);
 			if (default::thing(0,2,entity,_)) {
 				!common::go_around(n);
@@ -365,6 +375,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 <-	
 	if ( X - MyX > 0  ) {
 		if (not default::thing(1,0,block,_)) {
+			if (default::obstacle(1,0)) {
+				!action::clear(2,0);
+				!action::clear(2,0);
+				!action::clear(2,0);
+			}
 			!action::move(e);
 			if (default::thing(1,0,entity,_)) {
 				!common::go_around(e);
@@ -380,6 +395,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	}
 	else {
 		if ( not default::thing(-1,0,block,_) ) {
+			if (default::obstacle(-1,0)) {
+				!action::clear(-2,0);
+				!action::clear(-2,0);
+				!action::clear(-2,0);
+			}
 			!action::move(w);
 			if (default::thing(-1,0,entity,_)) {
 				!common::go_around(w);

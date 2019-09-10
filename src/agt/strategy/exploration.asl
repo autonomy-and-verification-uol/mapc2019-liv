@@ -91,7 +91,7 @@ remove_opposite(w,e) :- true.
 	: explorer
 <-
 	.print("@@@@@ No movement options available, sending skip forever");
-	//!default::always_skip;
+	!default::always_skip;
 	.
 
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
