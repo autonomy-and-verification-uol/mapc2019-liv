@@ -37,7 +37,7 @@
 
 +!always_skip :
 	not task::origin & 
-	not default::attached(0, 1)
+	not default::attached(0, 1) & retrieve::retriever
 <-
 	!!retrieve::retrieve_block;
 	.
@@ -73,7 +73,7 @@
 	!action::move(z);
 	!!always_skip;
 	.
--!always_skip <- !!always_skip.
+//-!always_skip <- !!always_skip.
     
 +!always_move_north
 	: true
