@@ -88,7 +88,7 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore(Dirlist)
-	: explorer
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0)
 <-
 	.print("@@@@@ No movement options available, sending skip forever");
 	!default::always_skip;
@@ -181,9 +181,10 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0)
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
-	//!default::always_skip;
+	!default::always_skip;
 	.
+
 	
