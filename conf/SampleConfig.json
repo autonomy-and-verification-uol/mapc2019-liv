@@ -24,9 +24,9 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 2000,
-      "randomSeed" : 19,
+      "NorandomSeed" : 19,
       "randomFail" : 1,
-      "entities" : [{"standard" : 5}],
+      "entities" : [{"standard" : 10}],
 
       "clearSteps" : 3,
       "clearEnergyCost" : 30,
@@ -59,7 +59,7 @@
       },
 
       "events" : {
-        "chance" : 0,
+        "chance" : 10,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [-3, 1],
