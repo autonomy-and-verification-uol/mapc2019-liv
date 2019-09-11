@@ -62,6 +62,7 @@
 <-
 	.print("Removing retriever");
 	-retrieve::retriever;
+	-stop::stop;
 	-stop::first_to_stop(Me);
 	!action::forget_old_action;
 	.print("Adding explorer");
