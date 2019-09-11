@@ -320,7 +320,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(0,-2);
 			}
 			!action::move(s);
-			if (default::thing(0,-1,entity,_)) {
+			if (default::thing(0,-2,entity,_)) {
 				!common::go_around(s);
 				!rotate_back;
 //				!action::move(s);
@@ -340,7 +340,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(0,3);
 			}
 			!action::move(n);
-			if (default::thing(0,2,entity,_)) {
+			if (default::thing(0,1,entity,_)) {
 				!common::go_around(n);
 				!rotate_back;
 //				!action::move(n);
