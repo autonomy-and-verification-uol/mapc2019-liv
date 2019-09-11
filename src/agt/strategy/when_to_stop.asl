@@ -22,8 +22,8 @@
 	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	//.length(GoalList, N);
 	//if(N > 5){
-	if(.member(cluster(_, GoalList), Clusters) & 
-		.member(origin(Side, GoalX, GoalY), GoalList) & .member(Side, [n,s,w,e]) & 
+	if(.member(cluster(_, GoalList), Clusters) & .member(Side, [n,e,w,s]) &
+		.member(origin(Side, GoalX, GoalY), GoalList) & 
 		not .member(origin(boh, _, _), GoalList)
 	){
 		.broadcast(tell, stop::first_to_stop(Me));
@@ -75,8 +75,12 @@
 <-
 	if(Pos < PosOther){
 		-stop::first_to_stop(Ag2)[source(_)];
+		-stop::first_to_stop(Ag1)[source(_)];
+		+stop::first_to_stop(Ag1)[source(_)];
 	} else{
 		-stop::first_to_stop(Ag1)[source(_)];
+		-stop::first_to_stop(Ag2)[source(_)];
+		+stop::first_to_stop(Ag2)[source(_)];
 	}
 	.
 //@check_join_group[atomic]

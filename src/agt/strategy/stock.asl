@@ -291,9 +291,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::decide_block_type_flat(Type) : 
 	true
 <-
-	getAvailableAgent(AgList);
+	//getAvailableAgent(AgList);
+	getBlocks(Blocks);
 	!map::get_dispensers(Dispensers);
-	.setof(Type1, retrieve::most_needed_type(Dispensers, AgList, Type1), MostNeededTypes);
+	.setof(B, (.member(dispenser(B, _, _), Dispensers) & not .member(B, Blocks)), MostNeededTypes);
 	if(MostNeededTypes == []){
 		.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
 		.shuffle(Types1, Types);
@@ -301,7 +302,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		.shuffle(MostNeededTypes, Types);
 	}
 	.nth(0, Types, Type);
-	
+	addBlock(Type);
 	.
 
 +!retrieve::decide_block_type(Type) : 

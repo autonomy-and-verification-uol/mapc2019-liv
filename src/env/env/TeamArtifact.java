@@ -50,6 +50,8 @@ public class TeamArtifact extends Artifact {
 	private Integer targetGoalY;
 	private String goalSide;
 	
+	private static List<String> ourBlocks = new ArrayList<>();
+	
 	void init(){
 		logger.info("Team Artifact has been created!");
 		agentmaps.put("agent1",map1);
@@ -348,6 +350,26 @@ public class TeamArtifact extends Artifact {
 		}
 		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
 		list.set(arrayagents);
+	}
+	
+	@OPERATION
+	void getBlocks(OpFeedbackParam<Literal[]> list) {
+		List<Literal> things = new ArrayList<Literal>();
+		for(String b : ourBlocks) {
+			things.add(ASSyntax.createLiteral(b));
+		}
+		Literal[] arraythings = things.toArray(new Literal[things.size()]);
+		list.set(arraythings);
+	}
+	
+	@OPERATION
+	void addBlock(String b) {
+		ourBlocks.add(b);
+	}
+	
+	@OPERATION
+	void removeBlock(String b) {
+		ourBlocks.remove(b);
 	}
 	
 	@OPERATION
