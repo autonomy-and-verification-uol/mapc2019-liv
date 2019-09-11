@@ -1,3 +1,4 @@
+
 check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
 check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
 check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
@@ -88,7 +89,7 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0)
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & exploration::explorer
 <-
 	.print("@@@@@ No movement options available, sending skip forever");
 	!default::always_skip;
@@ -181,10 +182,10 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0)
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & exploration::explorer
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
 	!default::always_skip;
 	.
 
-	
+

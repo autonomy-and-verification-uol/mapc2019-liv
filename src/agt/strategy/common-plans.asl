@@ -248,7 +248,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	!move_to_pos_aux(X, Y, MyX, MyY).
 +!move_to_pos_aux(X, Y, X, Y).
 +!move_to_pos_aux(X, Y, MyX, MyY) :	
-	pick_direction(MyX, MyY, X, Y, Direction) 
+	retrieve::pick_direction(MyX, MyY, X, Y, Direction)
 <-		
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
@@ -270,11 +270,59 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	} else {
 		!retrieve::smart_move(Direction);
 	}
-	!move_to_pos_aux.
+	getMyPos(MyX2,MyY2);
+	!move_to_pos_aux(X, Y, MyX2, MyY2).
 	
 -!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
 	
-	
+
+/*
++!move_to_pos_aux(_, X, Y, X, Y).
++!move_to_pos_aux(Leader, X, Y, MyX, MyY) :	
+	retrieve::pick_direction(MyX, MyY, X, Y, Direction)
+<-		
+	if (exploration::check_obstacle_special_1(Direction, 1)) {
+		.print(i_can_avoid(Direction, DirectionToGo));
+		if(retrieve::i_can_avoid(Direction, DirectionToGo)){
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			getMyPos(MyX1,MyY1);
+			if(MyX == MyX1 & MyY == MyY1){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
+			}
+		} elif(map::check_vertixes){
+			hfjkgdhgfdkjghfdghkfd;
+			.fail;
+		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
+			!retrieve::smart_clear(Direction);
+			if(retrieve::res(0)){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
+				!retrieve::go_around_obstacle(Direction, 20);
+			}
+		} else{
+			!retrieve::go_around_obstacle(Direction, 20);
+		}
+	} else {
+		!retrieve::smart_move(Direction);
+		if(default::lastActionResult(failed_forbidden) & map::check_vertixes){
+			.fail;
+		}
+	}
+	getMyPos(MyX2,MyY2);
+	!move_to_pos_aux(Leader, X, Y, MyX2, MyY2).*/
+
+/*
+-!move_to_pos(Leader1, StartX, StartY, X, Y) : 
+	map::myMap(Leader2) & Leader1 \== Leader2
+<- 
+	LocalX = X - StartX;
+	LocalY = Y - StartY;
+	getMyPos(NewStartX, NewStartY);
+	!move_to_pos(Leader2, NewStartX, NewStartY, NewStartX + LocalX, NewStartY + LocalY).*/
+//-!move_to_pos(Leader1, StartX, StartY, X, Y) : true <- .fail.
 	
 	
 	

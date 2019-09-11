@@ -1,3 +1,4 @@
+
 evaluate_task([], AgList, CommitListTemp, CommitList) :- CommitList = CommitListTemp.
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- .member(agent(Ag, Type), AgList) & .delete(agent(Ag, Type), AgList, NewAgList) & evaluate_task(ReqList, NewAgList, [agent(Ag,Type,X,Y)|CommitListTemp], CommitList).
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- not .member(agent(Ag, Type), AgList) & CommitList = [].
@@ -113,7 +114,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyX,MyY);
 	?check_pos(X,Y,NewX,NewY);
 	if (task::no_block) {
-		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock, MyX, MyY));
+		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
 	}
 	else {
 		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
@@ -122,7 +123,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 			!action::detach(n);
 		}
 		else {
-			.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y, MyX, MyY));
+			.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
 		}
 	}
 	!default::always_skip;
@@ -155,7 +156,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!update_commitlist(CommitListSortNewNew);
 	getMyPos(MyX,MyY);
 //	+connect(0,1);
-	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y, MyX, MyY));
+	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
 	.
 +!perform_task_origin
 	: default::attached(0,1) & default::thing(0,1, block, Type)
@@ -209,16 +210,13 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!perform_task_origin_next;
 	.
 	
-+!perform_task(Type,X,Y,LocalX,LocalY,noblock, OriginX, OriginY)[source(Origin)]
-	: default::attached(0,1) & default::thing(0,1, block, Type) & map::myMap(Leader)
++!perform_task(Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
+	: default::attached(0,1) & default::thing(0,1, block, Type)
 <-
 //	.print("@@@@ Received order for new task");
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
-	getGoalClusters(Leader, Clusters);
-	!find_empty_goal_close_to(OriginX, OriginY, Clusters, BorderX, BorderY);
-	!common::move_to_pos(BorderX, BorderY);
-	!get_to_pos_horiz(BorderX, BorderY,X,Y,LocalX,LocalY);
+	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
@@ -228,6 +226,24 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		!retrieve::retrieve_block;
 	}
 	.
+	
++!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
+	: default::attached(0,1) & default::thing(0,1, block, Type)
+<-
+//	.print("@@@@ Received order for new task");
+	!action::forget_old_action(default,always_skip);
+	getMyPos(MyX,MyY);
+	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
+	getMyPos(MyXNew,MyYNew);
+	?where_is_my_block(BlockX,BlockY,DetachPos);
+	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
+	!action::connect(Origin,BlockX,BlockY);
+	!action::detach(DetachPos);
+	if (not task::help) {
+		!retrieve::retrieve_block;
+	}
+	.
+	
 +!find_empty_goal_close_to(OriginX, OriginY, Clusters, X, Y) :
 	.member(cluster(_, GoalList), Clusters) & .member(origin(OriginX, OriginY), GoalList)
 <-
@@ -248,26 +264,6 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	} else{
 		Goal =  Goal2;
 		Distance = Distance2;
-	}
-	.
-	
-+!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
-	: default::attached(0,1) & default::thing(0,1, block, Type) & map::myMap(Leader)
-<-
-//	.print("@@@@ Received order for new task");
-	!action::forget_old_action(default,always_skip);
-	getMyPos(MyX,MyY);
-	getGoalClusters(Leader, Clusters);
-	!find_empty_goal_close_to(OriginX, OriginY, Clusters, BorderX, BorderY);
-	!common::move_to_pos(BorderX, BorderY);
-	!get_to_pos_horiz(BorderX, BorderY,X,Y,LocalX,LocalY);
-	getMyPos(MyXNew,MyYNew);
-	?where_is_my_block(BlockX,BlockY,DetachPos);
-	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
-	!action::connect(Origin,BlockX,BlockY);
-	!action::detach(DetachPos);
-	if (not task::help) {
-		!retrieve::retrieve_block;
 	}
 	.
 	
@@ -416,4 +412,4 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.
-	
+

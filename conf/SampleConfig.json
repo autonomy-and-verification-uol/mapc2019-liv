@@ -23,10 +23,10 @@
     {
 	  "setup" : "conf/setup/testsample.txt",
 
-      "steps" : 500,
-      "randomSeed" : 17,
+      "steps" : 2000,
+      "randomSeed" : 19,
       "randomFail" : 1,
-      "entities" : [{"standard" : 10}],
+      "entities" : [{"standard" : 5}],
 
       "clearSteps" : 3,
       "clearEnergyCost" : 30,

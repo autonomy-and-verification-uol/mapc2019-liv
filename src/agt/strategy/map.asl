@@ -22,7 +22,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +default::thing(X, Y, dispenser, Type)
 	: true
 <-
-	getMyPos(MyX,MyY);
+	getMyPos(MyX,MyY)
 	!map::get_dispensers(Dispensers);
 	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
@@ -36,56 +36,330 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @perceivegoal[atomic]
 +default::goal(X,Y)
-	: true
+	: not map::evaluating_vertexes
 <-
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
 	!map::update_goal_in_map(MyX, MyY, X, Y, Clusters);
 	.
 
-+!map::visit_goal_cluster(X, Y) :
-	X > 0 & not default::obstacle(1, 0)
-<- 
-	!action::move(e);
-	!map::visit_goal_cluster(X-1, Y).
-+!map::visit_goal_cluster(X, Y) :
-	X < 0 & not default::obstacle(-1, 0)
-<- 
-	!action::move(w);
-	!map::visit_goal_cluster(X+1, Y).
-+!map::visit_goal_cluster(X, Y) :
-	Y > 0 & not default::obstacle(0, 1)
-<- 
-	!action::move(s);
-	!map::visit_goal_cluster(X, Y-1).
-+!map::visit_goal_cluster(X, Y) :
-	Y < 0 & not default::obstacle(0, -1)
-<- 
-	!action::move(n);
-	!map::visit_goal_cluster(X, Y+1).
-+!map::visit_goal_cluster(X, Y) :
-	true
-<- 
-	!map::evaluate_cluster;
-	-map::evaluating_cluster;
-	+exploration::explorer;
-	//!action::forget_old_action;
-	!!exploration::explore([n,s,e,w]).
-
-	
-+!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) : .member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList) | .member(origin(MyX+X, MyY+Y), GoalList)) <- true.
++!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) : .member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList) | .member(origin(_, MyX+X, MyY+Y), GoalList)) <- true.
 +!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) 
 	: map::myMap(Leader)
 <-
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
-	/*
-	if(exploration::explorer){
-		-exploration::explorer;
-		!action::forget_old_action;
-		+map::evaluating_cluster;
-		!!map::visit_goal_cluster(X, Y);
+	.
+
+-!map::evaluate(_, _) : true <- -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
++!map::evaluate(GoalLocalX, GoalLocalY) :
+	true
+<-
+	-exploration::explorer;
+	!action::forget_old_action;
+	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+
+	!map::find_cluster_origins(GoalLocalX, GoalLocalY);
+	if(not map::evaluating_positions(_)){
+		.fail;
 	}
-	*/
+	
+	+map::evaluating_vertexes;
+	!map::evaluate_origin(n, Value1); 
+	if(not map::evaluating_positions(_)){
+		.fail;
+	}
+	!map::update_origin_evaluation(n, Value1);
+	.print("OriginN evaluated as:", Value1);
+	
+	!map::evaluate_origin(e, Value2);
+	if(not map::evaluating_positions(_)){
+		.fail;
+	}
+	!map::update_origin_evaluation(e, Value2);
+	.print("OriginE evaluated as:", Value2);
+	
+	!map::evaluate_origin(s, Value3);
+	if(not map::evaluating_positions(_)){
+		.fail;
+	}
+	!map::update_origin_evaluation(s, Value3);
+	.print("OriginS evaluated as:", Value3);
+	
+	!map::evaluate_origin(w, Value4);
+	if(not map::evaluating_positions(_)){
+		.fail;
+	}
+	!map::update_origin_evaluation(w, Value4);
+	.print("OriginW evaluated as:", Value4);
+	
+	-map::evaluating_positions(_);
+	-map::evaluating_vertexes;
+	
+	!action::forget_old_action;
+	!map::get_clusters(Clusters);
+	.print("Clusters: ", Clusters);
+	
+	+exploration::explorer;
+	!!exploration::explore([n,s,w,e]);
+	.
+
++!map::update_origin_evaluation(Side, Value) :
+	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
+<-
+	getMyPos(MyX, MyY);
+	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
+	.
+
++!map::evaluate_origin(Side, Value) :
+	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
+<-
+	!retrieve::generate_helpers_position(origin(X, Y), Side, _, pos(V1X, V1Y), pos(V2X, V2Y));
+	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
+	L2 = [vertex(Side, e, V2X, V2Y)|L1];
+	-+map::evaluating_positions(L2);
+	if(map::evaluating_positions(Pos)){
+		.print(Pos);
+	}
+	!map::move_to_evaluating_pos(Side, w);
+	if(map::evaluating_positions(_)){
+		!map::move_to_evaluating_pos(Side, e);
+		if(map::evaluating_positions(_)){
+			Value = Side;
+		}
+	}
+	.
+-!map::evaluate_origin(_, Value) : true <- Value = bad.
+
++!map::update_evaluating_positions(Side) :
+	map::evaluating_positions(Positions)
+<-
+	if(Side == n){
+		DiffX = 0;
+		DiffY = 1;
+	} elif(Side == s){
+		DiffX = 0;
+		DiffY = -1;
+	} elif(Side == w){
+		DiffX = 1;
+		DiffY = 0;
+	} else{
+		DiffX = -1;
+		DiffY = 0;
+	}
+	for(.member(origin(OriginSide, X, Y), Positions)){
+		!map::update_evaluating_positions_aux(origin(OriginSide, X, Y), DiffX, DiffY);
+	}
+	for(.member(vertex(OriginSide, VertexSide, X, Y), Positions)){
+		!map::update_evaluating_positions_aux(vertex(OriginSide, VertexSide, X, Y), DiffX, DiffY);
+	}
+	for(.member(start(X, Y), Positions)){
+		!map::update_evaluating_positions_aux(start(X, Y), DiffX, DiffY);
+	}
+	if(map::evaluating_positions(NewUpdatedPositions)){
+		.print("Old: ", Positions);
+		.print("New: ", NewUpdatedPositions);
+	}
+	.
++!map::update_evaluating_positions_aux(origin(Side, X, Y), DiffX, DiffY) :
+	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) 
+<-
+	.delete(origin(Side, X, Y), Positions, Positions1);
+	-+map::evaluating_positions([origin(Side, X + DiffX, Y + DiffY)|Positions1]);
+	.
++!map::update_evaluating_positions_aux(vertex(OriginSide, VertexSide, X, Y), DiffX, DiffY) :
+	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, X, Y), Positions) 
+<-
+	.delete(vertex(OriginSide, VertexSide, X, Y), Positions, Positions1);
+	-+map::evaluating_positions([vertex(OriginSide, VertexSide, X + DiffX, Y + DiffY)|Positions1]);
+	.
++!map::update_evaluating_positions_aux(start(X, Y), DiffX, DiffY) :
+	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) 
+<-
+	.delete(start(X, Y), Positions, Positions1);
+	-+map::evaluating_positions([start(X + DiffX, Y + DiffY)|Positions1]);
+	.
+
++!map::move_to_evaluating_pos(OriginSide, VertexSide) :
+	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(start(X, Y), Positions)
+<-
+	getMyPos(MyX, MyY);
+	getGoalClusters(Leader, Clusters);
+	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
+		not .member(origin(_, _, _), GoalList)
+	){
+		!map::move_to_evaluating_pos_1(OriginSide, VertexSide);
+	} else{
+		-map::evaluating_positions(_);
+		.print("Stop evaluating the cluster1");
+	}
+	.
++!map::move_to_evaluating_pos(OriginSide, VertexSide) :
+	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(_, X, Y), Positions)
+<-
+	if(map::myMap(Leader1)){.print("Leader1: ", Leader1);}
+	getMyPos(MyX, MyY);
+	if(map::myMap(Leader2)){.print("Leader2: ", Leader2);}
+	getGoalClusters(Leader, Clusters);
+	if(map::myMap(Leader3)){.print("Leader3: ", Leader3);}
+	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
+		.member(origin(boh, _, _), GoalList)
+	){
+		!map::move_to_evaluating_pos_1(OriginSide, VertexSide);
+	} else{
+		-map::evaluating_positions(_);
+		if(map::myMap(Leader4)){.print("Leader4: ", Leader4);}
+		.print("Stop evaluating the cluster2: (", MyX+X, ", ", MyY+Y, ") ", Clusters);
+	}
+	.
++!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
+	map::evaluating_positions(Positions) & .member(start(0, 0), Positions)
+<- 
+	.delete(start(_, _), Positions, NewPositions);
+	-+map::evaluating_positions(NewPositions);
+	.
++!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
+	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, 0, 0), Positions).
++!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
+	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
+	retrieve::pick_direction(0, 0, X, Y, Direction)
+<-
+	!map::move_to_evaluating_pos_aux(Direction);
+	!map::move_to_evaluating_pos(OriginSide, VertexSide);
+	.
++!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
+	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, X, Y), Positions) &
+	retrieve::pick_direction(0, 0, X, Y, Direction)
+<-
+	
+	if((math.abs(X)+math.abs(Y)) <= 5 & default::obstacle(X, Y)){
+		.fail;
+	}
+	!map::move_to_evaluating_pos_aux(Direction);
+	!map::move_to_evaluating_pos(OriginSide, VertexSide);
+	.
++!map::move_to_evaluating_pos_aux(Direction) :
+	true
+<-
+	if (exploration::check_obstacle_special_1(Direction, 1)) {
+		.print(i_can_avoid(Direction, DirectionToGo));
+		if(retrieve::i_can_avoid(Direction, DirectionToGo)){
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			getMyPos(MyX1,MyY1);
+			if(MyX == MyX1 & MyY == MyY1){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
+			}
+		} else{
+			.fail;
+		} 
+	} else {
+		!retrieve::smart_move(Direction);
+		if(default::lastActionResult(failed_forbidden)){
+			.fail;
+		}
+	}
+	.
+
++!map::find_cluster_origins(GoalLocalX, GoalLocalY) :
+	true
+<-
+	!map::move_to_evaluating_pos(start, start);
+	!map::find_cluster_origin(n); 
+	!map::find_cluster_origin(e); 
+	!map::find_cluster_origin(s); 
+	!map::find_cluster_origin(w);
+	.
++!map::find_cluster_origin(n) :
+	default::goal(GX, GY) & GY < 0 & GX > 0
+<-
+	!retrieve::smart_move(e);
+	!retrieve::smart_move(n);
+	!map::find_cluster_origin(n);
+	.
++!map::find_cluster_origin(n) :
+	default::goal(GX, GY) & GY < 0 & GX < 0
+<-
+	!retrieve::smart_move(w);
+	!retrieve::smart_move(n);
+	!map::find_cluster_origin(n);
+	.
++!map::find_cluster_origin(n) :
+	default::goal(GX, GY) & GY < 0
+<-
+	!retrieve::smart_move(n);
+	!map::find_cluster_origin(n);
+	.
++!map::find_cluster_origin(s) :
+	default::goal(GX, GY) & GY > 0 & GX > 0
+<-
+	!retrieve::smart_move(e);
+	!retrieve::smart_move(s);
+	!map::find_cluster_origin(s);
+	.
++!map::find_cluster_origin(s) :
+	default::goal(GX, GY) & GY > 0 & GX < 0
+<-
+	!retrieve::smart_move(w);
+	!retrieve::smart_move(s);
+	!map::find_cluster_origin(s);
+	.
++!map::find_cluster_origin(s) :
+	default::goal(GX, GY) & GY > 0
+<-
+	!retrieve::smart_move(s);
+	!map::find_cluster_origin(s);
+	.
++!map::find_cluster_origin(w) :
+	default::goal(GX, GY) & GY < 0 & GX < 0
+<-
+	!retrieve::smart_move(n);
+	!retrieve::smart_move(w);
+	!map::find_cluster_origin(w);
+	.
++!map::find_cluster_origin(w) :
+	default::goal(GX, GY) & GY > 0 & GX < 0
+<-
+	!retrieve::smart_move(s);
+	!retrieve::smart_move(w);
+	!map::find_cluster_origin(w);
+	.
++!map::find_cluster_origin(w) :
+	default::goal(GX, GY) & GX < 0
+<-
+	!retrieve::smart_move(w);
+	!map::find_cluster_origin(w);
+	.
++!map::find_cluster_origin(e) :
+	default::goal(GX, GY) & GY < 0 & GX > 0
+<-
+	!retrieve::smart_move(n);
+	!retrieve::smart_move(e);
+	!map::find_cluster_origin(e);
+	.
++!map::find_cluster_origin(e) :
+	default::goal(GX, GY) & GY > 0 & GX > 0
+<-
+	!retrieve::smart_move(s);
+	!retrieve::smart_move(e);
+	!map::find_cluster_origin(e);
+	.
++!map::find_cluster_origin(e) :
+	default::goal(GX, GY) & GX > 0
+<-
+	!retrieve::smart_move(e);
+	!map::find_cluster_origin(e);
+	.
++!map::find_cluster_origin(Side) : 
+	map::myMap(Leader) & map::evaluating_positions(Positions)
+<-
+	getMyPos(MyX, MyY);
+	evaluateOrigin(Leader, MyX, MyY, boh);
+	.print("OldPos: ", Positions);
+	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
+	if(map::evaluating_positions(Pos)){
+		.print("NewPos: ", Pos);
+	}
 	.
 
 @addmap[atomic]
@@ -93,10 +367,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	: .my_name(Me) & map::myMap(Me)
 <-
 	if(Type == goal){
-		updateGoalMap(Me, MyX+X, MyY+Y, NewCluster);
-		/*if(.ground(NewCluster)){
-			.send(Ag, achieve, map::visit_goal_cluster(X, Y));
-		}*/
+		updateGoalMap(Me, MyX+X, MyY+Y, InsertedInCluster, IsANewCluster);
+		if(IsANewCluster){
+			.send(Ag, achieve, map::evaluate(X, Y));
+		}
 		//!retrieve::update_target;
 	} else{
 		!map::get_dispensers(Dispensers);
@@ -119,108 +393,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.send(Ag, achieve, exploration::try_again(Type, X, Y));
 	.	
 	
-
-/*@evaluate_goal1[atomic]
-+!map::evaluate_cluster(Cluster) :
-	.my_name(Me)
-<-
-	getGoals(Me, Cluster, Goals);
-	if(exploration::explorer){
-		-exploration::explorer;
-		!action::forget_old_action;
-		+map::evaluating_goal;	
-	}
-	!!map::evaluate_cluster_aux(Goals);
-	.
-	
-+!map::evaluate_cluster_aux(Goals) :
-	.member(Goal, Goals)
-<-
-	getMyPos(MyX, MyY);
-	!map::move_to_goal_to_evaluate(MyX, MyY, Goal);
-	getMyPos(MyX1, MyY1);
-	!map::search_the_lowest_goal(MyX1, MyY1);
-	.
-
-+!map::evaluate_goal_aux(goal(GoalX, GoalY)):
-	.my_name(Me) & map::myMap(Leader)
-<-
-	.print("EVALUATE1");
-	getMyPos(MyX, MyY);
-	!map::move_to_goal_to_evaluate(MyX, MyY, goal(GoalX, GoalY));
-	.print("EVALUATE2");
-	!action::clear(0, 2);
-	.print("EVALUATE3");
-	getMyPos(MyX1, MyY1);
-	-map::evaluating_goal;
-	if(default::lastActionResult(failed_target)){
-		updateMap(Me, goal, MyX1, MyY1, -2);
-	}else{
-		.findall(obstacle(X, Y), (default::obstacle(X, Y)), Obstacles);
-		.length(Obstacles, NObstacles);
-		.findall(goal(X, Y), (default::goal(X, Y)), Goals);
-		.length(Goals, NGoals);
-		if(NGoals < NObstacles){
-			updateMap(Me, goal, MyX1, MyY1, 1);
-		} else{
-			updateMap(Me, goal, MyX1, MyY1, NGoals-NObstacles);
-		}
-	}
-	.send(Leader, achieve, map::finished_to_evaluate_goal(MyX1, MyY1));
-	.
-	
-+!map::search_the_lowest_goal(MyX, MyY) :
-	not(default::goal(0, 0))
-<-
-	if(default::goal(1, 0) | default::goal(2, 0) | default::goal(3, 0) | default::goal(4, 0) | default::goal(5, 0)){
-		!action::move(e);
-	} elif(default::goal(-1, 0) | default::goal(-2, 0) | default::goal(-3, 0) | default::goal(-4, 0) | default::goal(-5, 0)){
-		!action::move(e);
-	}
-	.
-+!map::search_the_lowest_goal(MyX, MyY) :
-	not(default::goal(0, 1)) &
-	not(default::goal(1, 1)) &
-	not(default::goal(2, 1)) &
-	not(default::goal(3, 1)) &
-	not(default::goal(4, 1)) &
-	not(default::goal(-1, 1)) &
-	not(default::goal(-2, 1)) &
-	not(default::goal(-3, 1)) &
-	not(default::goal(-4, 1))
-<-
-	true;
-	.
-+!map::search_the_lowest_goal(MyX, MyY) :
-	true
-<-
-	!action::move(s);
-	getMyPos(MyX1, MyY1);
-	!map::search_the_lowest_goal(MyX1, MyY1);
-	.
-
-+!map::move_to_goal_to_evaluate(MyX, MyY, goal(MyX, MyY)). 
-+!map::move_to_goal_to_evaluate(MyX, MyY, goal(GoalX, GoalY)) :
-	retrieve::pick_direction(MyX, MyY, GoalX, GoalY, Direction)
-<-
-	
-	!action::move(Direction);
-	if(Direction == n){
-		NewX = MyX;
-		NewY = MyY - 1;
-	} elif(Direction == s){
-		NewX = MyX;
-		NewY = MyY + 1;
-	} elif(Direction == w){
-		NewX = MyX - 1;
-		NewY = MyY;
-	} else{
-		NewX = MyX + 1;
-		NewY = MyY;
-	}
-	!map::move_to_goal_to_evaluate(NewX, NewY, Goal);
-	.
-*/
 @trygoal[atomic]
 +!try_again(goal, X, Y)
 	: true

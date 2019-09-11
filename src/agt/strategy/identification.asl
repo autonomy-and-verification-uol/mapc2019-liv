@@ -148,11 +148,15 @@ i_met_new_agent(Iknow, IdList) :-
 	+map::myMap(MapOther);
 	getMyPos(MyX,MyY);
 	updateMyPos(MyX+OriginX,MyY+OriginY);
+	if(map::evaluating_cluster([origin(XN, YN), origin(XS, YS), origin(XW, YW), origin(XE, YE)])){
+		-map::evaluating_cluster(_);
+		+map::evaluating_cluster([origin(XN+OriginX, YN+OriginY), origin(XS+OriginX, YS+OriginY), origin(XW+OriginX, YW+OriginY), origin(XE+OriginX, YE+OriginY)]);
+	}
 	if(retrieve::target(TargetX, TargetY)){
 		-+retrieve::target(TargetX+OriginX,TargetY+OriginY);
 	}
 	if(Map \== MapOther){
-		getTargetGoal(GoalAgent, GoalX, GoalY);
+		getTargetGoal(GoalAgent, GoalX, GoalY, _);
 		.term2string(Me, Me1);
 		if(GoalAgent == Me1){
 			setTargetGoal(Pos, Me, OriginX+GoalX, OriginY+GoalY);
@@ -196,18 +200,19 @@ i_met_new_agent(Iknow, IdList) :-
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
 		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
-			/*if (.member(origin(Evaluated, GX,GY),GoalList)) {
-				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, NewCluster);
-				if(Evaluated \== 'none' & .ground(NewCluster)){
-					evaluateCluster(Me, NewCluster, Evaluated)
-				}
-			}*/
+			for (.member(origin(Evaluated, GX,GY),GoalList)) {
+				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, InsertedInCluster, IsANewCluster);
+				//if(Evaluated \== 'none'){
+				evaluateOrigin(Me, NewOriginX+GX,NewOriginY+GY, Evaluated);
+				//evaluateCluster(Me, InsertedInCluster, GX, GY, Evaluated);
+				//}
+			}
 			for (.member(goal(GX,GY),GoalList)) {
-				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
+				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _, _);
 			}
-			for (.member(origin(GX,GY),GoalList)) {
+			/*for (.member(origin(GX,GY),GoalList)) {
 				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, _);
-			}
+			}*/
 			//!retrieve::update_target;
 		}
 		?identification::identified(IdList);

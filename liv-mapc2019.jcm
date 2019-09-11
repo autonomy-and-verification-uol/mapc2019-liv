@@ -29,7 +29,7 @@ mas scenario {
 		focus: agentart.eis_art_agent5, team::agentart.team_artifact
 		goals: register("connectionA5")
 
-	}
+	}/*
 	agent agent6: agent.asl {
 		join: agentart
 		focus: agentart.eis_art_agent6, team::agentart.team_artifact
@@ -60,18 +60,18 @@ mas scenario {
 		goals: register("connectionA10")
 
 	}
-	
+	*/
 	workspace agentart {
 		artifact eis_art_agent1: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig1.json")
 		artifact eis_art_agent2: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig2.json")
-		artifact eis_art_agent3: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig3.json")
+		artifact eis_art_agent3: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig3.json") 
 		artifact eis_art_agent4: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig4.json")
-		artifact eis_art_agent5: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig5.json")
+		artifact eis_art_agent5: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig5.json")/*
 		artifact eis_art_agent6: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig6.json")
 		artifact eis_art_agent7: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig7.json")
 		artifact eis_art_agent8: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig8.json")
 		artifact eis_art_agent9: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig9.json")
-		artifact eis_art_agent10: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig10.json")
+		artifact eis_art_agent10: env.EISArtifact("conf/eisconfig/localhost/eismassimconfig10.json")*/
 		
 		artifact team_artifact: env.TeamArtifact()
 	}

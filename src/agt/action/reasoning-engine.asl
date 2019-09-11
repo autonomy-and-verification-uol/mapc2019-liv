@@ -150,7 +150,7 @@
 
 @helprequest[atomic]
 +team::chosenActions(ActionId, Agents) // all the agents have chosen their actions
-	: .length(Agents) == 10 & not ::committedToAction(ActionId) & not ::action_sent(ActionId)
+	: .length(Agents) == 5 & not ::committedToAction(ActionId) & not ::action_sent(ActionId)
 <-
 	.print("All agents have chosen their action on ",ActionId,", dropping wait_request_for_help");
 	.drop_desire(::wait_request_for_help(ActionId));

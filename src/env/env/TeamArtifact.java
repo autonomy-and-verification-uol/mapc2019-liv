@@ -48,6 +48,7 @@ public class TeamArtifact extends Artifact {
 	private String goalAgent;
 	private Integer targetGoalX;
 	private Integer targetGoalY;
+	private String goalSide;
 	
 	void init(){
 		logger.info("Team Artifact has been created!");
@@ -64,21 +65,33 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y){
+	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> side){
 		if(goalAgent == null) {
 			return;
 		}
 		agent.set(goalAgent);
 		x.set(targetGoalX);
 		y.set(targetGoalY);
+		side.set(goalSide);
+	}
+	
+	@OPERATION
+	void setTargetGoal(int pos, String agent, int x, int y, String side){
+		if(pos <= this.pos) {
+			this.goalAgent = agent;
+			this.targetGoalX = x;
+			this.targetGoalY = y;
+			this.pos = pos;
+			this.goalSide = side;
+		}
 	}
 	
 	@OPERATION
 	void setTargetGoal(int pos, String agent, int x, int y){
 		if(pos <= this.pos) {
-			goalAgent = agent;
-			targetGoalX = x;
-			targetGoalY = y;
+			this.goalAgent = agent;
+			this.targetGoalX = x;
+			this.targetGoalY = y;
 			this.pos = pos;
 		}
 	}
@@ -102,19 +115,43 @@ public class TeamArtifact extends Artifact {
 		return agentRoles.get(agent);
 	}
 	
-	/*
-	@OPERATION
-	void evaluateCluster(String name, String cluster, boolean evaluated) {
+	/*@OPERATION
+	void evaluateCluster(String name, String cluster, int x, int y, int evaluated) {
 		for(Point p : agentmaps.get(name).get(cluster)) {
-			if(p instanceof OriginPoint) {
-				((OriginPoint) p).evaluated = evaluated;
+			if(p.x == x && p.y == y) {
+				agentmaps.get(name).get(cluster).remove(p);
+				agentmaps.get(name).get(cluster).add(new OriginPoint(x, y, evaluated));
 				return;
 			}
 		}
 	}*/
 	
 	@OPERATION
-	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> newClusterGenerated) {
+	void evaluateOrigin(String name, int x, int y, String evaluation) {
+		//if(evaluation.equals("boh")) return;
+		logger.info("evaluateOrigin(" + name + ", " + x + ", " + y + ", " + evaluation + ")");
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_")) {
+				for(Point pp : agentmaps.get(name).get(key)) {
+					if(x == pp.x && y == pp.y) {
+						if(pp instanceof OriginPoint) {
+							if(((OriginPoint) pp).evaluated.equals("boh")) {
+								((OriginPoint) pp).evaluated = evaluation;
+							} 
+							return;
+						}
+						agentmaps.get(name).get(key).remove(pp);
+						agentmaps.get(name).get(key).add(new OriginPoint(x, y, evaluation));
+						return;
+					}
+				}
+			}
+		}
+		logger.info("not found it");
+	}
+	
+	@OPERATION
+	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> clusterInserterIn, OpFeedbackParam<Boolean> isANewCluster) {
 		Point p = new Point(x, y);
 		logger.info("Try to add point (" + x + ", " + y + ")");
 		double minDistance = 5;
@@ -141,25 +178,32 @@ public class TeamArtifact extends Artifact {
 		if(myCluster == null) {
 			//logger.info("ID: " + id);
 			Set<Point> set = new HashSet<Point>();
-			set.add(new OriginPoint(x, y));
+			//set.add(new OriginPoint(x, y));
+			set.add(p);
 			agentmaps.get(name).put("goal_" + id, set);
-			newClusterGenerated.set("goal_" + id);
+			clusterInserterIn.set("goal_" + id);
+			isANewCluster.set(true);
 			//logger.info("[" + name + "]" + " added point (" + p.x + ", " + p.y + ") to cluster " + agentmaps.get(name).get("goal_" + id) + " because distance is: " + minDistance);
 		} else {
 			//logger.info("[" + name + "]" + " added point (" + p.x + ", " + p.y + ") to cluster " + agentmaps.get(name).get(myCluster) + " because distance is: " + minDistance);
+			clusterInserterIn.set(myCluster);
+			isANewCluster.set(false);
+			agentmaps.get(name).get(myCluster).add(p);
+			/*
 			for(Point pp : agentmaps.get(name).get(myCluster)) {
 				if(pp instanceof OriginPoint) {
 					if(p.y < pp.y) {
 						agentmaps.get(name).get(myCluster).remove(pp);
 						agentmaps.get(name).get(myCluster).add(new Point(pp.x, pp.y));
-						agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y));
-						//agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y, ((OriginPoint) pp).evaluated));
+						//agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y));
+						agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y, ((OriginPoint) pp).evaluated));
 					} else {
 						agentmaps.get(name).get(myCluster).add(p);
 					}
 					return;
 				}
 			}
+			*/
 		}
 	}
 	
@@ -190,14 +234,14 @@ public class TeamArtifact extends Artifact {
 	}*/
 	
 	private static class OriginPoint extends Point{
-		//private Boolean evaluated = null;
+		private String evaluated = "boh";
 		public OriginPoint(int x, int y) {
 			super(x, y);
 		}
-		/*public OriginPoint(int x, int y, Boolean evaluated) {
+		public OriginPoint(int x, int y, String evaluated) {
 			super(x, y);
 			this.evaluated = evaluated;
-		}*/
+		}
 		// nothing different to add for now
 	}
 	
@@ -241,15 +285,7 @@ public class TeamArtifact extends Artifact {
 					Literal literal = null;
 					if(p instanceof OriginPoint) {
 						literal = ASSyntax.createLiteral("origin");
-						/*Atom evaluated;
-						if(((OriginPoint) p).evaluated == null) {
-							evaluated = ASSyntax.createAtom("none");
-						} else if(((OriginPoint) p).evaluated == true) {
-							evaluated = ASSyntax.createAtom("true");
-						} else {
-							evaluated = ASSyntax.createAtom("false");
-						}
-						literal.addTerm(evaluated);	*/
+						literal.addTerm(new Atom(((OriginPoint) p).evaluated));
 					} else {
 						literal = ASSyntax.createLiteral("goal");
 					}
@@ -274,15 +310,8 @@ public class TeamArtifact extends Artifact {
 			Literal literal = null;
 			if(p instanceof OriginPoint) {
 				literal = ASSyntax.createLiteral("origin");
-				/*Atom evaluated;
-				if(((OriginPoint) p).evaluated == null) {
-					evaluated = ASSyntax.createAtom("none");
-				} else if(((OriginPoint) p).evaluated == true) {
-					evaluated = ASSyntax.createAtom("true");
-				} else {
-					evaluated = ASSyntax.createAtom("false");
-				}
-				literal.addTerm(evaluated);	*/
+				Atom evaluated;
+				literal.addTerm(new Atom(((OriginPoint) p).evaluated));
 			} else {
 				literal = ASSyntax.createLiteral("goal");
 			}

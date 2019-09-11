@@ -176,8 +176,8 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 	
 most_needed_type(Dispensers, AgList, Type) :-
 	.member(dispenser(Type, _, _), Dispensers) & not .member(agent(_, Type), AgList).
-
-+!retrieve::generate_helpers_position(origin(X, Y), 
+	
++!retrieve::generate_helpers_position(origin(X, Y), n, 
 	[
 		pos(X-9, Y-12),
 		pos(X-6, Y-12),
@@ -200,7 +200,79 @@ most_needed_type(Dispensers, AgList, Type) :-
 		pos(X+3, Y-4),
 		pos(X+6, Y-4),
 		pos(X+9, Y-4)
-	]).
+	], pos(X-9, Y-12), pos(X+9, Y-12)).
++!retrieve::generate_helpers_position(origin(X, Y), s, 
+	[
+		pos(X-9, Y+12),
+		pos(X-6, Y+12),
+		pos(X-3, Y+12),
+		pos(X, Y+12),
+		pos(X+3, Y+12),
+		pos(X+6, Y+12),
+		pos(X+9, Y+12),
+		pos(X-9, Y+8),
+		pos(X-6, Y+8),
+		pos(X-3, Y+8),
+		pos(X, Y+8),
+		pos(X+3, Y+8),
+		pos(X+6, Y+8),
+		pos(X+9, Y+8),
+		pos(X-9, Y+4),
+		pos(X-6, Y+4),
+		pos(X-3, Y+4),
+		pos(X, Y+4),
+		pos(X+3, Y+4),
+		pos(X+6, Y+4),
+		pos(X+9, Y+4)
+	], pos(X-9, Y+12), pos(X+9, Y+12)).
++!retrieve::generate_helpers_position(origin(X, Y), w, 
+	[
+		pos(X-12, Y-9),
+		pos(X-12, Y-6),
+		pos(X-12, Y-3),
+		pos(X-12, Y),
+		pos(X-12, Y+3),
+		pos(X-9, Y+6),
+		pos(X-9, Y+9),
+		pos(X-9, Y-9),
+		pos(X-9, Y-6),
+		pos(X-9, Y-3),
+		pos(X-9, Y),
+		pos(X-9, Y+3),
+		pos(X-9, Y+6),
+		pos(X-9, Y+9),
+		pos(X-6, Y-9),
+		pos(X-6, Y-6),
+		pos(X-6, Y-3),
+		pos(X-6, Y),
+		pos(X-6, Y+3),
+		pos(X-6, Y+6),
+		pos(X-6, Y+9)
+	], pos(X-12, Y-9), pos(X-12, Y+9)).
++!retrieve::generate_helpers_position(origin(X, Y), e, 
+	[
+		pos(X+12, Y-9),
+		pos(X+12, Y-6),
+		pos(X+12, Y-3),
+		pos(X+12, Y),
+		pos(X+12, Y+3),
+		pos(X+9, Y+6),
+		pos(X+9, Y+9),
+		pos(X+9, Y-9),
+		pos(X+9, Y-6),
+		pos(X+9, Y-3),
+		pos(X+9, Y),
+		pos(X+9, Y+3),
+		pos(X+9, Y+6),
+		pos(X+9, Y+9),
+		pos(X+6, Y-9),
+		pos(X+6, Y-6),
+		pos(X+6, Y-3),
+		pos(X+6, Y),
+		pos(X+6, Y+3),
+		pos(X+6, Y+6),
+		pos(X+6, Y+9)
+	], pos(X+12, Y-9), pos(X+12, Y+9)).
 
 +!retrieve::retrieve_block :
 	true
@@ -370,12 +442,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.my_name(Me)
 <-
 	!retrieve::create_and_attach_block(Direction);
-	getTargetGoal(Ag, GoalX, GoalY);
+	getTargetGoal(Ag, GoalX, GoalY, SideStr);
+	.term2string(Side, SideStr);
 	.print("Chosen Goal position: ", GoalX, GoalY);
 	if(stop::first_to_stop(Me)){
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
-		!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
+		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _, _);
 		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
 		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
 	}
@@ -489,7 +562,11 @@ most_needed_type(Dispensers, AgList, Type) :-
 			}
 		}	
 	}
-	!action::move(Direction).
+	!action::move(Direction);
+	if(default::lastActionResult(success) & map::evaluating_positions(_)){
+		!map::update_evaluating_positions(Direction);
+	}
+	.
 
 +!retrieve::go_around_obstacle(DirectionObstacle, Threshold) :
 	true
@@ -540,7 +617,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getMyPos(MyX1,MyY1);
 	!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX1, MyY1, Attempts+1, Threshold, ActualDirection, Count).
 +!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count) :
-	true
+	not map::evaluating_positions(_)
 <-
 	if(default::energy(Energy) & Energy >= 30){
 		!retrieve::smart_clear(DirectionObstacle);
@@ -589,8 +666,9 @@ most_needed_type(Dispensers, AgList, Type) :-
 	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
 <-
-	getTargetGoal(_, GoalX, GoalY);
-	!retrieve::generate_helpers_position(origin(GoalX, GoalY), HelpersPos);
+	getTargetGoal(_, GoalX, GoalY, SideStr);
+	.term2string(Side, SideStr);
+	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _, _);
 	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
 	.length(HelpersPos, NHelpersPos);
 	if(Pos == (NHelpersPos-1)){
@@ -674,7 +752,6 @@ most_needed_type(Dispensers, AgList, Type) :-
 	default::energy(Energy) & Energy >= 30
 <-
 	-res(_);
-	.print("CLEAR1");
 	if(Direction == n){
 		if(default::attached(0, -1)){
 			ClearX = 0; ClearY = -3

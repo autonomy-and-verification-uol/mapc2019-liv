@@ -1,3 +1,4 @@
+
 +!stop::choose_the_biggest_cluster([], cluster(_, [])).
 +!stop::choose_the_biggest_cluster([cluster(Id1, GoalList1)|Clusters], Cluster) :
 	true
@@ -18,9 +19,13 @@
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	!map::get_clusters(Clusters);
-	!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
-	.length(GoalList, N);
-//	if(N > 5){
+	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
+	//.length(GoalList, N);
+	//if(N > 5){
+	if(.member(cluster(_, GoalList), Clusters) & 
+		.member(origin(Side, GoalX, GoalY), GoalList) & .member(Side, [n,s,w,e]) & 
+		not .member(origin(boh, _, _), GoalList)
+	){
 		.broadcast(tell, stop::first_to_stop(Me));
 		+stop::first_to_stop(Me);
 		.print("Removing explorer");
@@ -29,12 +34,13 @@
 		.print("Adding retriever");
 		+retrieve::retriever;
 		.print("Call first time setTargetGoal");
-		.member(origin(GoalX, GoalY), GoalList);
-		setTargetGoal(Pos, Me, GoalX, GoalY);
+		//.member(origin(_, GoalX, GoalY), GoalList);
+		setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 		!!retrieve::retrieve_block;
-//	} else{
-//		-stop::stop;
-//	}
+	}
+	else{
+		-stop::stop;
+	}
 	.
 @stop2[atomic]
 +stop
@@ -98,8 +104,8 @@
  	!map::get_dispensers(Dispensers);
 	!stop::update_blocks_count(Blocks);
 	!map::get_clusters(Clusters);
-	.length(Clusters, NClusters);
-	!stop::conditional_stop(Blocks, NClusters, Dispensers, Stop);
+	//.length(Clusters, NClusters);
+	!stop::conditional_stop(Blocks, Clusters, Dispensers, Stop);
 	!stop::update_stop(Stop);
 	.
 	
@@ -118,15 +124,16 @@
 	+retrieve::block_count(Type, 1);
 	!stop::update_blocks_count(Blocks).
 	
-+!stop::conditional_stop(Blocks, NClusters, Dispensers, true) : 
-	NClusters >= 1 &  // at least one goal position known
++!stop::conditional_stop(Blocks, Clusters, Dispensers, true) : 
+	.member(cluster(_, GoalList), Clusters) &
+	.member(origin(Side, GoalX, GoalY), GoalList) & .member(Side, [n,s,w,e]) &
 	.length(Blocks, NBlocks) & 
 	identification::identified(KnownAgs) & .length(KnownAgs, NKnownAgs) & (NKnownAgs + 1) >= NBlocks & // enough agents to build the structure
 	.findall(Type, (.member(req(_, _, Type), Blocks) & not(.member(dispenser(Type, _, _), Dispensers))), []) // all the necessary types are known
 <- 
 	.print("I can stop exploring now..");
 	.
-+!stop::conditional_stop(Blocks, NClusters, Dispensers, false) : true <-  .print("I cannot stop exploring yet..").
++!stop::conditional_stop(Blocks, Clusters, Dispensers, false) : true <-  .print("I cannot stop exploring yet..").
 
 @trigger2[atomic]
 +!stop::new_dispenser_or_merge[source(_)] 
@@ -143,9 +150,10 @@
 	: not(stop::stop) 
 <-
 	!map::get_clusters(Clusters);
-	.length(Clusters, NClusters);
-	!stop::conditional_stop(Blocks, NClusters, Dispensers, Stop);
+	//.length(Clusters, NClusters);
+	!stop::conditional_stop(Blocks, Clusters, Dispensers, Stop);
 	!stop::update_stop(Stop);
 	!stop::check_active_tasks(Tasks, Dispensers);
 	.
 +!stop::check_active_tasks([task(ID, Deadline, Reward, Blocks)|Tasks], Dispensers) : stop::stop <- .print("I can stop exploring now..").
+
