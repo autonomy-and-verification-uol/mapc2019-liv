@@ -386,29 +386,31 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		}
 	}
 	.
-@addmapnotme[atomic]
-+!add_map(Type, MyX, MyY, X, Y)[source(Ag)]
-	: true
-<-
-	.send(Ag, achieve, exploration::try_again(Type, X, Y));
-	.	
-	
-@trygoal[atomic]
-+!try_again(goal, X, Y)
-	: true
-<-
-	getMyPos(MyX,MyY);
-	!map::get_clusters(Clusters);
-	!map::update_goal_in_map(MyX, MyY, X, Y, Clusters);
-	.
-@trydispenser[atomic]
-+!try_again(Type, X, Y)
-	: true
-<-
-	getMyPos(MyX,MyY);
-	!map::get_dispensers(Dispensers);
-	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
-	.
++!add_map(Type, MyX, MyY, X, Y)[source(Ag)].
+
+//@addmapnotme[atomic]
+//+!add_map(Type, MyX, MyY, X, Y)[source(Ag)]
+//	: true
+//<-
+//	.send(Ag, achieve, map::try_again(Type, X, Y));
+//	.	
+//	
+//@trygoal[atomic]
+//+!try_again(goal, X, Y)
+//	: true
+//<-
+//	getMyPos(MyX,MyY);
+//	!map::get_clusters(Clusters);
+//	!map::update_goal_in_map(MyX, MyY, X, Y, Clusters);
+//	.
+//@trydispenser[atomic]
+//+!try_again(Type, X, Y)
+//	: true
+//<-
+//	getMyPos(MyX,MyY);
+//	!map::get_dispensers(Dispensers);
+//	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
+//	.
 
 +!get_dispensers(List)
 	: map::myMap(Me)
