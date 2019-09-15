@@ -36,6 +36,16 @@
 	
 
 +!always_skip :
+	task::origin & 
+	not task::committed(_,_) & default::obstacle(X,Y)
+<-
+	for(.range(I, 1, 3) & not task::committed(_,_)){
+		!action::clear(X,Y);
+	}
+	!!always_skip;
+	.
+
++!always_skip :
 	not task::origin & 
 	not default::attached(0, 1) & retrieve::retriever
 <-

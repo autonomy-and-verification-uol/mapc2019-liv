@@ -750,7 +750,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 -!retrieve::move_to_goal : retrieve::retriever <- !!retrieve::move_to_goal.
 	
 +!retrieve::smart_clear(Direction) :
-	default::energy(Energy) & Energy >= 30
+	default::energy(Energy) & Energy >= 30 & default::team(Team)
 <-
 	-res(_);
 	if(Direction == n){
@@ -786,7 +786,12 @@ most_needed_type(Dispensers, AgList, Type) :-
 			not default::thing(ClearX-1, ClearY, block, _) &
 			not default::thing(ClearX+1, ClearY, block, _) &
 			not default::thing(ClearX, ClearY-1, block, _) &
-			not default::thing(ClearX, ClearY+1, block, _)
+			not default::thing(ClearX, ClearY+1, block, _) &
+			not default::thing(ClearX, ClearY, entity, Team) & 
+			not default::thing(ClearX-1, ClearY, entity, Team) &
+			not default::thing(ClearX+1, ClearY, entity, Team) &
+			not default::thing(ClearX, ClearY-1, entity, Team) &
+			not default::thing(ClearX, ClearY+1, entity, Team)
 		){
 			!action::clear(ClearX, ClearY);
 		} else{

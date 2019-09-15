@@ -214,6 +214,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	: default::attached(0,1) & default::thing(0,1, block, Type)
 <-
 //	.print("@@@@ Received order for new task");
+	removeRetriever;
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
@@ -224,13 +225,18 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	if (not task::help) {
-		!retrieve::retrieve_block;
+//		!retrieve::retrieve_block;
+		-retrieve::retriever;
+		-stop::stop;
+		+exploration::explorer;
+		!!exploration::explore([n,s,e,w]);
 	}
 	.
 	
 +!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
 	: default::attached(0,1) & default::thing(0,1, block, Type)
 <-
+	removeRetriever;
 //	.print("@@@@ Received order for new task");
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
@@ -242,7 +248,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	if (not task::help) {
-		!retrieve::retrieve_block;
+//		!retrieve::retrieve_block;
+		-retrieve::retriever;
+		-stop::stop;
+		+exploration::explorer;
+		!!exploration::explore([n,s,e,w]);
 	}
 	.
 	
@@ -286,7 +296,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::connect(Origin,BlockX,BlockY);
 	!action::detach(DetachPos);
 	-help[source(_)];
-	!retrieve::retrieve_block;
+//	!retrieve::retrieve_block;
+	-retrieve::retriever;
+	-stop::stop;
+	+exploration::explorer;
+	!!exploration::explore([n,s,e,w]);
 	.
 	
 +!rotate_back

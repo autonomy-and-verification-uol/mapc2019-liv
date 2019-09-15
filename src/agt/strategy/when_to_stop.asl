@@ -29,6 +29,7 @@
 		.broadcast(tell, stop::first_to_stop(Me));
 		+stop::first_to_stop(Me);
 		.print("Removing explorer");
+		-exploration::special(_);
 		-exploration::explorer;
 		!action::forget_old_action;
 		.print("Adding retriever");
@@ -46,12 +47,19 @@
 +stop
 	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
-	.print("Removing explorer");
-	-exploration::explorer;
-	!action::forget_old_action;
-	.print("Adding retriever");
-	+retrieve::retriever;
-	!!retrieve::retrieve_block;
+	joinRetrievers(Flag);
+	if (Flag) {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		!action::forget_old_action;
+		.print("Adding retriever");
+		+retrieve::retriever;
+		!!retrieve::retrieve_block;
+	}
+	else {
+		-stop;
+	}
 	.
 +stop: true <- -stop::stop.
 
@@ -94,6 +102,7 @@
 	.print("Leader: ", Leader, " Leader1: ", Leader1);
 	if(Leader == Leader1){
 		-exploration::explorer;
+		-exploration::special(_);
 		+retrieve::retriever;
 		!action::forget_old_action;
 		!!retrieve::retrieve_block;
