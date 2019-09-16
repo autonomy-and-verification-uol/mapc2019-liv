@@ -50,7 +50,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
 	.
 
--!map::evaluate(_, _) : true <- -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
+-!map::evaluate(_, _) : true <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
 +!map::evaluate(GoalLocalX, GoalLocalY) :
 	true
 <-
@@ -60,12 +60,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 	!map::find_cluster_origins(GoalLocalX, GoalLocalY);
 	if(not map::evaluating_positions(_)){
+		.print("Failing because of cluster origin");
 		.fail;
 	}
 	
 	+map::evaluating_vertexes;
 	!map::evaluate_origin(n, Value1); 
 	if(not map::evaluating_positions(_)){
+		.print("Failing because of evaluation of north origin");
 		.fail;
 	}
 	!map::update_origin_evaluation(n, Value1);
@@ -113,20 +115,24 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::evaluate_origin(Side, Value) :
 	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
 <-
-	!retrieve::generate_helpers_position(origin(X, Y), Side, _, pos(V1X, V1Y), pos(V2X, V2Y));
-	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
-	L2 = [vertex(Side, e, V2X, V2Y)|L1];
-	-+map::evaluating_positions(L2);
-	if(map::evaluating_positions(Pos)){
-		.print(Pos);
-	}
-	!map::move_to_evaluating_pos(Side, w);
+	!retrieve::generate_helpers_position(origin(X, Y), Side, _, pos(PosX, PosY));
+//	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
+//	L2 = [vertex(Side, e, V2X, V2Y)|L1];
+	L = [scout(Side, PosX, PosY)|Positions];
+	-+map::evaluating_positions(L);
+//	if(map::evaluating_positions(Pos)){
+//		.print(Pos);
+//	}
+	!map::move_to_evaluating_pos(Side);
 	if(map::evaluating_positions(_)){
-		!map::move_to_evaluating_pos(Side, e);
-		if(map::evaluating_positions(_)){
-			Value = Side;
-		}
+		Value = Side;
 	}
+//	if(map::evaluating_positions(_)){
+//		!map::move_to_evaluating_pos(Side, e);
+//		if(map::evaluating_positions(_)){
+//			Value = Side;
+//		}
+//	}
 	.
 -!map::evaluate_origin(_, Value) : true <- Value = bad.
 
@@ -149,8 +155,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	for(.member(origin(OriginSide, X, Y), Positions)){
 		!map::update_evaluating_positions_aux(origin(OriginSide, X, Y), DiffX, DiffY);
 	}
-	for(.member(vertex(OriginSide, VertexSide, X, Y), Positions)){
-		!map::update_evaluating_positions_aux(vertex(OriginSide, VertexSide, X, Y), DiffX, DiffY);
+	for(.member(scout(OriginSide, X, Y), Positions)){
+		!map::update_evaluating_positions_aux(scout(OriginSide, X, Y), DiffX, DiffY);
 	}
 	for(.member(start(X, Y), Positions)){
 		!map::update_evaluating_positions_aux(start(X, Y), DiffX, DiffY);
@@ -166,11 +172,11 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.delete(origin(Side, X, Y), Positions, Positions1);
 	-+map::evaluating_positions([origin(Side, X + DiffX, Y + DiffY)|Positions1]);
 	.
-+!map::update_evaluating_positions_aux(vertex(OriginSide, VertexSide, X, Y), DiffX, DiffY) :
-	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, X, Y), Positions) 
++!map::update_evaluating_positions_aux(scout(OriginSide, X, Y), DiffX, DiffY) :
+	map::evaluating_positions(Positions) & .member(scout(OriginSide, X, Y), Positions) 
 <-
-	.delete(vertex(OriginSide, VertexSide, X, Y), Positions, Positions1);
-	-+map::evaluating_positions([vertex(OriginSide, VertexSide, X + DiffX, Y + DiffY)|Positions1]);
+	.delete(scout(OriginSide, X, Y), Positions, Positions1);
+	-+map::evaluating_positions([scout(OriginSide, X + DiffX, Y + DiffY)|Positions1]);
 	.
 +!map::update_evaluating_positions_aux(start(X, Y), DiffX, DiffY) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) 
@@ -179,7 +185,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	-+map::evaluating_positions([start(X + DiffX, Y + DiffY)|Positions1]);
 	.
 
-+!map::move_to_evaluating_pos(OriginSide, VertexSide) :
++!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(start(X, Y), Positions)
 <-
 	getMyPos(MyX, MyY);
@@ -187,13 +193,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
 		not .member(origin(_, _, _), GoalList)
 	){
-		!map::move_to_evaluating_pos_1(OriginSide, VertexSide);
+		!map::move_to_evaluating_pos_1(OriginSide);
 	} else{
 		-map::evaluating_positions(_);
 		.print("Stop evaluating the cluster1");
 	}
 	.
-+!map::move_to_evaluating_pos(OriginSide, VertexSide) :
++!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(_, X, Y), Positions)
 <-
 	if(map::myMap(Leader1)){.print("Leader1: ", Leader1);}
@@ -204,38 +210,38 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
 		.member(origin(boh, _, _), GoalList)
 	){
-		!map::move_to_evaluating_pos_1(OriginSide, VertexSide);
+		!map::move_to_evaluating_pos_1(OriginSide);
 	} else{
 		-map::evaluating_positions(_);
 		if(map::myMap(Leader4)){.print("Leader4: ", Leader4);}
 		.print("Stop evaluating the cluster2: (", MyX+X, ", ", MyY+Y, ") ", Clusters);
 	}
 	.
-+!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
++!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(0, 0), Positions)
 <- 
 	.delete(start(_, _), Positions, NewPositions);
 	-+map::evaluating_positions(NewPositions);
 	.
-+!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
-	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, 0, 0), Positions).
-+!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
++!map::move_to_evaluating_pos_1(OriginSide) :
+	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions).
++!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
 	retrieve::pick_direction(0, 0, X, Y, Direction)
 <-
 	!map::move_to_evaluating_pos_aux(Direction);
-	!map::move_to_evaluating_pos(OriginSide, VertexSide);
+	!map::move_to_evaluating_pos(OriginSide);
 	.
-+!map::move_to_evaluating_pos_1(OriginSide, VertexSide) :
-	map::evaluating_positions(Positions) & .member(vertex(OriginSide, VertexSide, X, Y), Positions) &
++!map::move_to_evaluating_pos_1(OriginSide) :
+	map::evaluating_positions(Positions) & .member(scout(OriginSide, X, Y), Positions) &
 	retrieve::pick_direction(0, 0, X, Y, Direction)
 <-
 	
-	if((math.abs(X)+math.abs(Y)) <= 5 & default::obstacle(X, Y)){
-		.fail;
-	}
+//	if((math.abs(X)+math.abs(Y)) <= 5 & default::obstacle(X, Y)){
+//		.fail;
+//	}
 	!map::move_to_evaluating_pos_aux(Direction);
-	!map::move_to_evaluating_pos(OriginSide, VertexSide);
+	!map::move_to_evaluating_pos(OriginSide);
 	.
 +!map::move_to_evaluating_pos_aux(Direction) :
 	true
@@ -264,7 +270,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origins(GoalLocalX, GoalLocalY) :
 	true
 <-
-	!map::move_to_evaluating_pos(start, start);
+	!map::move_to_evaluating_pos(start);
 	!map::find_cluster_origin(n); 
 	!map::find_cluster_origin(e); 
 	!map::find_cluster_origin(s); 

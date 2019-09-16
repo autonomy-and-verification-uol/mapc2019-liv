@@ -202,39 +202,39 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	-escape;
 	.
 	
-+!no_escape : not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
-+!no_escape <- !action::commit_action(move(z)); !no_escape.
++!no_escape : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
++!no_escape : escape <- !action::commit_action(move(z)); !no_escape.
 	
 +!move_to_escape(MyX,MyY,MyX,MyY).
-+!move_to_escape(MyX,MyY,X,Y) : not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
++!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
 +!move_to_escape(MyX,MyY,X,Y)
-	: default::thing(X-MyX, Y-MyY, Thing, _) & Thing \== dispenser & (X-MyX = 1 | X-MyX = -1 | Y-MyY = 1 | Y-MyY = -1) & default::vision(V) & find_empty_position(XNew,YNew,1,V)
+	: escape & default::thing(X-MyX, Y-MyY, Thing, _) & Thing \== dispenser & (X-MyX = 1 | X-MyX = -1 | Y-MyY = 1 | Y-MyY = -1) & default::vision(V) & find_empty_position(XNew,YNew,1,V)
 <-
 	!move_to_escape(MyX,MyY,XNew,YNew);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
-	: X < MyX 
+	: escape & X < MyX 
 <-
 	!action::move(w);
 	getMyPos(MyXNew,MyYNew);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
-	: X > MyX 
+	: escape & X > MyX 
 <-
 	!action::move(e);
 	getMyPos(MyXNew,MyYNew);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
-	: Y < MyY 
+	: escape & Y < MyY 
 <-
 	!action::move(n);
 	getMyPos(MyXNew,MyYNew);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
-	: Y > MyY 
+	: escape & Y > MyY 
 <-
 	!action::move(s);
 	getMyPos(MyXNew,MyYNew);

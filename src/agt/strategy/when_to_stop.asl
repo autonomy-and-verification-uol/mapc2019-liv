@@ -26,21 +26,29 @@
 		.member(origin(Side, GoalX, GoalY), GoalList) & 
 		not .member(origin(boh, _, _), GoalList)
 	){
-		.broadcast(tell, stop::first_to_stop(Me));
-		+stop::first_to_stop(Me);
-		.print("Removing explorer");
-		-exploration::special(_);
-		-exploration::explorer;
-		!action::forget_old_action;
-		.print("Adding retriever");
-		+retrieve::retriever;
-		.print("Call first time setTargetGoal");
-		//.member(origin(_, GoalX, GoalY), GoalList);
-		setTargetGoal(Pos, Me, GoalX, GoalY, Side);
-		!!retrieve::retrieve_block;
+		firstToStop(Me,Flag);
+		if (Flag) {
+			.broadcast(tell, stop::first_to_stop(Me));
+			+stop::first_to_stop(Me);
+			.print("Removing explorer");
+			-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			.print("Adding retriever");
+			+retrieve::retriever;
+			.print("Call first time setTargetGoal");
+			//.member(origin(_, GoalX, GoalY), GoalList);
+			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
+			!!retrieve::retrieve_block;
+		}
+		else{
+			-stop::stop;
+		}
 	}
-	else{
-		-stop::stop;
+	else {
+		-stop;
 	}
 	.
 @stop2[atomic]
@@ -52,6 +60,8 @@
 		.print("Removing explorer");
 		-exploration::explorer;
 		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
 		!action::forget_old_action;
 		.print("Adding retriever");
 		+retrieve::retriever;
@@ -69,6 +79,7 @@
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Ag) & PosOther < Pos
 <-
 	.print("Removing retriever");
+//	removeRetriever;
 	-retrieve::retriever;
 	-stop::stop;
 	-stop::first_to_stop(Me);
@@ -100,12 +111,17 @@
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
 	.print("Leader: ", Leader, " Leader1: ", Leader1);
-	if(Leader == Leader1){
-		-exploration::explorer;
-		-exploration::special(_);
-		+retrieve::retriever;
-		!action::forget_old_action;
-		!!retrieve::retrieve_block;
+	joinRetrievers(Flag);
+	if (Flag) {
+		if(Leader == Leader1){
+			-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			+retrieve::retriever;
+			!action::forget_old_action;
+			!!retrieve::retrieve_block;
+		}
 	}
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").

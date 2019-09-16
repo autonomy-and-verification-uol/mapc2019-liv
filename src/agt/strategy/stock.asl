@@ -179,100 +179,36 @@ most_needed_type(Dispensers, AgList, Type) :-
 	
 +!retrieve::generate_helpers_position(origin(X, Y), n, 
 	[
-		pos(X-9, Y-12),
-		pos(X-6, Y-12),
-		pos(X-3, Y-12),
-		pos(X, Y-12),
-		pos(X+3, Y-12),
-		pos(X+6, Y-12),
-		pos(X+9, Y-12),
-		pos(X-9, Y-8),
-		pos(X-6, Y-8),
-		pos(X-3, Y-8),
-		pos(X, Y-8),
-		pos(X+3, Y-8),
-		pos(X+6, Y-8),
-		pos(X+9, Y-8),
-		pos(X-9, Y-4),
-		pos(X-6, Y-4),
-		pos(X-3, Y-4),
-		pos(X, Y-4),
-		pos(X+3, Y-4),
-		pos(X+6, Y-4),
-		pos(X+9, Y-4)
-	], pos(X-9, Y-12), pos(X+9, Y-12)).
+		pos(X, Y-5),
+		pos(X-2, Y-5),
+		pos(X-4, Y-5),
+		pos(X+2, Y-5),
+		pos(X+4, Y-5)
+	], pos(X, Y-5)).
 +!retrieve::generate_helpers_position(origin(X, Y), s, 
 	[
-		pos(X-9, Y+12),
-		pos(X-6, Y+12),
-		pos(X-3, Y+12),
-		pos(X, Y+12),
-		pos(X+3, Y+12),
-		pos(X+6, Y+12),
-		pos(X+9, Y+12),
-		pos(X-9, Y+8),
-		pos(X-6, Y+8),
-		pos(X-3, Y+8),
-		pos(X, Y+8),
-		pos(X+3, Y+8),
-		pos(X+6, Y+8),
-		pos(X+9, Y+8),
-		pos(X-9, Y+4),
-		pos(X-6, Y+4),
-		pos(X-3, Y+4),
-		pos(X, Y+4),
-		pos(X+3, Y+4),
-		pos(X+6, Y+4),
-		pos(X+9, Y+4)
-	], pos(X-9, Y+12), pos(X+9, Y+12)).
+		pos(X, Y+5),
+		pos(X-2, Y+5),
+		pos(X-4, Y+5),
+		pos(X+2, Y+5),
+		pos(X+4, Y+5)
+	], pos(X, Y+5)).
 +!retrieve::generate_helpers_position(origin(X, Y), w, 
 	[
-		pos(X-12, Y-9),
-		pos(X-12, Y-6),
-		pos(X-12, Y-3),
-		pos(X-12, Y),
-		pos(X-12, Y+3),
-		pos(X-9, Y+6),
-		pos(X-9, Y+9),
-		pos(X-9, Y-9),
-		pos(X-9, Y-6),
-		pos(X-9, Y-3),
-		pos(X-9, Y),
-		pos(X-9, Y+3),
-		pos(X-9, Y+6),
-		pos(X-9, Y+9),
-		pos(X-6, Y-9),
-		pos(X-6, Y-6),
-		pos(X-6, Y-3),
-		pos(X-6, Y),
-		pos(X-6, Y+3),
-		pos(X-6, Y+6),
-		pos(X-6, Y+9)
-	], pos(X-12, Y-9), pos(X-12, Y+9)).
+		pos(X-5, Y),
+		pos(X-5, Y-2),
+		pos(X-5, Y-4),
+		pos(X-5, Y+2),
+		pos(X-5, Y+4)
+	], pos(X-5, Y)).
 +!retrieve::generate_helpers_position(origin(X, Y), e, 
 	[
-		pos(X+12, Y-9),
-		pos(X+12, Y-6),
-		pos(X+12, Y-3),
-		pos(X+12, Y),
-		pos(X+12, Y+3),
-		pos(X+9, Y+6),
-		pos(X+9, Y+9),
-		pos(X+9, Y-9),
-		pos(X+9, Y-6),
-		pos(X+9, Y-3),
-		pos(X+9, Y),
-		pos(X+9, Y+3),
-		pos(X+9, Y+6),
-		pos(X+9, Y+9),
-		pos(X+6, Y-9),
-		pos(X+6, Y-6),
-		pos(X+6, Y-3),
-		pos(X+6, Y),
-		pos(X+6, Y+3),
-		pos(X+6, Y+6),
-		pos(X+6, Y+9)
-	], pos(X+12, Y-9), pos(X+12, Y+9)).
+		pos(X+5, Y),
+		pos(X+5, Y-2),
+		pos(X+5, Y-4),
+		pos(X+5, Y+2),
+		pos(X+5, Y+4)
+	], pos(X+5, Y)).
 
 +!retrieve::retrieve_block :
 	true
@@ -449,7 +385,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if(stop::first_to_stop(Me)){
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
-		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _, _);
+		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
 		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
 	}
@@ -669,7 +605,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	getTargetGoal(_, GoalX, GoalY, SideStr);
 	.term2string(Side, SideStr);
-	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _, _);
+	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
 	.length(HelpersPos, NHelpersPos);
 	if(Pos == (NHelpersPos-1)){

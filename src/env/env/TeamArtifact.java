@@ -47,6 +47,8 @@ public class TeamArtifact extends Artifact {
 	private int maxRetrievers = 5;
 	private int retrievers = 0;
 	
+	private String firstToStop = null;
+	
 	private int pos = 10;
 	private String goalAgent;
 	private Integer targetGoalX;
@@ -70,8 +72,20 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
+	void firstToStop(String agent, OpFeedbackParam<Boolean> flag){
+		if(this.firstToStop != null) {
+			flag.set(false);
+		}
+		else {
+			this.firstToStop = agent;
+			flag.set(true);
+		}
+		logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!! "+firstToStop);
+	}
+	
+	@OPERATION
 	void joinRetrievers(OpFeedbackParam<Boolean> flag){
-		if(retrievers == maxRetrievers) {
+		if(this.retrievers >= this.maxRetrievers) {
 			flag.set(false);
 		}
 		else {
