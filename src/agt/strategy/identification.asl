@@ -153,7 +153,8 @@ i_met_new_agent(Iknow, IdList) :-
 		+map::evaluating_cluster([origin(XN+OriginX, YN+OriginY), origin(XS+OriginX, YS+OriginY), origin(XW+OriginX, YW+OriginY), origin(XE+OriginX, YE+OriginY)]);
 	}
 	if(retrieve::target(TargetX, TargetY)){
-		-+retrieve::target(TargetX+OriginX,TargetY+OriginY);
+		-retrieve::target(TargetX, TargetY);
+		+retrieve::target(TargetX+OriginX,TargetY+OriginY);
 	}
 	if(Map \== MapOther){
 		getTargetGoal(GoalAgent, GoalX, GoalY, _);

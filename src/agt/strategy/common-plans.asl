@@ -3,6 +3,20 @@ relative_right(s,w) :- true.
 relative_right(e,s) :- true.
 relative_right(w,n) :- true.
 
+direction_block(n,X,Y) :- X = 0 & Y = -1.
+direction_block(s,X,Y) :- X = 0 & Y = 1.
+direction_block(e,X,Y) :- X = 1 & Y = 0.
+direction_block(w,X,Y) :- X = -1 & Y = 0.
+
+rotate_direction(cw,NewX,NewY) :- stock::block(0,-1) & NewX = 1 & NewY = 0.
+rotate_direction(cw,NewX,NewY) :- stock::block(0,1) & NewX = -1 & NewY = 0.
+rotate_direction(cw,NewX,NewY) :- stock::block(1,0) & NewX = 0 & NewY = 1.
+rotate_direction(cw,NewX,NewY) :- stock::block(-1,0) & NewX = 0 & NewY = -1.
+rotate_direction(ccw,NewX,NewY) :- stock::block(0,-1) & NewX = -1 & NewY = 0.
+rotate_direction(ccw,NewX,NewY) :- stock::block(0,1) & NewX = 1 & NewY = 0.
+rotate_direction(ccw,NewX,NewY) :- stock::block(1,0) & NewX = 0 & NewY = -1.
+rotate_direction(ccw,NewX,NewY) :- stock::block(-1,0) & NewX = 0 & NewY = 1.
+
 find_empty_position(X,Y,Count,Vision) :- Count > Vision & false. 
 find_empty_position(X,Y,1,Vision) :- (not (default::thing(-1,1,Thing,_) & Thing \== dispenser) & not default::obstacle(-1,1) & X = -1 & Y = 1) |
 (not (default::thing(-1,0,Thing,_) & Thing \== dispenser) & not default::obstacle(-1,0) & X = -1 & Y = 0) |
@@ -85,6 +99,10 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	!go_around(OldDir, Dir);
 	
 	.
+	
++!go_around(OldDir)
+	: not common::avoid(_) & stock::block(X,Y)
+.
 	
 +!go_around(OldDir)
 	: not common::avoid(_)

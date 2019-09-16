@@ -47,36 +47,36 @@
 
 +!always_skip :
 	not task::origin & 
-	not default::attached(0, 1) & retrieve::retriever
+	not stock::block(0, 1) & retrieve::retriever
 <-
 	!!retrieve::retrieve_block;
 	.
-/* +!always_skip :
-	not task::origin & default::attached(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
-<-
-	if(not default::obstacle(-1, 0)){
-		!action::rotate(cw);
-		while(not default::lastActionResult(success)){
-			!action::rotate(cw);
-		}
-		!action::move(z);
-		!action::rotate(ccw);
-		while(not default::lastActionResult(success)){
-			!action::rotate(ccw);
-		}
-	} elif(not default::obstacle(1, 0)){
-		!action::rotate(ccw);
-		while(not default::lastActionResult(success)){
-			!action::rotate(ccw);
-		}
-		!action::move(z);
-		!action::rotate(cw);
-		while(not default::lastActionResult(success)){
-			!action::rotate(cw);
-		}
-	}
-	!!always_skip;
-	.*/
+//+!always_skip :
+//	not task::origin & stock::block(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
+//<-
+//	if(not default::obstacle(-1, 0)){
+//		!action::rotate(cw);
+//		while(not default::lastActionResult(success)){
+//			!action::rotate(cw);
+//		}
+//		!action::move(z);
+//		!action::rotate(ccw);
+//		while(not default::lastActionResult(success)){
+//			!action::rotate(ccw);
+//		}
+//	} elif(not default::obstacle(1, 0)){
+//		!action::rotate(ccw);
+//		while(not default::lastActionResult(success)){
+//			!action::rotate(ccw);
+//		}
+//		!action::move(z);
+//		!action::rotate(cw);
+//		while(not default::lastActionResult(success)){
+//			!action::rotate(cw);
+//		}
+//	}
+//	!!always_skip;
+//	.
 +!always_skip
 	: true
 <-

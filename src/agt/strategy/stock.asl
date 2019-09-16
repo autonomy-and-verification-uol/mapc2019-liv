@@ -78,69 +78,70 @@ i_can_avoid(e, n) :-
 		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(0, -3)) & not(default::obstacle(1, -3)) & not(default::obstacle(2, -3)))
 	).
 
+
 count_attached_blocks(n, 0) :-
-	not(default::attached(0, -1)).
+	not(stock::block(0, -1)).
 count_attached_blocks(n, 1) :-
-	default::attached(0, -1) & not(default::attached(0, -2)).
+	stock::block(0, -1) & not(stock::block(0, -2)).
 count_attached_blocks(n, 2) :-
-	default::attached(0, -1) & default::attached(0, -2) & 
-	not(default::attached(0, -3)).
+	stock::block(0, -1) & stock::block(0, -2) & 
+	not(stock::block(0, -3)).
 count_attached_blocks(n, 3) :-
-	default::attached(0, -1) & default::attached(0, -2) & default::attached(0, -3) &
-	not(default::attached(0, -4)).
+	stock::block(0, -1) & stock::block(0, -2) & stock::block(0, -3) &
+	not(stock::block(0, -4)).
 count_attached_blocks(n, 4) :-
-	default::attached(0, -1) & default::attached(0, -2) & default::attached(0, -3) &  default::attached(0, -4) &
-	not(default::attached(0, -5)).
+	stock::block(0, -1) & stock::block(0, -2) & stock::block(0, -3) &  stock::block(0, -4) &
+	not(stock::block(0, -5)).
 count_attached_blocks(n, 5) :-
-	default::attached(0, -1) & default::attached(0, -2) & default::attached(0, -3) &  default::attached(0, -4) & default::attached(0, -5).
+	stock::block(0, -1) & stock::block(0, -2) & stock::block(0, -3) &  stock::block(0, -4) & stock::block(0, -5).
 count_attached_blocks(s, 0) :-
-	not(default::attached(0, 1)).
+	not(stock::block(0, 1)).
 count_attached_blocks(s, 1) :-
-	default::attached(0, 1) & not(default::attached(0, 2)).
+	stock::block(0, 1) & not(stock::block(0, 2)).
 count_attached_blocks(s, 2) :-
-	default::attached(0, 1) & default::attached(0, 2) & 
-	not(default::attached(0, 3)).
+	stock::block(0, 1) & stock::block(0, 2) & 
+	not(stock::block(0, 3)).
 count_attached_blocks(s, 3) :-
-	default::attached(0, 1) & default::attached(0, 2) & default::attached(0, 3) &
-	not(default::attached(0, 4)).
+	stock::block(0, 1) & stock::block(0, 2) & stock::block(0, 3) &
+	not(stock::block(0, 4)).
 count_attached_blocks(s, 4) :-
-	default::attached(0, 1) & default::attached(0, 2) & default::attached(0, 3) &  default::attached(0, 4) &
-	not(default::attached(0, 5)).
+	stock::block(0, 1) & stock::block(0, 2) & stock::block(0, 3) &  stock::block(0, 4) &
+	not(stock::block(0, 5)).
 count_attached_blocks(s, 5) :-
-	default::attached(0, 1) & default::attached(0, 2) & default::attached(0, 3) &  default::attached(0, 4) & default::attached(0, 5).
+	stock::block(0, 1) & stock::block(0, 2) & stock::block(0, 3) &  stock::block(0, 4) & stock::block(0, 5).
 count_attached_blocks(w, 0) :-
-	not(default::attached(-1, 0)).
+	not(stock::block(-1, 0)).
 count_attached_blocks(w, 1) :-
-	default::attached(-1, 0) & not(default::attached(-2, 0)).
+	stock::block(-1, 0) & not(stock::block(-2, 0)).
 count_attached_blocks(w, 2) :-
-	default::attached(-1, 0) & default::attached(-2, 0) & 
-	not(default::attached(-3, 0)).
+	stock::block(-1, 0) & stock::block(-2, 0) & 
+	not(stock::block(-3, 0)).
 count_attached_blocks(w, 3) :-
-	default::attached(-1, 0) & default::attached(-2, 0) & default::attached(-3, 0) &
-	not(default::attached(-4, 0)).
+	stock::block(-1, 0) & stock::block(-2, 0) & stock::block(-3, 0) &
+	not(stock::block(-4, 0)).
 count_attached_blocks(w, 4) :-
-	default::attached(-1, 0) & default::attached(-2, 0) & default::attached(-3, 0) &  default::attached(-4, 0) &
-	not(default::attached(-5, 0)).
+	stock::block(-1, 0) & stock::block(-2, 0) & stock::block(-3, 0) &  stock::block(-4, 0) &
+	not(stock::block(-5, 0)).
 count_attached_blocks(w, 5) :-
-	default::attached(-1, 0) & default::attached(-2, 0) & default::attached(-3, 0) &  default::attached(-4, 0) & default::attached(-5, 0).
+	stock::block(-1, 0) & stock::block(-2, 0) & stock::block(-3, 0) &  stock::block(-4, 0) & stock::block(-5, 0).
 count_attached_blocks(e, 0) :-
-	not(default::attached(1, 0)).
+	not(stock::block(1, 0)).
 count_attached_blocks(e, 1) :-
-	default::attached(1, 0) & not(default::attached(2, 0)).
+	stock::block(1, 0) & not(stock::block(2, 0)).
 count_attached_blocks(e, 2) :-
-	default::attached(1, 0) & default::attached(2, 0) & 
-	not(default::attached(3, 0)).
+	stock::block(1, 0) & stock::block(2, 0) & 
+	not(stock::block(3, 0)).
 count_attached_blocks(e, 3) :-
-	default::attached(1, 0) & default::attached(2, 0) & default::attached(3, 0) &
-	not(default::attached(4, 0)).
+	stock::block(1, 0) & stock::block(2, 0) & stock::block(3, 0) &
+	not(stock::block(4, 0)).
 count_attached_blocks(e, 4) :-
-	default::attached(1, 0) & default::attached(2, 0) & default::attached(3, 0) &  default::attached(4, 0) &
-	not(default::attached(5, 0)).
+	stock::block(1, 0) & stock::block(2, 0) & stock::block(3, 0) &  stock::block(4, 0) &
+	not(stock::block(5, 0)).
 count_attached_blocks(e, 5) :-
-	default::attached(1, 0) & default::attached(2, 0) & default::attached(3, 0) &  default::attached(4, 0) & default::attached(5, 0).
+	stock::block(1, 0) & stock::block(2, 0) & stock::block(3, 0) &  stock::block(4, 0) & stock::block(5, 0).
 
 i_have_attached_block :-
-	default::attached(0, -1) | default::attached(0, 1) | default::attached(-1, 0) | default::attached(1, 0).
+	stock::block(0, -1) | stock::block(0, 1) | stock::block(-1, 0) | stock::block(1, 0).
 
 opposite_direction(n, s).
 opposite_direction(s, n).
@@ -337,7 +338,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			!action::request(Direction);
 		}
 		!action::attach(Direction);
-		if(default::lastActionResult(success) & default::attached(DispX, DispY)){
+		if(default::lastActionResult(success) & stock::block(DispX, DispY)){
 			+retrieve::attach_completed;
 		}
 	}
@@ -428,13 +429,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	.print("Direction: ", Direction);
 	if(Direction == n){
-		if(default::attached(1, 0)){
+		if(stock::block(1, 0)){
 			!action::rotate(ccw);
 		}
-		elif(default::attached(-1, 0)){
+		elif(stock::block(-1, 0)){
 			!action::rotate(cw);
 		}
-		elif(default::attached(0, 1)){
+		elif(stock::block(0, 1)){
 			if(not(default::thing(1, 0, _, _)) & not(default::obstacle(1, 0))){
 				!action::rotate(ccw);
 				!action::rotate(ccw);
@@ -446,13 +447,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 	}
 	elif(Direction == s){
-		if(default::attached(1, 0)){
+		if(stock::block(1, 0)){
 			!action::rotate(cw);
 		}
-		elif(default::attached(-1, 0)){
+		elif(stock::block(-1, 0)){
 			!action::rotate(ccw);
 		}
-		elif(default::attached(0, -1)){
+		elif(stock::block(0, -1)){
 			if(not(default::thing(1, 0, _, _)) & not(default::obstacle(1, 0))){
 				!action::rotate(cw);
 				!action::rotate(cw);
@@ -464,13 +465,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 	}
 	elif(Direction == w){
-		if(default::attached(0, 1)){
+		if(stock::block(0, 1)){
 			!action::rotate(cw);
 		}
-		elif(default::attached(0, -1)){
+		elif(stock::block(0, -1)){
 			!action::rotate(ccw);
 		}
-		elif(default::attached(1, 0)){
+		elif(stock::block(1, 0)){
 			if(not(default::thing(0, 1, _, _)) & not(default::obstacle(0, 1))){
 				!action::rotate(cw);
 				!action::rotate(cw);
@@ -482,13 +483,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 	}
 	else{
-		if(default::attached(0, 1)){
+		if(stock::block(0, 1)){
 			!action::rotate(ccw);
 		}
-		elif(default::attached(0, -1)){
+		elif(stock::block(0, -1)){
 			!action::rotate(cw);
 		}
-		elif(default::attached(-1, 0)){
+		elif(stock::block(-1, 0)){
 			if(not(default::thing(0, 1, _, _)) & not(default::obstacle(0, 1))){
 				!action::rotate(ccw);
 				!action::rotate(ccw);
@@ -576,13 +577,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY)
 <-
-	if(default::attached(0, -1)){
+	if(stock::block(0, -1)){
 		!action::rotate(cw);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
-	} elif(default::attached(-1, 0)){
+	} elif(stock::block(-1, 0)){
 		!action::rotate(ccw);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
-	} elif(default::attached(1, 0)){
+	} elif(stock::block(1, 0)){
 		!action::rotate(cw);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
@@ -690,28 +691,28 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-res(_);
 	if(Direction == n){
-		if(default::attached(0, -1)){
+		if(stock::block(0, -1)){
 			ClearX = 0; ClearY = -3
 		} else{
 			ClearX = 0; ClearY = -2
 		}
 	}
 	elif(Direction == s){
-		if(default::attached(0, 1)){
+		if(stock::block(0, 1)){
 			ClearX = 0; ClearY = 3
 		} else{
 			ClearX = 0; ClearY = 2
 		}
 	}
 	elif(Direction == w){
-		if(default::attached(-1, 0)){
+		if(stock::block(-1, 0)){
 			ClearX = -3; ClearY = 0
 		} else{
 			ClearX = -2 ClearY = 0
 		}
 	}
 	else{
-		if(default::attached(1, 0)){
+		if(stock::block(1, 0)){
 			ClearX = 3; ClearY = 0
 		} else{
 			ClearX = 2 ClearY = 0

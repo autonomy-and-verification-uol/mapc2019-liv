@@ -18,10 +18,10 @@ check_pos(X,Y,NewX,NewY) :- not (default::thing(X-1, Y, Thing, _) & (Thing == en
 check_pos(X,Y,NewX,NewY) :- not (default::thing(X, Y+1, Thing, _) & (Thing == entity | Thing == block)) & NewX = X & NewY = Y+1.
 check_pos(X,Y,NewX,NewY) :- not (default::thing(X+1, Y, Thing, _) & (Thing == entity | Thing == block)) & NewX = X+1 & NewY = Y.
 
-where_is_my_block(X,Y,DetachPos) :- default::thing(0,1,block,_) & default::attached (0,1) & X = 0 & Y = 1 & DetachPos = s.
-where_is_my_block(X,Y,DetachPos) :- default::thing(0,-1,block,_) & default::attached (0,-1) & X = 0 & Y = -1 & DetachPos = n.
-where_is_my_block(X,Y,DetachPos) :- default::thing(1,0,block,_) & default::attached (1,0) & X = 1 & Y = 0 & DetachPos = e.
-where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & default::attached (-1,0) & X = -1 & Y = 0 & DetachPos = w.
+where_is_my_block(X,Y,DetachPos) :- default::thing(0,1,block,_) & stock::block (0,1) & X = 0 & Y = 1 & DetachPos = s.
+where_is_my_block(X,Y,DetachPos) :- default::thing(0,-1,block,_) & stock::block (0,-1) & X = 0 & Y = -1 & DetachPos = n.
+where_is_my_block(X,Y,DetachPos) :- default::thing(1,0,block,_) & stock::block (1,0) & X = 1 & Y = 0 & DetachPos = e.
+where_is_my_block(X,Y,DetachPos) :- default::thing(-1,0,block,_) & stock::block (-1,0) & X = -1 & Y = 0 & DetachPos = w.
 
 get_direction(0,-1,Dir) :- Dir = n.
 get_direction(0,1,Dir) :- Dir = s.
@@ -140,7 +140,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 
 // Update this plan after adding the belief for attached blocks
 +!verify_block
-	: default::attached(0,-1) & default::thing(0,-1, block, Type)
+	: stock::block(0,-1) & default::thing(0,-1, block, Type)
 <-
 	!action::rotate(cw);
 	!action::rotate(cw);
@@ -148,7 +148,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!verify_block.	
 	
 +!perform_task_origin(0,1)
-	: default::attached(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
+	: stock::block(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
 <-
 	.delete(agent(1,Me,Type,0,1),CommitListSort,CommitListSortNew);
 	.nth(0,CommitListSortNew,agent(Sum,Ag,TypeAg,X,Y));
@@ -159,7 +159,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
 	.
 +!perform_task_origin
-	: default::attached(0,1) & default::thing(0,1, block, Type)
+	: stock::block(0,1) & default::thing(0,1, block, Type)
 <-
 	!action::forget_old_action(default,always_skip);
 	!action::rotate(cw);
@@ -175,7 +175,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!perform_task_origin_next;
 	.
 +!perform_task_origin(X,Y)
-	: default::attached(0,1) & default::thing(0,1, block, Type) & help(X,Y)
+	: stock::block(0,1) & default::thing(0,1, block, Type) & help(X,Y)
 <-
 	!action::forget_old_action(default,always_skip);
 	!action::rotate(cw);
@@ -197,7 +197,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.
 	
 +!help_connect(ConX,ConY)[source(Help)]
-//	:  connect(X,Y) & default::attached(X,Y) & default::thing(X,Y, block, Type)
+//	:  connect(X,Y) & stock::block(X,Y) & default::thing(X,Y, block, Type)
 <-
 	getMyPos(MyX,MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
@@ -211,7 +211,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.
 	
 +!perform_task(Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
-	: default::attached(0,1) & default::thing(0,1, block, Type)
+	: stock::block(0,1) & default::thing(0,1, block, Type)
 <-
 //	.print("@@@@ Received order for new task");
 	removeRetriever;
@@ -234,7 +234,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.
 	
 +!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
-	: default::attached(0,1) & default::thing(0,1, block, Type)
+	: stock::block(0,1) & default::thing(0,1, block, Type)
 <-
 	removeRetriever;
 //	.print("@@@@ Received order for new task");
@@ -304,7 +304,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.
 	
 +!rotate_back
-	: not default::attached(0,1)
+	: not stock::block(0,1)
 <-
 	!action::rotate(cw);
 	!rotate_back;

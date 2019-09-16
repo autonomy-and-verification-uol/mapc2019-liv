@@ -4,27 +4,27 @@ check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2) | default::
 check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0) | default::thing(1,0,block,_) | default::thing(2,0,block,_). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
 check_obstacle(w) :- default::obstacle(-1,0) | default::obstacle(-2,0) | default::thing(-1,0,block,_) | default::thing(-2,0,block,_). //| default::obstacle(-3,0) | default::obstacle(-4,0) | default::obstacle(-5,0).
 
-check_obstacle_special(n) :- default::obstacle(0,-1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(0, -1))).
-check_obstacle_special(s) :- default::obstacle(0,1)  | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(0, 1))).
-check_obstacle_special(e) :- default::obstacle(1,0)  | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(1, 0))).
-check_obstacle_special(w) :- default::obstacle(-1,0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker & not(default::attached(-1, 0))).
+check_obstacle_special(n) :- default::obstacle(0,-1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker & not(stock::block(0, -1))).
+check_obstacle_special(s) :- default::obstacle(0,1)  | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker & not(stock::block(0, 1))).
+check_obstacle_special(e) :- default::obstacle(1,0)  | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker & not(stock::block(1, 0))).
+check_obstacle_special(w) :- default::obstacle(-1,0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker & not(stock::block(-1, 0))).
 
-check_obstacle_special_1(n, 1) :- default::attached(0, -1) & (default::obstacle(0, -2) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(n, 1) :- not(default::attached(0, -1)) & (default::obstacle(0, -1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(s, 1) :- default::attached(0, 1) & (default::obstacle(0, 2) | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(s, 1) :- not(default::attached(0, 1)) & (default::obstacle(0, 1) | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(w, 1) :- default::attached(-1, 0) & (default::obstacle(-2, 0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(w, 1) :- not(default::attached(-1, 0)) & (default::obstacle(-1, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(e, 1) :- default::attached(1, 0) & (default::obstacle(2, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(e, 1) :- not(default::attached(1, 0)) & (default::obstacle(1, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(n, 2) :- default::attached(0, -1) & (default::obstacle(0, -2) | default::obstacle(0, -3) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, -3, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(n, 2) :- not(default::attached(0, -1)) & (default::obstacle(0, -1) | default::obstacle(0, -2) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker)).
-check_obstacle_special_1(s, 2) :- default::attached(0, 1) & (default::obstacle(0, 2) | default::obstacle(0, 3) | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, 3, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(s, 2) :- not(default::attached(0, 1)) & (default::obstacle(0, 1) | default::obstacle(0, 2) | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, 2, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(w, 2) :- default::attached(-1, 0) & (default::obstacle(-2, 0) | default::obstacle(-3, 0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(-3, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(w, 2) :- not(default::attached(-1, 0)) & (default::obstacle(-1, 0) | default::obstacle(-2, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(-2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(e, 2) :- default::attached(1, 0) & (default::obstacle(2, 0) | default::obstacle(3, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(3, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-check_obstacle_special_1(e, 2) :- not(default::attached(1, 0)) & (default::obstacle(1, 0) | default::obstacle(2, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(n, 1) :- stock::block(0, -1) & (default::obstacle(0, -2) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(n, 1) :- not(stock::block(0, -1)) & (default::obstacle(0, -1) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(s, 1) :- stock::block(0, 1) & (default::obstacle(0, 2) | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(s, 1) :- not(stock::block(0, 1)) & (default::obstacle(0, 1) | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(w, 1) :- stock::block(-1, 0) & (default::obstacle(-2, 0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(w, 1) :- not(stock::block(-1, 0)) & (default::obstacle(-1, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(e, 1) :- stock::block(1, 0) & (default::obstacle(2, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(e, 1) :- not(stock::block(1, 0)) & (default::obstacle(1, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(n, 2) :- stock::block(0, -1) & (default::obstacle(0, -2) | default::obstacle(0, -3) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, -3, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(n, 2) :- not(stock::block(0, -1)) & (default::obstacle(0, -1) | default::obstacle(0, -2) | (default::thing(0, -1, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker)).
+check_obstacle_special_1(s, 2) :- stock::block(0, 1) & (default::obstacle(0, 2) | default::obstacle(0, 3) | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, 3, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(s, 2) :- not(stock::block(0, 1)) & (default::obstacle(0, 1) | default::obstacle(0, 2) | (default::thing(0, 1, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(0, 2, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(w, 2) :- stock::block(-1, 0) & (default::obstacle(-2, 0) | default::obstacle(-3, 0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(-3, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(w, 2) :- not(stock::block(-1, 0)) & (default::obstacle(-1, 0) | default::obstacle(-2, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(-2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(e, 2) :- stock::block(1, 0) & (default::obstacle(2, 0) | default::obstacle(3, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(3, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
+check_obstacle_special_1(e, 2) :- not(stock::block(1, 0)) & (default::obstacle(1, 0) | default::obstacle(2, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
 
 
 check_obstacle_all(n) :- default::obstacle(0,-1) | default::thing(0, -1, Thing, _) & (Thing == entity | Thing == block).
@@ -32,19 +32,19 @@ check_obstacle_all(s) :- default::obstacle(0,1) | default::thing(0, 1, Thing, _)
 check_obstacle_all(e) :- default::obstacle(1,0) | default::thing(1, 0, Thing, _) & (Thing == entity | Thing == block).
 check_obstacle_all(w) :- default::obstacle(-1,0) | default::thing(-1, 0, Thing, _) & (Thing == entity | Thing == block).
 
-check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | (default::thing(0, -1, block, _) & default::attached(0,-1) & default::thing(0, -2, entity, Team)) | (default::thing(-1, 0, block, _) & default::attached(-1,0) & default::thing(-1, -1, entity, Team)) | (default::thing(0, 1, block, _) & default::attached(0,1) & default::thing(1, -1, entity, Team))). 
-check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | (default::thing(0, 1, block, _) & default::attached(0,1) & default::thing(0, 2, entity, Team))  | (default::thing(1, 0, block, _) & default::attached(1,0) & default::thing(1, 1, entity, Team))  | (default::thing(-1, 0, block, _) & default::attached(-1,0) & default::thing(-1, 1, entity, Team))). 
-check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | (default::thing(1, 0, block, _) & default::attached(1,0) & default::thing(2, 0, entity, Team)) | (default::thing(0, -1, block, _) & default::attached(0,-1) & default::thing(1, -1, entity, Team))  | (default::thing(0, 1, block, _) & default::attached(0,1) & default::thing(1, 1, entity, Team))). 
-check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | (default::thing(-1, 0, block, _) & default::attached(-1,0) & default::thing(-2, 0, entity, Team)) | (default::thing(0, 1, block, _) & default::attached(0,1) & default::thing(-1, 1, entity, Team)) | (default::thing(0, -1, block, _) & default::attached(0,-1) & default::thing(-1, -1, entity, Team))).
+check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | (default::thing(0, -1, block, _) & stock::block(0,-1) & default::thing(0, -2, entity, Team)) | (default::thing(-1, 0, block, _) & stock::block(-1,0) & default::thing(-1, -1, entity, Team)) | (default::thing(0, 1, block, _) & stock::block(0,1) & default::thing(1, -1, entity, Team))). 
+check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | (default::thing(0, 1, block, _) & stock::block(0,1) & default::thing(0, 2, entity, Team))  | (default::thing(1, 0, block, _) & stock::block(1,0) & default::thing(1, 1, entity, Team))  | (default::thing(-1, 0, block, _) & stock::block(-1,0) & default::thing(-1, 1, entity, Team))). 
+check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | (default::thing(1, 0, block, _) & stock::block(1,0) & default::thing(2, 0, entity, Team)) | (default::thing(0, -1, block, _) & stock::block(0,-1) & default::thing(1, -1, entity, Team))  | (default::thing(0, 1, block, _) & stock::block(0,1) & default::thing(1, 1, entity, Team))). 
+check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | (default::thing(-1, 0, block, _) & stock::block(-1,0) & default::thing(-2, 0, entity, Team)) | (default::thing(0, 1, block, _) & stock::block(0,1) & default::thing(-1, 1, entity, Team)) | (default::thing(0, -1, block, _) & stock::block(0,-1) & default::thing(-1, -1, entity, Team))).
 
-check_agent_special(n) :- default::attached(0, -1) & default::team(Team) & default::thing(0, -2, entity, Team).
-check_agent_special(n) :- (not default::attached(0, -1)) & default::team(Team) & default::thing(0, -1, entity, Team).
-check_agent_special(s) :- default::attached(0, 1) & default::team(Team) & default::thing(0, 2, entity, Team).
-check_agent_special(s) :- (not default::attached(0, 1)) & default::team(Team) & default::thing(0, 1, entity, Team).
-check_agent_special(e) :- default::attached(1, 0) & default::team(Team) & default::thing(2, 0, entity, Team).
-check_agent_special(e) :- (not default::attached(0, -1)) & default::team(Team) & default::thing(1, 0, entity, Team).
-check_agent_special(w) :- default::attached(-1, 0) & default::team(Team) & default::thing(-2, 0, entity, Team).
-check_agent_special(w) :- (not default::attached(-1, 0)) & default::team(Team) & default::thing(-1, 0, entity, Team).
+check_agent_special(n) :- stock::block(0, -1) & default::team(Team) & default::thing(0, -2, entity, Team).
+check_agent_special(n) :- (not stock::block(0, -1)) & default::team(Team) & default::thing(0, -1, entity, Team).
+check_agent_special(s) :- stock::block(0, 1) & default::team(Team) & default::thing(0, 2, entity, Team).
+check_agent_special(s) :- (not stock::block(0, 1)) & default::team(Team) & default::thing(0, 1, entity, Team).
+check_agent_special(e) :- stock::block(1, 0) & default::team(Team) & default::thing(2, 0, entity, Team).
+check_agent_special(e) :- (not stock::block(0, -1)) & default::team(Team) & default::thing(1, 0, entity, Team).
+check_agent_special(w) :- stock::block(-1, 0) & default::team(Team) & default::thing(-2, 0, entity, Team).
+check_agent_special(w) :- (not stock::block(-1, 0)) & default::team(Team) & default::thing(-1, 0, entity, Team).
 
 prune_direction([],PrunedDirListTemp,PrunedDirList) :- PrunedDirList = PrunedDirListTemp.
 prune_direction([Dir|L],PrunedDirListTemp,PrunedDirList) :- check_obstacle(Dir) & prune_direction(L,PrunedDirListTemp,PrunedDirList).
