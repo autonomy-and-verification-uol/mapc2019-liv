@@ -226,10 +226,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions) 
 <-
-	if((OriginSide == n | OriginSide == s) & default::obstacle(-4, 0) | default::obstacle(-2, 0) | default::obstacle(2, 0)  | default::obstacle(4, 0)) {
+	if((OriginSide == n | OriginSide == s) & ((default::obstacle(0,1) | (default::obstacle(-4, 0) | default::obstacle(-4,1)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))))) {
 		.fail;
 	}
-	if((OriginSide == e | OriginSide == w) & default::obstacle(0, -4) | default::obstacle(0, -2) | default::obstacle(0, 2)  | default::obstacle(0, 4)) {
+	elif((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))) {
+		.fail;
+	}
+	elif((OriginSide == w) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(-4, 0) | default::obstacle(-4, 1))) {
 		.fail;
 	}
 	.

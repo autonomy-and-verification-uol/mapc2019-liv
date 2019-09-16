@@ -197,17 +197,17 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::generate_helpers_position(origin(X, Y), w, 
 	[
 		pos(X-5, Y),
-		pos(X-5, Y-2),
 		pos(X-5, Y-4),
-		pos(X-5, Y+2),
+		pos(X-7, Y),
+		pos(X-9, Y),
 		pos(X-5, Y+4)
 	], pos(X-5, Y)).
 +!retrieve::generate_helpers_position(origin(X, Y), e, 
 	[
 		pos(X+5, Y),
-		pos(X+5, Y-2),
 		pos(X+5, Y-4),
-		pos(X+5, Y+2),
+		pos(X+7, Y),
+		pos(X+9, Y),
 		pos(X+5, Y+4)
 	], pos(X+5, Y)).
 
@@ -322,6 +322,50 @@ most_needed_type(Dispensers, AgList, Type) :-
 	default::thing(1, 0, dispenser, _)
 <- 
 	!create_and_attach_block(e, 1, 0).
+	
++!create_and_attach_block(Direction) :
+	default::thing(2, 0, dispenser, _)
+<-
+	!action::move(e);
+	!create_and_attach_block(e, 1, 0).
++!create_and_attach_block(Direction) :
+	default::thing(1, 1, dispenser, _)
+<-
+	!action::move(s);
+	!create_and_attach_block(e, 1, 0).
++!create_and_attach_block(Direction) :
+	default::thing(0, 2, dispenser, _)
+<-
+	!action::move(s);
+	!create_and_attach_block(s, 0, 1).
++!create_and_attach_block(Direction) :
+	default::thing(-1, 1, dispenser, _)
+<-
+	!action::move(s);
+	!create_and_attach_block(w, -1, 0).
++!create_and_attach_block(Direction) :
+	default::thing(-2, 0, dispenser, _)
+<-
+	!action::move(w);
+	!create_and_attach_block(w, -1, 0).
++!create_and_attach_block(Direction) :
+	default::thing(-1, -1, dispenser, _)
+<-
+	!action::move(w);
+	!create_and_attach_block(n, 0, -1).
++!create_and_attach_block(Direction) :
+	default::thing(0, -2, dispenser, _)
+<-
+	!action::move(n);
+	!create_and_attach_block(n, 0, -1).
++!create_and_attach_block(Direction) :
+	default::thing(1, -1, dispenser, _)
+<-
+	!action::move(n);
+	!create_and_attach_block(e, 1, 0).
+	
+	
+
 
 +!create_and_attach_block(Direction, DispX, DispY) :
 	true
@@ -387,9 +431,9 @@ most_needed_type(Dispensers, AgList, Type) :-
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		getAvailablePos(MyGoalX, MyGoalY);
-		//!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-		//.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
-		//.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
+//		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
+//		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
+//		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
 	}
 	-+retrieve::target(MyGoalX, MyGoalY);
 	!retrieve::move_to_goal.
@@ -600,27 +644,26 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	.
 	
-/* +!retrieve::move_to_goal_aux(MyX, MyY) :
-	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY) &
-	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
-	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
-<-
-	getTargetGoal(_, GoalX, GoalY, SideStr);
-	.term2string(Side, SideStr);
-	//!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-	//.nth(Pos, HelpersPos, pos(TargetX, TargetY));
-	//.length(HelpersPos, NHelpersPos);
-	//if(Pos == (NHelpersPos-1)){
-	//	Pos1 = 0;
-	//} else{
-	//	Pos1 = Pos + 1;
-	//}
-	//.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
-	
-	getAvailablePos(NewTargetX, NewTargetY);
-	-+retrieve::target(NewTargetX, NewTargetY)
-	!retrieve::move_to_goal_aux(MyX, MyY);
-	.*/
+//+!retrieve::move_to_goal_aux(MyX, MyY) :
+//	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY) &
+//	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
+//	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
+//<-
+//	getTargetGoal(_, GoalX, GoalY, SideStr);
+//	.term2string(Side, SideStr);
+//	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
+//	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
+//	.length(HelpersPos, NHelpersPos);
+//	if(Pos == (NHelpersPos-1)){
+//		Pos1 = 0;
+//	} else{
+//		Pos1 = Pos + 1;
+//	}
+//	.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
+//	getAvailablePos(NewTargetX, NewTargetY);
+//	-+retrieve::target(NewTargetX, NewTargetY)
+//	!retrieve::move_to_goal_aux(MyX, MyY);
+//	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 

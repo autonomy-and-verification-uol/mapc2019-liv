@@ -37,9 +37,9 @@
 
 +!always_skip :
 	task::origin & 
-	not task::committed(_,_) & default::obstacle(X,Y)
+	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30
 <-
-	for(.range(I, 1, 3) & not task::committed(_,_)){
+	for(.range(I, 1, 3) & not task::committed(_,_) & (not default::thing(X, Y, entity, _) | not default::thing(X, Y, block, _))){
 		!action::clear(X,Y);
 	}
 	!!always_skip;

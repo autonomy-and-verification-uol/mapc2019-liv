@@ -57,6 +57,12 @@
 	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	joinRetrievers(Flag);
+//		.print("Removing explorer");
+//		-exploration::explorer;
+//		-exploration::special(_);
+//		-common::avoid(_);
+//		-common::escape;
+//		!action::forget_old_action;
 	if (Flag) {
 		.print("Removing explorer");
 		-exploration::explorer;
@@ -70,6 +76,7 @@
 	}
 	else {
 		-stop;
+//		!!default::always_skip;
 	}
 	.
 +stop: true <- -stop::stop.
@@ -112,9 +119,9 @@
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
 	.print("Leader: ", Leader, " Leader1: ", Leader1);
-	joinRetrievers(Flag);
-	if (Flag) {
-		if(Leader == Leader1){
+	if(Leader == Leader1){
+		joinRetrievers(Flag);
+		if (Flag) {
 			-exploration::explorer;
 			-exploration::special(_);
 			-common::avoid(_);
@@ -123,6 +130,9 @@
 			!action::forget_old_action;
 			!!retrieve::retrieve_block;
 		}
+//		else {
+//			!!default::always_skip;
+//		}
 	}
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").
