@@ -51,7 +51,7 @@
 <-
 	!!retrieve::retrieve_block;
 	.
-+!always_skip :
+/* +!always_skip :
 	not task::origin & default::attached(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
 <-
 	if(not default::obstacle(-1, 0)){
@@ -76,7 +76,7 @@
 		}
 	}
 	!!always_skip;
-	.
+	.*/
 +!always_skip
 	: true
 <-

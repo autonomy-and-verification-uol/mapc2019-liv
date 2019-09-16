@@ -41,17 +41,17 @@ i_can_avoid(n, e) :-
 		(not(default::obstacle(1, 0)) & not(default::obstacle(2, 0)) & not(default::obstacle(2, -1)) & not(default::obstacle(2, -2))) |
 		(not(default::obstacle(1, 0)) & not(default::obstacle(2, 0)) & not(default::obstacle(3, 0)) & not(default::obstacle(3, -1)) & not(default::obstacle(3, -2)))
 	).
-i_can_avoid(s, w) :-
-	(
-		(not(default::obstacle(-1, 0)) & not(default::obstacle(-1, 1)) & not(default::obstacle(-1, 2)) & not(default::thing(-1,2, marker, clear))) |
-		(not(default::obstacle(-1, 0)) & not(default::obstacle(-2, 0)) & not(default::obstacle(-2, 1)) & not(default::obstacle(-2, 2))) |
-		(not(default::obstacle(-1, 0)) & not(default::obstacle(-2, 0)) & not(default::obstacle(-3, 0)) & not(default::obstacle(-3, 1)) & not(default::obstacle(-3, 2)))
-	).
 i_can_avoid(s, e) :-
 	(
 		(not(default::obstacle(1, 0)) & not(default::obstacle(1, 1)) & not(default::obstacle(1, 2)) & not(default::thing(1,2, marker, clear))) |
 		(not(default::obstacle(1, 0)) & not(default::obstacle(2, 0)) & not(default::obstacle(2, 1)) & not(default::obstacle(2, 2))) |
 		(not(default::obstacle(1, 0)) & not(default::obstacle(2, 0)) & not(default::obstacle(3, 0)) & not(default::obstacle(3, 1)) & not(default::obstacle(3, 2)))
+	).
+i_can_avoid(s, w) :-
+	(
+		(not(default::obstacle(-1, 0)) & not(default::obstacle(-1, 1)) & not(default::obstacle(-1, 2)) & not(default::thing(-1,2, marker, clear))) |
+		(not(default::obstacle(-1, 0)) & not(default::obstacle(-2, 0)) & not(default::obstacle(-2, 1)) & not(default::obstacle(-2, 2))) |
+		(not(default::obstacle(-1, 0)) & not(default::obstacle(-2, 0)) & not(default::obstacle(-3, 0)) & not(default::obstacle(-3, 1)) & not(default::obstacle(-3, 2)))
 	).
 i_can_avoid(w, n) :-
 	(
@@ -65,18 +65,19 @@ i_can_avoid(w, s) :-
 		(not(default::obstacle(0, 1)) & not(default::obstacle(0, 2)) & not(default::obstacle(-1, 2)) & not(default::obstacle(-2, 2))) |
 		(not(default::obstacle(0, 1)) & not(default::obstacle(0, 2)) & not(default::obstacle(0, 3)) & not(default::obstacle(-1, 3)) & not(default::obstacle(-2, 3)))
 	).
-i_can_avoid(e, n) :-
-	(
-		(not(default::obstacle(0, -1)) & not(default::obstacle(1, -1)) & not(default::obstacle(2, -1))) |
-		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(1, -2)) & not(default::obstacle(2, -2))) |
-		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(0, -3)) & not(default::obstacle(1, -3)) & not(default::obstacle(2, -3)))
-	).
 i_can_avoid(e, s) :-
 	(
 		(not(default::obstacle(0, 1)) & not(default::obstacle(1, 1)) & not(default::obstacle(2, 1))) |
 		(not(default::obstacle(0, 1)) & not(default::obstacle(0, 2)) & not(default::obstacle(1, 2)) & not(default::obstacle(2, 2))) |
 		(not(default::obstacle(0, 1)) & not(default::obstacle(0, 2)) & not(default::obstacle(0, 3)) & not(default::obstacle(1, 3)) & not(default::obstacle(2, 3)))
 	).
+i_can_avoid(e, n) :-
+	(
+		(not(default::obstacle(0, -1)) & not(default::obstacle(1, -1)) & not(default::obstacle(2, -1))) |
+		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(1, -2)) & not(default::obstacle(2, -2))) |
+		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(0, -3)) & not(default::obstacle(1, -3)) & not(default::obstacle(2, -3)))
+	).
+
 
 count_attached_blocks(n, 0) :-
 	not(default::attached(0, -1)).
