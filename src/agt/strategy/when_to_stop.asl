@@ -41,6 +41,7 @@
 			.print("Call first time setTargetGoal");
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
+			initAvailablePos;
 			!!retrieve::retrieve_block;
 		}
 		else{

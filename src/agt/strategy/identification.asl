@@ -161,6 +161,7 @@ i_met_new_agent(Iknow, IdList) :-
 		.term2string(Me, Me1);
 		if(GoalAgent == Me1){
 			setTargetGoal(Pos, Me, OriginX+GoalX, OriginY+GoalY);
+			updateAvailablePos(OriginX, OriginY);
 		}
 	}
 	.

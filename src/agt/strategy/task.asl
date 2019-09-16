@@ -218,6 +218,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
+	addAvailablePos(MyX, MyY);
 	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
@@ -241,6 +242,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
+	addAvailablePos(MyX, MyY);
 	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
@@ -326,16 +328,16 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY)
 	: true
 <-	
-	if ( Y - MyY > 0 ) {
+	if ( Y - MyY < 0 ) {
 		if (not default::thing(0,-1,block,_)) {
 			if (default::obstacle(0,-1)) {
 				!action::clear(0,-2);
 				!action::clear(0,-2);
 				!action::clear(0,-2);
 			}
-			!action::move(s);
+			!action::move(n);
 			if (default::thing(0,-2,entity,_)) {
-				!common::go_around(s);
+				!common::go_around(n);
 				!rotate_back;
 //				!action::move(s);
 			}
@@ -353,9 +355,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(0,3);
 				!action::clear(0,3);
 			}
-			!action::move(n);
+			!action::move(s);
 			if (default::thing(0,1,entity,_)) {
-				!common::go_around(n);
+				!common::go_around(s);
 				!rotate_back;
 //				!action::move(n);
 			}

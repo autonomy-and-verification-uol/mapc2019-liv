@@ -386,9 +386,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if(stop::first_to_stop(Me)){
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
-		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
-		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
+		getAvailablePos(MyGoalX, MyGoalY);
+		//!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
+		//.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
+		//.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
 	}
 	-+retrieve::target(MyGoalX, MyGoalY);
 	!retrieve::move_to_goal.
@@ -599,25 +600,27 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	.
 	
-+!retrieve::move_to_goal_aux(MyX, MyY) :
+/* +!retrieve::move_to_goal_aux(MyX, MyY) :
 	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY) &
 	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
 <-
 	getTargetGoal(_, GoalX, GoalY, SideStr);
 	.term2string(Side, SideStr);
-	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
-	.length(HelpersPos, NHelpersPos);
-	if(Pos == (NHelpersPos-1)){
-		Pos1 = 0;
-	} else{
-		Pos1 = Pos + 1;
-	}
-	.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
+	//!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
+	//.nth(Pos, HelpersPos, pos(TargetX, TargetY));
+	//.length(HelpersPos, NHelpersPos);
+	//if(Pos == (NHelpersPos-1)){
+	//	Pos1 = 0;
+	//} else{
+	//	Pos1 = Pos + 1;
+	//}
+	//.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
+	
+	getAvailablePos(NewTargetX, NewTargetY);
 	-+retrieve::target(NewTargetX, NewTargetY)
 	!retrieve::move_to_goal_aux(MyX, MyY);
-	.
+	.*/
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 

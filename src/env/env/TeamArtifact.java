@@ -54,6 +54,7 @@ public class TeamArtifact extends Artifact {
 	private Integer targetGoalX;
 	private Integer targetGoalY;
 	private String goalSide;
+	private List<Point> availablePositions = new ArrayList<>();
 	
 	private static List<String> ourBlocks = new ArrayList<>();
 	
@@ -130,7 +131,59 @@ public class TeamArtifact extends Artifact {
 			this.pos = pos;
 		}
 	}
+	
+	@OPERATION
+	void updateAvailablePos(int x, int y) {
+		for(Point p: this.availablePositions) {
+			p.x += x;
+			p.y += y;
+		}
+	}
+	
+	@OPERATION
+	void initAvailablePos() {
+		this.availablePositions.clear();
+		if(this.goalSide.equals("n")) {
+			this.availablePositions.add(new Point(targetGoalX, targetGoalY-5));
+			this.availablePositions.add(new Point(targetGoalX-2, targetGoalY-5));
+			this.availablePositions.add(new Point(targetGoalX-4, targetGoalY-5));
+			this.availablePositions.add(new Point(targetGoalX+2, targetGoalY-5));
+			this.availablePositions.add(new Point(targetGoalX+4, targetGoalY-5));
+		} else if(this.goalSide.equals("s")) {
+			this.availablePositions.add(new Point(targetGoalX, targetGoalY+5));
+			this.availablePositions.add(new Point(targetGoalX-2, targetGoalY+5));
+			this.availablePositions.add(new Point(targetGoalX-4, targetGoalY+5));
+			this.availablePositions.add(new Point(targetGoalX+2, targetGoalY+5));
+			this.availablePositions.add(new Point(targetGoalX+4, targetGoalY+5));
+		} else if(this.goalSide.equals("w")) {
+			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY));
+			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY-2));
+			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY-4));
+			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY+2));
+			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY+4));
+		} else {
+			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY));
+			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY-2));
+			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY-4));
+			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+2));
+			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+4));
+		}
+	}
 		
+	@OPERATION
+	void getAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
+		if(!this.availablePositions.isEmpty()) {
+			x.set(this.availablePositions.get(0).x);
+			y.set(this.availablePositions.get(0).y);
+			this.availablePositions.remove(0);
+		}
+	}
+	
+	@OPERATION
+	void addAvailablePos(int x, int y) {
+		this.availablePositions.add(new Point(x, y));
+	}
+	
 	@OPERATION
 	void addServerName(String agent, String agentServer){
 		agentNames.put(agent,agentServer);

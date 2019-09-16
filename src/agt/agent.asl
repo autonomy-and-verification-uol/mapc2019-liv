@@ -49,6 +49,8 @@
 	not task::origin & 
 	not stock::block(0, 1) & retrieve::retriever
 <-
+	getMyPos(MyX, MyY);
+	addAvailablePos(MyX, MyY);
 	!!retrieve::retrieve_block;
 	.
 //+!always_skip :
