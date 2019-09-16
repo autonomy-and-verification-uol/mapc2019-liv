@@ -22,7 +22,7 @@
 	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	//.length(GoalList, N);
 	//if(N > 5){
-	if(.member(cluster(_, GoalList), Clusters) & .member(Side, [n,e,w,s]) &
+	/*if(.member(cluster(_, GoalList), Clusters) & .member(Side, [n,e,w,s]) &
 		.member(origin(Side, GoalX, GoalY), GoalList) & 
 		not .member(origin(boh, _, _), GoalList)
 	){
@@ -47,9 +47,9 @@
 			-stop::stop;
 		}
 	}
-	else {
+	else {*/
 		-stop;
-	}
+	//}
 	.
 @stop2[atomic]
 +stop

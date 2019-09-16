@@ -78,7 +78,6 @@ i_can_avoid(e, n) :-
 		(not(default::obstacle(0, -1)) & not(default::obstacle(0, -2)) & not(default::obstacle(0, -3)) & not(default::obstacle(1, -3)) & not(default::obstacle(2, -3)))
 	).
 
-
 count_attached_blocks(n, 0) :-
 	not(default::attached(0, -1)).
 count_attached_blocks(n, 1) :-
@@ -401,7 +400,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
@@ -412,10 +411,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction);
 			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 20);
+				!retrieve::go_around_obstacle(Direction, 5);
 			}
 		} else{
-			!retrieve::go_around_obstacle(Direction, 20);
+			!retrieve::go_around_obstacle(Direction, 5);
 		}
 	} else {
 		!retrieve::smart_move(Direction);
@@ -627,7 +626,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE");
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1);
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1);
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
@@ -638,10 +637,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction);
 			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 20);
+				!retrieve::go_around_obstacle(Direction, 5);
 			}
 		} else{
-			!retrieve::go_around_obstacle(Direction, 20);
+			!retrieve::go_around_obstacle(Direction, 5);
 		}
 		!retrieve::move_to_goal;
 	} else {
