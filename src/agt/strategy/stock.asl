@@ -143,28 +143,28 @@ count_attached_blocks(e, 5) :-
 i_have_attached_block :-
 	stock::block(0, -1) | stock::block(0, 1) | stock::block(-1, 0) | stock::block(1, 0).
 
-opposite_direction(n, s).
-opposite_direction(s, n).
-opposite_direction(w, e).
-opposite_direction(e, w).
-other_cardinals(n, [w,e]).
-other_cardinals(s, [w,e]).
-other_cardinals(w, [n,s]).
-other_cardinals(e, [n,s]).
+opposite_direction(n, s) :- true.
+opposite_direction(s, n) :- true.
+opposite_direction(w, e) :- true.
+opposite_direction(e, w) :- true.
+other_cardinals(n, [w,e]) :- true.
+other_cardinals(s, [w,e]) :- true.
+other_cardinals(w, [n,s]) :- true.
+other_cardinals(e, [n,s]) :- true.
 
-get_rotation(n, w, ccw).
-get_rotation(n, e, cw).
-get_rotation(s, w, cw).
-get_rotation(s, e, ccw).
-get_rotation(w, n, cw).
-get_rotation(w, s, ccw).
-get_rotation(e, n, ccw).
-get_rotation(e, s, cw).
+get_rotation(n, w, ccw) :- true.
+get_rotation(n, e, cw) :- true.
+get_rotation(s, w, cw) :- true.
+get_rotation(s, e, ccw) :- true.
+get_rotation(w, n, cw) :- true.
+get_rotation(w, s, ccw) :- true.
+get_rotation(e, n, ccw) :- true.
+get_rotation(e, s, cw) :- true.
 
-get_rel_pos(n, 0, -1).
-get_rel_pos(s, 0, 1).
-get_rel_pos(w, -1, 0).
-get_rel_pos(e, 1, 0).
+get_rel_pos(n, 0, -1) :- true.
+get_rel_pos(s, 0, 1) :- true.
+get_rel_pos(w, -1, 0) :- true.
+get_rel_pos(e, 1, 0) :- true.
 
 neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, n) :-
 	MyX == TargetX & MyY == (TargetY+1).
