@@ -63,7 +63,7 @@
 <-
 	!action::commit_action(attach(Direction));
 	if (default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
-		+stock::block(X,Y);
+		+retrieve::block(X,Y);
 	}
 	.
 -!attach(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Direction ",Direction," is not valid, it should be one of {n,s,e,w}.").
@@ -77,7 +77,7 @@
 <-
 	!action::commit_action(detach(Direction));
 	if (default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
-		-stock::block(X,Y);
+		-retrieve::block(X,Y);
 	}
 	.
 -!detach(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Direction ",Direction," is not valid, it should be one of {n,s,e,w}.").
@@ -89,14 +89,14 @@
 +!rotate(Direction)
 <-
 	!action::commit_action(rotate(Direction));
-	if (default::lastActionResult(success) & stock::block(X,Y) & common::rotate_direction(Direction,NewX,NewY)) {
-		-stock::block(X,Y);
-		+stock::block(NewX,NewY);
+	if (default::lastActionResult(success) & retrieve::block(X,Y) & common::rotate_direction(Direction,NewX,NewY)) {
+		-retrieve::block(X,Y);
+		+retrieve::block(NewX,NewY);
 	}
 	.
 -!rotate(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Rotation ",Direction," is not valid, it should be one of {cw,cww}.").
 // Improve this failure to drop disjunction into two different plans
--!rotate(Direction)[code(.fail(action(Action),result(failed)))] : task::origin <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."). //; !rotate(Direction).
+-!rotate(Direction)[code(.fail(action(Action),result(failed)))] : task::origin <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."); !rotate(Direction).
 -!rotate(Direction)[code(.fail(action(Action),result(failed)))] <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."). //; !rotate(Direction).
 -!rotate(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !rotate(Direction).
 
@@ -140,8 +140,8 @@
 +!submit(Task)
 <-
 	!action::commit_action(submit(Task));
-	if (default::lastActionResult(success) & not stock::block(0,-1) & stock::block(0,1)) {
-		-stock::block(0,1);
+	if (default::lastActionResult(success) & not retrieve::block(0,-1) & retrieve::block(0,1)) {
+		-retrieve::block(0,1);
 	}
 	.
 -!submit(Task)[code(.fail(action(Action),result(failed_target)))] <- .print("There is no active task named ",Task).

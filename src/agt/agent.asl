@@ -10,6 +10,7 @@
 { include("strategy/map.asl", map) }
 { include("strategy/common-plans.asl", common) }
 { include("strategy/new-round.asl", newround) }
+{ include("strategy/end-round.asl", endround) }
 	
 +!register(E)
 	: .my_name(Me)
@@ -47,14 +48,14 @@
 
 +!always_skip :
 	not task::origin & 
-	not stock::block(0, 1) & retrieve::retriever
+	not retrieve::block(0, 1) & retrieve::retriever
 <-
 	getMyPos(MyX, MyY);
 	addAvailablePos(MyX, MyY);
 	!!retrieve::retrieve_block;
 	.
 //+!always_skip :
-//	not task::origin & stock::block(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
+//	not task::origin & retrieve::block(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
 //<-
 //	if(not default::obstacle(-1, 0)){
 //		!action::rotate(cw);

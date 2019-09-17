@@ -25,7 +25,6 @@ public class TeamArtifact extends Artifact {
 	private static Logger logger = Logger.getLogger(TeamArtifact.class.getName());
 
 	private static Map<String, String>  agentNames 	 	= new HashMap<String, String>();
-	private static Map<String, String>  agentRoles 	 	= new HashMap<String, String>();
 	
 	private static Map<String, String>  agentAvailable 	 	= new HashMap<String, String>();
 
@@ -45,11 +44,11 @@ public class TeamArtifact extends Artifact {
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
 	private int maxRetrievers = 5;
-	private int retrievers = 0;
+	private int retrievers;
 	
-	private String firstToStop = null;
+	private String firstToStop;
 	
-	private int pos = 10;
+	private int pos;
 	private String goalAgent;
 	private Integer targetGoalX;
 	private Integer targetGoalY;
@@ -70,6 +69,9 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
+		retrievers = 0;
+		firstToStop = null;
+		pos  = 10;
 	}
 	
 	@OPERATION
@@ -157,15 +159,15 @@ public class TeamArtifact extends Artifact {
 			this.availablePositions.add(new Point(targetGoalX+4, targetGoalY+5));
 		} else if(this.goalSide.equals("w")) {
 			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY));
-			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY-2));
 			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY-4));
-			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY+2));
+			this.availablePositions.add(new Point(targetGoalX-7, targetGoalY));
+			this.availablePositions.add(new Point(targetGoalX-9, targetGoalY));
 			this.availablePositions.add(new Point(targetGoalX-5, targetGoalY+4));
 		} else {
 			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY));
-			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY-2));
 			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY-4));
-			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+2));
+			this.availablePositions.add(new Point(targetGoalX+7, targetGoalY));
+			this.availablePositions.add(new Point(targetGoalX+9, targetGoalY));
 			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+4));
 		}
 	}
@@ -192,15 +194,6 @@ public class TeamArtifact extends Artifact {
 	@OPERATION
 	void getServerName(String agent, OpFeedbackParam<String> agentServer){
 		agentServer.set(agentNames.get(agent));
-	}
-	
-	@OPERATION
-	void addRole(String agent, String role){
-		agentRoles.put(agent,role);
-	}
-	
-	public static String getAgentRole(String agent) {
-		return agentRoles.get(agent);
 	}
 	
 	/*@OPERATION
@@ -459,10 +452,23 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void clearRound() {
+	void clearTeam() {
 		agentNames.clear();
-		agentRoles.clear();
 		actionsByStep.clear();
+		agentmaps.clear();
+		agentAvailable.clear();
+		map1.clear();
+		map2.clear();
+		map3.clear();
+		map4.clear();
+		map5.clear();
+		map6.clear();
+		map7.clear();
+		map8.clear();
+		map9.clear();
+		map10.clear();
+		availablePositions.clear();
+		ourBlocks.clear();
 		this.init();
 	}
 	
