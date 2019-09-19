@@ -7,6 +7,7 @@
 	.abolish(org::_[source(_)]);
 	.abolish(action::_[source(_)]);
 	.abolish(exploration::_[source(_)]);
+	.abolish(identification::_[source(_)]);
 	.abolish(task::_[source(_)]);
 	.abolish(stop::_[source(_)]);
 	.abolish(retrieve::_[source(_)]);

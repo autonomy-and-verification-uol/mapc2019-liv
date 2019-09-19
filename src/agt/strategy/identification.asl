@@ -118,7 +118,7 @@ i_met_new_agent(Iknow, IdList) :-
 	.
 	
 @updateidmergeside[atomic]
-+!update_identified(List,AgRequested,AgResquesting)[source(Ag)]
++!update_identified_same_group(List,AgRequested,AgRequesting)[source(Ag)]
 	: .my_name(Me)
 <-
 	?identification::identified(OldList);
@@ -243,7 +243,7 @@ i_met_new_agent(Iknow, IdList) :-
 		+identification::identified(NewList);
 		.send(Leader, tell, identification::merge_completed(NewList,NewOriginX,NewOriginY));
 		for (.member(Ag,IdList)) {
-			.send(Ag, achieve, identification::update_identified(NewList,AgRequested,AgRequesting));
+			.send(Ag, achieve, identification::update_identified_same_group(NewList,AgRequested,AgRequesting));
 		}
 		for (.member(Ag,IdListOther)) {
 			.send(Ag, achieve, identification::update_identified(NewList,NewOriginX,NewOriginY));

@@ -24,7 +24,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 500,
-      "randomSeed" : 19,
+      "NorandomSeed" : 19,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
@@ -71,7 +71,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 500,
-      "randomSeed" : 19,
+      "NorandomSeed" : 19,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
@@ -118,7 +118,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 500,
-      "randomSeed" : 19,
+      "NorandomSeed" : 19,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
