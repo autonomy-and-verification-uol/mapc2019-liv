@@ -143,28 +143,28 @@ count_attached_blocks(e, 5) :-
 i_have_attached_block :-
 	retrieve::block(0, -1) | retrieve::block(0, 1) | retrieve::block(-1, 0) | retrieve::block(1, 0).
 
-opposite_direction(n, s) :- true.
-opposite_direction(s, n) :- true.
-opposite_direction(w, e) :- true.
-opposite_direction(e, w) :- true.
-other_cardinals(n, [w,e]) :- true.
-other_cardinals(s, [w,e]) :- true.
-other_cardinals(w, [n,s]) :- true.
-other_cardinals(e, [n,s]) :- true.
+opposite_direction(n, s).
+opposite_direction(s, n).
+opposite_direction(w, e).
+opposite_direction(e, w).
+other_cardinals(n, [w,e]).
+other_cardinals(s, [w,e]).
+other_cardinals(w, [n,s]).
+other_cardinals(e, [n,s]).
 
-get_rotation(n, w, ccw) :- true.
-get_rotation(n, e, cw) :- true.
-get_rotation(s, w, cw) :- true.
-get_rotation(s, e, ccw) :- true.
-get_rotation(w, n, cw) :- true.
-get_rotation(w, s, ccw) :- true.
-get_rotation(e, n, ccw) :- true.
-get_rotation(e, s, cw) :- true.
+get_rotation(n, w, ccw).
+get_rotation(n, e, cw).
+get_rotation(s, w, cw).
+get_rotation(s, e, ccw).
+get_rotation(w, n, cw).
+get_rotation(w, s, ccw).
+get_rotation(e, n, ccw).
+get_rotation(e, s, cw).
 
-get_rel_pos(n, 0, -1) :- true.
-get_rel_pos(s, 0, 1) :- true.
-get_rel_pos(w, -1, 0) :- true.
-get_rel_pos(e, 1, 0) :- true.
+get_rel_pos(n, 0, -1).
+get_rel_pos(s, 0, 1).
+get_rel_pos(w, -1, 0).
+get_rel_pos(e, 1, 0).
 
 neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, n) :-
 	MyX == TargetX & MyY == (TargetY+1).
@@ -178,6 +178,50 @@ neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, w) :-
 most_needed_type(Dispensers, AgList, Type) :-
 	.member(dispenser(Type, _, _), Dispensers) & not .member(agent(_, Type), AgList).
 	
+/*[
+		scout(Side, X, Y-RangeN),
+		scout(Side, X+RangeE, Y-RangeN),
+		scout(Side, X+RangeE, Y),
+		scout(Side, X+RangeE, Y+RangeS),
+		scout(Side, X, Y+RangeS),
+		scout(Side, X-RangeW, Y+RangeS),
+		scout(Side, X-RangeW, Y),
+		scout(Side, X-RangeW, Y-RangeN)
+	] */	
++!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, RangeN, RangeS, RangeW, RangeE,
+	L) : 
+	true
+<-
+	-retrieve::scouts_aux(_);
+	+retrieve::scouts_aux([]);
+	for(.range(H, -RangeW+3, RangeE, 3)){
+		if(retrieve::scouts_aux(Scouts)){
+			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
+			-+retrieve::scouts_aux(Scouts1);
+		}
+	}
+	for(.range(V, -RangeN+3, RangeS, 3)){
+		if(retrieve::scouts_aux(Scouts)){
+			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
+			-+retrieve::scouts_aux(Scouts1);
+		}
+	}		
+	for(.range(H, RangeE-3, -RangeW, -3)){
+		if(retrieve::scouts_aux(Scouts)){
+			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
+			-+retrieve::scouts_aux(Scouts1);
+		}
+	}
+	for(.range(V, RangeS-3, -RangeN, -3)){
+		if(retrieve::scouts_aux(Scouts)){
+			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
+			-+retrieve::scouts_aux(Scouts1);
+		}
+	}
+	if(retrieve::scouts_aux(Scouts)){
+		L = Scouts;
+	}	
+	.
 +!retrieve::generate_helpers_position(origin(X, Y), n, 
 	[
 		pos(X, Y-5),
@@ -280,6 +324,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 <- 
 	!retrieve::pick_block_aux(X, BlocksRange, Block).
 	
+@get_nearest_dispenser[atomic]
 +!retrieve::get_nearest_dispenser(Type, Dispenser) : 
 	true
 <-
@@ -288,7 +333,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::get_nearest_dispenser_aux1(Dispensers, Type, dispenser(Type, X, Y)) :
 	true
 <-
-	getMyPos(MyX,MyY);
+	//getMyPos(MyX,MyY);
+	getTargetGoal(_, MyX, MyY, _);
 	.findall(dispenser(Type, X, Y, Distance), (.member(dispenser(Type, X, Y), Dispensers) & (Distance = math.abs(MyX - X) + math.abs(MyY - Y))), DispensersDist);
 	!retrieve::get_nearest_dispenser_aux2(DispensersDist, dispenser(Type, X, Y, _)).
 +!retrieve::get_nearest_dispenser_aux2([], dispenser(_, _, _, 100000000000)) : true <- true.
@@ -331,14 +377,20 @@ most_needed_type(Dispensers, AgList, Type) :-
 	-retrieve::attach_completed;
 	while(not retrieve::attach_completed){
 		!action::request(Direction);
+		.print("here1");
 		if(default::lastActionResult(failed_target)){
 			.fail;
 		}
+		.print("here2");
 		while(not default::lastActionResult(success)){
+			.print("here3");
 			!action::request(Direction);
 		}
+		.print("here4");
 		!action::attach(Direction);
+		.print("here5");
 		if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
+			.print("here6");
 			+retrieve::attach_completed;
 		}
 	}
@@ -561,11 +613,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if(default::energy(Energy) & Energy >= 30){
 		!retrieve::smart_clear(DirectionObstacle);
 		if(retrieve::res(0)){
+			.print("FAILED TO CLEAR: ", Attempts, ", ", Threshold);
 			!action::move(z);
 			!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 		}
 	} else {
 		//.fail
+		.print("I WANT TO CLEAR BUT I HAVE NO ENERGY");
 		!action::move(z);
 		!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 	}.

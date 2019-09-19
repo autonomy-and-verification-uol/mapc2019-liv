@@ -16,7 +16,7 @@
 @stop1[atomic]
 +stop
 	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) // first to stop
-	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
+	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader)
 <-
 	!map::get_clusters(Clusters);
 	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
@@ -41,7 +41,7 @@
 			.print("Call first time setTargetGoal");
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
-			initAvailablePos;
+			initAvailablePos(Leader);
 			!!retrieve::retrieve_block;
 		}
 		else{

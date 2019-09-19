@@ -77,6 +77,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::update_origin_evaluation(n, Value1);
 	.print("OriginN evaluated as:", Value1);
 	
+	/* +map::scouts_found([]);
+	!map::update_origin_evaluation(e, bad);
+	!map::update_origin_evaluation(s, bad);
+	!map::update_origin_evaluation(w, bad);
+	-map::scouts_found(_);*/
+	
+	// we care only about the north one for now
+	/* 
 	!map::evaluate_origin(e, Value2);
 	if(not map::evaluating_positions(_)){
 		.fail;
@@ -97,6 +105,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	!map::update_origin_evaluation(w, Value4);
 	.print("OriginW evaluated as:", Value4);
+	*/
 	
 	-map::evaluating_positions(_);
 	-map::evaluating_vertexes;
@@ -110,27 +119,64 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 +!map::update_origin_evaluation(Side, Value) :
-	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
+	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
+	map::scouts_found(ScoutsList)
 <-
 	getMyPos(MyX, MyY);
 	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
+	if(.member(Side, [n,s,w,e])){
+		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
+			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
+		}
+	}
 	.
 
 +!map::evaluate_origin(Side, Value) :
 	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
 <-
-	!retrieve::generate_helpers_position(origin(X, Y), Side, _, pos(PosX, PosY));
+	!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, 4, 8, 6, 6, Scouts);
+	.print("SCOUTSSSSS:", Scouts);
 //	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
 //	L2 = [vertex(Side, e, V2X, V2Y)|L1];
-	L = [scout(Side, PosX, PosY)|Positions];
+	-map::scouts_found(_);
+	+map::scouts_found([]);
+	.concat(Scouts, Positions, L);
 	-+map::evaluating_positions(L);
+	.print("Positions: ", L);
+	NScouts = 4;
+	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & map::scouts_found(ScoutsList) & .length(ScoutsList, N) & N < NScouts){
+		.print("Evaluate scout: ", ScoutsList);
+		!map::move_to_evaluating_pos(Side);
+		.print("One scout has been evaluated");
+		if(map::evaluating_positions(Pos1) & .member(origin(_, OriginX, OriginY), Pos1) & .member(scout(_, XDel, YDel), Pos1)){
+			.length(Pos1, N1);
+			.delete(scout(_, 0, 0), Pos1, Pos2);
+			.length(Pos2, N2);
+			if(N1 == N2){
+				.delete(scout(_, XDel, YDel), Pos1, Pos3);
+				-map::evaluating_positions(_);
+				+map::evaluating_positions(Pos3);
+			} else{
+				-map::evaluating_positions(_);
+				+map::evaluating_positions(Pos2);
+			}
+		}
+	}
+	if(map::scouts_found(ScoutsList) & .length(ScoutsList, NScouts)){
+		Value = Side;
+	} else{
+		Value = bad;
+	}
+	//.concat(Scouts, Positions, L);
+	//L = [scout(Side, PosX, PosY)|Positions];
+	//-+map::evaluating_positions(L);
 //	if(map::evaluating_positions(Pos)){
 //		.print(Pos);
 //	}
-	!map::move_to_evaluating_pos(Side);
-	if(map::evaluating_positions(_)){
-		Value = Side;
-	}
+	//!map::move_to_evaluating_pos(Side);
+	//if(map::evaluating_positions(_)){
+	//	Value = Side;
+	//}
 //	if(map::evaluating_positions(_)){
 //		!map::move_to_evaluating_pos(Side, e);
 //		if(map::evaluating_positions(_)){
@@ -180,7 +226,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::evaluating_positions(Positions) & .member(scout(OriginSide, X, Y), Positions) 
 <-
 	.delete(scout(OriginSide, X, Y), Positions, Positions1);
-	-+map::evaluating_positions([scout(OriginSide, X + DiffX, Y + DiffY)|Positions1]);
+	.concat(Positions1, [scout(OriginSide, X + DiffX, Y + DiffY)], Positions2);
+	-+map::evaluating_positions(Positions2);
+	//-+map::evaluating_positions([scout(OriginSide, X + DiffX, Y + DiffY)|Positions1]);
 	.
 +!map::update_evaluating_positions_aux(start(X, Y), DiffX, DiffY) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) 
@@ -214,11 +262,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
 		.member(origin(boh, _, _), GoalList)
 	){
+		.print("call pos_1");
 		!map::move_to_evaluating_pos_1(OriginSide);
 	} else{
 		-map::evaluating_positions(_);
 		if(map::myMap(Leader4)){.print("Leader4: ", Leader4);}
-		.print("Stop evaluating the cluster2: (", MyX+X, ", ", MyY+Y, ") ", Clusters);
+		.print("Positions: ", Positions);
+		.print("Stop evaluating the cluster2: (", X, ", ", Y, ") ", Clusters);
 	}
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
@@ -228,56 +278,79 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	-+map::evaluating_positions(NewPositions);
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
-	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions) 
+	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions) &
+	map::scouts_found(ScoutsList) & .member(origin(OriginSide, OriginX, OriginY), Positions)
 <-
-	if((OriginSide == n | OriginSide == s) & ((default::obstacle(0,1) | (default::obstacle(-4, 0) | default::obstacle(-4,1)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))))) {
-		.fail;
+	if(
+		not ((OriginSide == n | OriginSide == s) & ((default::obstacle(0,1) | (default::obstacle(-4, 0) | default::obstacle(-4,1)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1)))))
+		&
+		not ((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1)))
+		&
+		not ((OriginSide == w) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(-4, 0) | default::obstacle(-4, 1)))
+		&
+		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _))
+	) {
+		.print("Scout found");
+		-map::scouts_found(_);
+		+map::scouts_found([scout(OriginSide, -OriginX, -OriginY)|ScoutsList]);
+	} else{
+		.print("Scout rejected");
 	}
-	elif((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))) {
+	/*elif((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))) {
 		.fail;
 	}
 	elif((OriginSide == w) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(-4, 0) | default::obstacle(-4, 1))) {
 		.fail;
-	}
+	}*/
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
 	retrieve::pick_direction(0, 0, X, Y, Direction)
 <-
-	!map::move_to_evaluating_pos_aux(Direction);
-	!map::move_to_evaluating_pos(OriginSide);
+	!map::move_to_evaluating_pos_aux(Direction, Res);
+	if(Res == 1){
+		!map::move_to_evaluating_pos(OriginSide);
+	}
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(scout(OriginSide, X, Y), Positions) &
 	retrieve::pick_direction(0, 0, X, Y, Direction)
 <-
 	
-//	if((math.abs(X)+math.abs(Y)) <= 5 & default::obstacle(X, Y)){
-//		.fail;
-//	}
-	!map::move_to_evaluating_pos_aux(Direction);
-	!map::move_to_evaluating_pos(OriginSide);
+	if((math.abs(X)+math.abs(Y)) > 5 | not default::obstacle(X, Y)){
+		.print("calling move_to_evaluating_pos_aux");
+		!map::move_to_evaluating_pos_aux(Direction, Res);
+		.print("RES: ", Res);
+		if(Res == 1){
+			!map::move_to_evaluating_pos(OriginSide);
+		}
+	}
 	.
-+!map::move_to_evaluating_pos_aux(Direction) :
++!map::move_to_evaluating_pos_aux(Direction, Res) :
 	true
 <-
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		.print(i_can_avoid(Direction, DirectionToGo));
 		if(retrieve::i_can_avoid(Direction, DirectionToGo)){
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
 					!retrieve::smart_move(Dir);
 				}
 			}
+			Res = 1;
 		} else{
-			.fail;
+			Res = 0;
 		} 
 	} else {
+		.print("before smart move");
 		!retrieve::smart_move(Direction);
+		.print("after smart move");
 		if(default::lastActionResult(failed_forbidden)){
-			.fail;
+			Res = 0;
+		} else{
+			Res = 1;
 		}
 	}
 	.
@@ -287,9 +360,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	!map::move_to_evaluating_pos(start);
 	!map::find_cluster_origin(n); 
-	!map::find_cluster_origin(e); 
-	!map::find_cluster_origin(s); 
-	!map::find_cluster_origin(w);
+	//!map::find_cluster_origin(e); 
+	//!map::find_cluster_origin(s); 
+	//!map::find_cluster_origin(w);
 	.
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & GX > 0

@@ -43,7 +43,7 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
-	private int maxRetrievers = 5;
+	private int maxRetrievers = 2;
 	private int retrievers;
 	
 	private String firstToStop;
@@ -143,7 +143,24 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void initAvailablePos() {
+	void initAvailablePos(String name) {
+		logger.info("initAvailablePos");
+		if(this.targetGoalX == null | this.targetGoalY == null) return;
+		this.availablePositions.clear();
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_")) {
+				for(Point pp : agentmaps.get(name).get(key)) {
+					if(targetGoalX == pp.x && targetGoalY == pp.y) {
+						for(Point scout : ((OriginPoint) pp).scouts) {
+							logger.info("[" + name + "]" + "( " + scout.x + ", " + scout.y + " ) added");
+							this.availablePositions.add(scout);
+						}
+						return;
+					}
+				}
+			}
+		}
+		/*
 		this.availablePositions.clear();
 		if(this.goalSide.equals("n")) {
 			this.availablePositions.add(new Point(targetGoalX, targetGoalY-5));
@@ -170,10 +187,15 @@ public class TeamArtifact extends Artifact {
 			this.availablePositions.add(new Point(targetGoalX+9, targetGoalY));
 			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+4));
 		}
+		*/
 	}
 		
 	@OPERATION
 	void getAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
+		logger.info("Available positions: ");
+		for(Point p : this.availablePositions) {
+			logger.info("( "+ p.x + p.y + " )");
+		}
 		if(!this.availablePositions.isEmpty()) {
 			x.set(this.availablePositions.get(0).x);
 			y.set(this.availablePositions.get(0).y);
@@ -229,6 +251,20 @@ public class TeamArtifact extends Artifact {
 			}
 		}
 		logger.info("not found it");
+	}
+	
+	@OPERATION
+	void addScoutToOrigin(String name, int originX, int originY, int scoutX, int scoutY) {
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_")) {
+				for(Point pp : agentmaps.get(name).get(key)) {
+					if(pp instanceof OriginPoint & originX == pp.x && originY == pp.y) {
+						((OriginPoint) pp).scouts.add(new Point(scoutX, scoutY));
+						return;
+					}
+				}
+			}
+		}
 	}
 	
 	@OPERATION
@@ -316,6 +352,7 @@ public class TeamArtifact extends Artifact {
 	
 	private static class OriginPoint extends Point{
 		private String evaluated = "boh";
+		private List<Point> scouts = new ArrayList<>();
 		public OriginPoint(int x, int y) {
 			super(x, y);
 		}
@@ -367,6 +404,45 @@ public class TeamArtifact extends Artifact {
 					if(p instanceof OriginPoint) {
 						literal = ASSyntax.createLiteral("origin");
 						literal.addTerm(new Atom(((OriginPoint) p).evaluated));
+					} else {
+						literal = ASSyntax.createLiteral("goal");
+					}
+					NumberTerm x = new NumberTermImpl(p.x);
+					NumberTerm y = new NumberTermImpl(p.y);
+					literal.addTerm(x);
+					literal.addTerm(y);
+					goals.add(literal);
+				}
+				cluster.addTerm(ASSyntax.createList(goals.toArray(new Literal[goals.size()])));
+				things.add(cluster);
+			}
+		}
+		Literal[] arraythings = things.toArray(new Literal[things.size()]);
+		clusters.set(arraythings);
+	}
+	
+	@OPERATION 
+	void getGoalClustersWithScouts(String name, OpFeedbackParam<Literal[]> clusters){
+		List<Literal> things 		= new ArrayList<Literal>();
+		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
+			if (entry.getKey().startsWith("goal_")) {
+	//		    logger.info(name+"  :   "+entry.getKey() + " = " + entry.getValue());
+				Literal cluster = ASSyntax.createLiteral("cluster");
+				cluster.addTerm(ASSyntax.createAtom(entry.getKey()));
+				List<Literal> goals = new ArrayList<Literal>();
+				for (Point p : entry.getValue()) {
+					Literal literal = null;
+					if(p instanceof OriginPoint) {
+						literal = ASSyntax.createLiteral("origin");
+						literal.addTerm(new Atom(((OriginPoint) p).evaluated));
+						List<Literal> scouts = new ArrayList<Literal>();
+						for(Point scout : ((OriginPoint)p).scouts) {
+							Literal s = ASSyntax.createLiteral("scout");
+							s.addTerm(new NumberTermImpl(scout.x));
+							s.addTerm(new NumberTermImpl(scout.y));
+							scouts.add(s);
+						}
+						literal.addTerm(ASSyntax.createList(scouts.toArray(new Literal[scouts.size()])));
 					} else {
 						literal = ASSyntax.createLiteral("goal");
 					}

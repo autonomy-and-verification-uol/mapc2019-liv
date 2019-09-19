@@ -202,7 +202,7 @@ i_met_new_agent(Iknow, IdList) :-
 <-
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
-	!map::get_clusters(Clusters);
+	getGoalClustersWithScouts(Leader, Clusters);
 	getMyPos(OtherX,OtherY);
 	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters,Ag,AgRequesting));
 	.
@@ -221,10 +221,14 @@ i_met_new_agent(Iknow, IdList) :-
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
 		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
-			for (.member(origin(Evaluated, GX,GY),GoalList)) {
+			for (.member(origin(Evaluated,Scouts, GX,GY),GoalList)) {
 				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, InsertedInCluster, IsANewCluster);
 				//if(Evaluated \== 'none'){
 				evaluateOrigin(Me, NewOriginX+GX,NewOriginY+GY, Evaluated);
+				for(.member(scout(ScoutX, ScoutY), Scouts)){
+					addScoutToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+ScoutX, NewOriginY+ScoutY);	
+				}
+				//initAvailablePos(Me);
 				//evaluateCluster(Me, InsertedInCluster, GX, GY, Evaluated);
 				//}
 			}
