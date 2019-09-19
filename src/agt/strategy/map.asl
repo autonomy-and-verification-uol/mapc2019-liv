@@ -143,7 +143,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.concat(Scouts, Positions, L);
 	-+map::evaluating_positions(L);
 	.print("Positions: ", L);
-	NScouts = 4;
+	NScouts = 5;
 	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & map::scouts_found(ScoutsList) & .length(ScoutsList, N) & N < NScouts){
 		.print("Evaluate scout: ", ScoutsList);
 		!map::move_to_evaluating_pos(Side);
