@@ -31,7 +31,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers) 
 	: map::myMap(Leader)
 <-
-	.send(Leader, achieve, map::add_map(Type, MyX, MyY, X, Y));
+	.concat(dispenser,Type,MyX+X,MyY+Y,UniqueString);
+	+action::reasoning_about_belief(UniqueString);
+	.send(Leader, achieve, map::add_map(Type, MyX, MyY, X, Y, UniqueString));
 	.
 
 @perceivegoal[atomic]
@@ -47,7 +49,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::update_goal_in_map(MyX, MyY, X, Y, Clusters) 
 	: map::myMap(Leader)
 <-
-	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y));
+	.concat(goal,MyX+X,MyY+Y,UniqueString);
+	+action::reasoning_about_belief(UniqueString);
+	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y, UniqueString));
 	.
 
 -!map::evaluate(_, _) : true <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
@@ -380,7 +384,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 @addmap[atomic]
-+!add_map(Type, MyX, MyY, X, Y)[source(Ag)]
++!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
 	: .my_name(Me) & map::myMap(Me)
 <-
 	if(Type == goal){
@@ -391,19 +395,36 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		//!retrieve::update_target;
 	} else{
 		!map::get_dispensers(Dispensers);
-		if(not .member(dispenser(Type,MyX+X,MyY+Y), Dispensers)){
+		if (not .member(dispenser(Type,_,_),Dispensers)) {
 			updateMap(Me, Type, MyX+X, MyY+Y);
-			if (not .member(dispenser(Type,_,_),Dispensers)) {
-				?identification::identified(IdList);
-				for (.member(Ag,IdList)) {
-					.send(Ag, achieve, stop::new_dispenser_or_merge);
-				}
-				!stop::new_dispenser_or_merge;
+			?identification::identified(IdList);
+			for (.member(Ag,IdList)) {
+				.send(Ag, achieve, stop::new_dispenser_or_merge);
 			}
+			!stop::new_dispenser_or_merge;
+		}	
+		elif(not .member(dispenser(Type,MyX+X,MyY+Y), Dispensers)){
+			updateMap(Me, Type, MyX+X, MyY+Y);
 		}
 	}
+	.term2string(Ag,S);
+	if (S == "self") {
+		!identification::remove_reasoning(UniqueString);
+	}
+	else {
+		.send(Ag, achieve, identification::remove_reasoning(UniqueString));
+	}
 	.
-+!add_map(Type, MyX, MyY, X, Y)[source(Ag)].
++!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
+<-
+	.term2string(Ag,S);
+	if (S == "self") {
+		!identification::remove_reasoning(UniqueString);
+	}
+	else {
+		.send(Ag, achieve, identification::remove_reasoning(UniqueString));
+	}
+	.
 
 //@addmapnotme[atomic]
 //+!add_map(Type, MyX, MyY, X, Y)[source(Ag)]
