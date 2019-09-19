@@ -107,11 +107,18 @@ i_met_new_agent(Iknow, IdList) :-
 	-identification::merge(MergeOldList);
 	?identification::i_know(Ag,LocalX,LocalY);
 	+identification::merge([agent(Ag,LocalX,LocalY)|MergeOldList]);
+    +action::reasoning_about_belief(Ag);	
 	!add_identified_ags(Ags,IdList);
 	.
 	
+@removereasoning[atomic]
++!remove_reasoning(AgRequested)[source(_)]
+<-
+	-action::reasoning_about_belief(AgRequested);
+	.
+	
 @updateidmergeside[atomic]
-+!update_identified(List)[source(Ag)]
++!update_identified(List,AgRequested,AgResquesting)[source(Ag)]
 	: .my_name(Me)
 <-
 	?identification::identified(OldList);
@@ -119,6 +126,9 @@ i_met_new_agent(Iknow, IdList) :-
 	.delete(Me,List,AuxList);
 	.union(AuxList,[Ag],NewList);
 	+identification::identified(NewList);
+	if (AgRequesting == Me) {
+		-action::reasoning_about_belief(AgRequested);
+	}
 	!stop::new_dispenser_or_merge;
 	if(not retrieve::retriever){
 		!stop::check_join_group;
@@ -167,29 +177,38 @@ i_met_new_agent(Iknow, IdList) :-
 	.
 
 @requestmerge[atomic]
-+!request_merge(MergeList,GlobalX,GlobalY)[source(_)]
++!request_merge(MergeList,GlobalX,GlobalY)[source(AgRequesting)]
 	: true
 <-
 	for (.member(agent(Ag,LocalX,LocalY),MergeList)) {
 		?identification::identified(IdList);
 		if (not .member(Ag,IdList)) {
-			.send(Ag, achieve, identification::request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY));
+			.send(Ag, achieve, identification::request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY,AgRequesting));
+		}
+		else {
+			.term2string(AgRequesting,S);
+			if (S == "self") {
+				!identification::remove_reasoning(Ag);
+			}
+			else {
+				.send(AgRequesting, achieve, identification::remove_reasoning(Ag));
+			}
 		}
 	}
 	.
 
-+!request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY)[source(Source)]
++!request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY,AgRequesting)[source(Source)]
 	: map::myMap(Leader)
 <-
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
 	!map::get_clusters(Clusters);
 	getMyPos(OtherX,OtherY);
-	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters));
+	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters,Ag,AgRequesting));
 	.
 
 @replyleaderme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList)[source(Source)]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList,AgRequested,AgRequesting)[source(Source)]
 	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
 <-
 	.send(Leader, achieve, identification::confirm_merge);
@@ -224,10 +243,14 @@ i_met_new_agent(Iknow, IdList) :-
 		+identification::identified(NewList);
 		.send(Leader, tell, identification::merge_completed(NewList,NewOriginX,NewOriginY));
 		for (.member(Ag,IdList)) {
-			.send(Ag, achieve, identification::update_identified(NewList));
+			.send(Ag, achieve, identification::update_identified(NewList,AgRequested,AgRequesting));
 		}
 		for (.member(Ag,IdListOther)) {
 			.send(Ag, achieve, identification::update_identified(NewList,NewOriginX,NewOriginY));
+		}
+		.term2string(AgRequesting,S);
+		if (S == "self") {
+			!identification::remove_reasoning(AgRequested);
 		}
 		!stop::new_dispenser_or_merge;
 		if(not retrieve::retriever){
@@ -237,10 +260,26 @@ i_met_new_agent(Iknow, IdList) :-
 	else {
 		-identification::merge_canceled[source(Leader)];
 		.print("Merge has been canceled!");
+		.term2string(AgRequesting,S);
+		if (S == "self") {
+			!identification::remove_reasoning(AgRequested);
+		}
+		else {
+			.send(AgRequesting, achieve, identification::remove_reasoning(AgRequested));
+		}
 	}
 	.
 @replyleadernotme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,GoalList)[source(Source)].
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList,AgRequested,AgRequesting)[source(Source)]
+<-
+	.term2string(AgRequesting,S);
+	if (S == "self") {
+		!identification::remove_reasoning(AgRequested);
+	}
+	else {
+		.send(AgRequesting, achieve, identification::remove_reasoning(AgRequested));
+	}
+	.
 
 @waitformerge[atomic]
 +!identification::confirm_merge[source(Ag)]
