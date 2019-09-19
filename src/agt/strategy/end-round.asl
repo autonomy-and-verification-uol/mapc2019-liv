@@ -14,6 +14,7 @@
 	.abolish(map::_[source(_)]);
 	.abolish(common::_[source(_)]);
 	.abolish(team::chosenActions(_, _)[source(_)]);
+	resetMyPos;
 	-default::start;
 	if (Me == agent1) { clearTeam; }
     .drop_all_intentions;
