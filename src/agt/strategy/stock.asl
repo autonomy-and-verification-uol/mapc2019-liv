@@ -322,50 +322,6 @@ most_needed_type(Dispensers, AgList, Type) :-
 	default::thing(1, 0, dispenser, _)
 <- 
 	!create_and_attach_block(e, 1, 0).
-	
-+!create_and_attach_block(Direction) :
-	default::thing(2, 0, dispenser, _)
-<-
-	!action::move(e);
-	!create_and_attach_block(e, 1, 0).
-+!create_and_attach_block(Direction) :
-	default::thing(1, 1, dispenser, _)
-<-
-	!action::move(s);
-	!create_and_attach_block(e, 1, 0).
-+!create_and_attach_block(Direction) :
-	default::thing(0, 2, dispenser, _)
-<-
-	!action::move(s);
-	!create_and_attach_block(s, 0, 1).
-+!create_and_attach_block(Direction) :
-	default::thing(-1, 1, dispenser, _)
-<-
-	!action::move(s);
-	!create_and_attach_block(w, -1, 0).
-+!create_and_attach_block(Direction) :
-	default::thing(-2, 0, dispenser, _)
-<-
-	!action::move(w);
-	!create_and_attach_block(w, -1, 0).
-+!create_and_attach_block(Direction) :
-	default::thing(-1, -1, dispenser, _)
-<-
-	!action::move(w);
-	!create_and_attach_block(n, 0, -1).
-+!create_and_attach_block(Direction) :
-	default::thing(0, -2, dispenser, _)
-<-
-	!action::move(n);
-	!create_and_attach_block(n, 0, -1).
-+!create_and_attach_block(Direction) :
-	default::thing(1, -1, dispenser, _)
-<-
-	!action::move(n);
-	!create_and_attach_block(e, 1, 0).
-	
-	
-
 
 +!create_and_attach_block(Direction, DispX, DispY) :
 	true
