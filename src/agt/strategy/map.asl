@@ -282,12 +282,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::scouts_found(ScoutsList) & .member(origin(OriginSide, OriginX, OriginY), Positions)
 <-
 	if(
-		not ((OriginSide == n | OriginSide == s) & ((default::obstacle(0,1) | (default::obstacle(-4, 0) | default::obstacle(-4,1)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1)))))
-		&
-		not ((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1)))
-		&
-		not ((OriginSide == w) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(-4, 0) | default::obstacle(-4, 1)))
-		&
 		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _))
 	) {
 		.print("Scout found");
