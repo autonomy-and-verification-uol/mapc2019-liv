@@ -477,10 +477,36 @@ most_needed_type(Dispensers, AgList, Type) :-
 	
 -!retrieve::fetch_block_to_goal : retrieve::retriever <- !!retrieve::fetch_block_to_goal.
 
+-!retrieve::smart_move(Direction) : 
+	true 
+<- 
+	!action::move(Direction);
+	if(default::lastActionResult(success) & map::evaluating_positions(_)){
+		!map::update_evaluating_positions(Direction);
+	}
+	.
 +!retrieve::smart_move(Direction) :
 	true
 <-
 	.print("Direction: ", Direction);
+	if(retrieve::block(1, 0)){
+		!retrieve::smart_rotate(e, Direction);
+	}
+	elif(retrieve::block(-1, 0)){
+		!retrieve::smart_rotate(w, Direction);
+	}
+	elif(retrieve::block(0, -1)){
+		!retrieve::smart_rotate(n, Direction);
+	} elif(retrieve::block(0, 1)){
+		!retrieve::smart_rotate(s, Direction);
+	}
+		
+	!action::move(Direction);
+	if(default::lastActionResult(success) & map::evaluating_positions(_)){
+		!map::update_evaluating_positions(Direction);
+	}
+	.
+	/*
 	if(Direction == n){
 		if(retrieve::block(1, 0)){
 			!action::rotate(ccw);
@@ -501,10 +527,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	elif(Direction == s){
 		if(retrieve::block(1, 0)){
-			!action::rotate(cw);
+			!retrieve::smart_rotate(e, Direction);
 		}
 		elif(retrieve::block(-1, 0)){
-			!action::rotate(ccw);
+			!retrieve::smart_rotate(w, Direction);
 		}
 		elif(retrieve::block(0, -1)){
 			if(not(default::thing(1, 0, _, _)) & not(default::obstacle(1, 0))){
@@ -553,11 +579,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			}
 		}	
 	}
-	!action::move(Direction);
-	if(default::lastActionResult(success) & map::evaluating_positions(_)){
-		!map::update_evaluating_positions(Direction);
-	}
-	.
+	*/
 
 +!retrieve::go_around_obstacle(DirectionObstacle, Threshold) :
 	true
@@ -763,7 +785,296 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.
 
 -!retrieve::move_to_goal : retrieve::retriever <- !!retrieve::move_to_goal.
+
++!retrieve::smart_rotate(Dir, Dir).
++!retrieve::smart_rotate(FromDirBlock, ToDirBlock) :
+	true
+<-
+	.print(smart_rotate(FromDirBlock, ToDirBlock));
+	if(FromDirBlock == n & ToDirBlock == e){
+		if(default::obstacle(1, 0)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(e);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(n, e);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(e) | default::thing(1, 0, block, _)){
+			.fail;
+		} else {
+			!action::rotate(cw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(n, e);
+			}
+		}
+	} elif(FromDirBlock == n & ToDirBlock == w){
+		if(default::obstacle(-1, 0)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(w);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(n, w);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(w) | default::thing(-1, 0, block, _)){
+			.fail;
+		} else {
+			!action::rotate(ccw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(n, w);
+			}
+		}
+	} elif(FromDirBlock == n & ToDirBlock == s){
+		if(not default::obstacle(1, 0) & not exploration::check_agent_special(e) & not default::thing(1, 0, block, _)){
+			!action::rotate(cw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(e, s);
+			} else{
+				!retrieve::smart_rotate(n, s);
+			}
+		} elif(not default::obstacle(-1, 0) & not exploration::check_agent_special(w) & not default::thing(-1, 0, block, _)){
+			!action::rotate(ccw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(w, s);
+			} else{
+				!retrieve::smart_rotate(n, s);
+			}
+		} elif(default::energy(Energy) & Energy >= 30){
+			!retrieve::smart_clear(w);
+			if(retrieve::res(0)){
+				!retrieve::smart_clear(e);
+				if(retrieve::res(0)){
+					.fail
+				} else {
+					!retrieve::smart_rotate(n, s);	
+				}
+			} else {
+				!retrieve::smart_rotate(n, s);
+			}
+		} else{
+			.fail;
+		}
+	} elif(FromDirBlock == e & ToDirBlock == s){
+		if(default::obstacle(0, 1)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(s);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(e, s);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(s) | default::thing(0, 1, block, _)){
+			.fail;
+		} else {
+			!action::rotate(cw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(e, s);
+			}
+		}
+	} elif(FromDirBlock == e & ToDirBlock == n){
+		if(default::obstacle(0, -1)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(n);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(e, n);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(n) | default::thing(0, -1, block, _)){
+			.fail;
+		} else {
+			!action::rotate(ccw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(e, n);
+			}
+		}
+	} elif(FromDirBlock == e & ToDirBlock == w){
+		if(not default::obstacle(0, 1) & not exploration::check_agent_special(s) & not default::thing(0, 1, block, _)){
+			!action::rotate(cw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(s, w);
+			} else{
+				!retrieve::smart_rotate(e, w);
+			}
+		} elif(not default::obstacle(0, -1) & not exploration::check_agent_special(n) & not default::thing(0, -1, block, _)){
+			!action::rotate(ccw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(n, w);
+			} else{
+				!retrieve::smart_rotate(e, w);
+			}
+		} elif(default::energy(Energy) & Energy >= 30){
+			!retrieve::smart_clear(s);
+			if(retrieve::res(0)){
+				!retrieve::smart_clear(n);
+				if(retrieve::res(0)){
+					.fail
+				} else {
+					!retrieve::smart_rotate(e, w);
+				}
+			} else {
+				!retrieve::smart_rotate(e, w);
+			}
+		} else{
+			.fail;
+		}
+	} elif(FromDirBlock == s & ToDirBlock == w){
+		if(default::obstacle(-1, 0)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(w);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(s, w);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(w) | default::thing(-1, 0, block, _)){
+			.fail;
+		} else {
+			!action::rotate(cw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(s, w);
+			}
+		}
+	} elif(FromDirBlock == s & ToDirBlock == e){
+		if(default::obstacle(1, 0)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(e);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(s, e);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(e) | default::thing(1, 0, block, _)){
+			.fail;
+		} else {
+			!action::rotate(ccw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(s, e);
+			}
+		}
+	} elif(FromDirBlock == s & ToDirBlock == n){
+		if(not default::obstacle(-1, 0) & not exploration::check_agent_special(w) & not default::thing(-1, 0, block, _)){
+			!action::rotate(cw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(w, n);
+			} else{
+				!retrieve::smart_rotate(s, n);
+			}
+		} elif(not default::obstacle(1, 0) & not exploration::check_agent_special(e) & not default::thing(1, 0, block, _)){
+			!action::rotate(ccw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(e, n);
+			} else{
+				!retrieve::smart_rotate(s, n);
+			}
+		} elif(default::energy(Energy) & Energy >= 30){
+			!retrieve::smart_clear(w);
+			if(retrieve::res(0)){
+				!retrieve::smart_clear(e);
+				if(retrieve::res(0)){
+					.fail;
+				} else{
+					!retrieve::smart_rotate(s, n);
+				}
+			} else {
+				!retrieve::smart_rotate(s, n);
+			}
+		} else{
+			.fail;
+		}
+	} elif(FromDirBlock == w & ToDirBlock == n){
+		if(default::obstacle(0, -1)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(n);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(w, n);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(n) | default::thing(0, -1, block, _)){
+			.fail;
+		} else {
+			!action::rotate(cw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(w, n);
+			}
+		}
+	} elif(FromDirBlock == w & ToDirBlock == s){
+		if(default::obstacle(0, 1)){
+			if(default::energy(Energy) & Energy >= 30){
+				!retrieve::smart_clear(s);
+				if(retrieve::res(1)){
+					!retrieve::smart_rotate(w, s);
+				} else {
+					.fail;
+				}
+			} else{
+				.fail;
+			}
+		} elif(exploration::check_agent_special(s) | default::thing(0, 1, block, _)){
+			.fail;
+		} else {
+			!action::rotate(ccw);
+			if(not default::lastActionResult(success)){
+				!retrieve::smart_rotate(w, s);
+			}
+		}
+	} elif(FromDirBlock == w & ToDirBlock == e){
+		if(not default::obstacle(0, -1) & not exploration::check_agent_special(n) & not default::thing(0, -1, block, _)){
+			!action::rotate(cw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(n, e);
+			} else{
+				!retrieve::smart_rotate(w, e);
+			}
+		} elif(not default::obstacle(0, 1) & not exploration::check_agent_special(s) & not default::thing(0, 1, block, _)){
+			!action::rotate(ccw);
+			if(default::lastActionResult(success)){
+				!retrieve::smart_rotate(s, e);
+			} else{
+				!retrieve::smart_rotate(w, w);
+			}
+		} elif(default::energy(Energy) & Energy >= 30){
+			!retrieve::smart_clear(n);
+			if(retrieve::res(0)){
+				!retrieve::smart_clear(s);
+				if(retrieve::res(0)){
+					.fail;
+				} else {
+					!retrieve::smart_rotate(w, e);
+				}
+			} else {
+				!retrieve::smart_rotate(w, e);
+			}
+		} else{
+			.fail;
+		}
+	}
+	.	
 	
+
 +!retrieve::smart_clear(Direction) :
 	default::energy(Energy) & Energy >= 30 & default::team(Team)
 <-
