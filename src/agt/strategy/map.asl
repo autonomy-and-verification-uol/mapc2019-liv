@@ -184,7 +184,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 //		}
 //	}
 	.
--!map::evaluate_origin(_, Value) : true <- Value = bad.
+-!map::evaluate_origin(_, Value) : true <- .print("Bad because of failure"); Value = bad.
 
 +!map::update_evaluating_positions(Side) :
 	map::evaluating_positions(Positions)
@@ -311,21 +311,26 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	retrieve::pick_direction(0, 0, X, Y, Direction)
 <-
 	
-	if((math.abs(X)+math.abs(Y)) > 5 | not default::obstacle(X, Y)){
-		.print("calling move_to_evaluating_pos_aux");
-		!map::move_to_evaluating_pos_aux(Direction, Res);
-		.print("RES: ", Res);
-		if(Res == 1){
-			!map::move_to_evaluating_pos(OriginSide);
-		}
+	//if((math.abs(X)+math.abs(Y)) > 5 | not default::obstacle(X, Y)){
+	!map::move_to_evaluating_pos_aux(Direction, Res);
+	if(Res == 1){
+		!map::move_to_evaluating_pos(OriginSide);
 	}
+	//}
 	.
+-!map::move_to_evaluating_pos_aux(Direction, Res) : true <- Res = 0.
 +!map::move_to_evaluating_pos_aux(Direction, Res) :
 	true
 <-
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
-		.print(i_can_avoid(Direction, DirectionToGo));
-		if(retrieve::i_can_avoid(Direction, DirectionToGo)){
+		if(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
+			!retrieve::smart_clear(Direction);
+			if(retrieve::res(0)){
+				Res = 0;
+			} else {
+				Res = 1;
+			}
+		} else {
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
@@ -333,17 +338,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					!retrieve::smart_move(Dir);
 				}
 			}
+			.print("After go_around_obstacle");
 			Res = 1;
-		} else{
-			Res = 0;
-		} 
+		}
 	} else {
-		.print("before smart move");
 		!retrieve::smart_move(Direction);
-		.print("after smart move");
 		if(default::lastActionResult(failed_forbidden)){
 			Res = 0;
-		} else{
+		} else {
 			Res = 1;
 		}
 	}

@@ -608,20 +608,28 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getMyPos(MyX1,MyY1);
 	!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX1, MyY1, Attempts+1, Threshold, ActualDirection, Count).
 +!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count) :
-	not map::evaluating_positions(_)
+	true//not map::evaluating_positions(_)
 <-
 	if(default::energy(Energy) & Energy >= 30){
 		!retrieve::smart_clear(DirectionObstacle);
 		if(retrieve::res(0)){
-			.print("FAILED TO CLEAR: ", Attempts, ", ", Threshold);
-			!action::move(z);
-			!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
+			if(not map::evaluating_positions(_)){
+				.print("FAILED TO CLEAR: ", Attempts, ", ", Threshold);
+				!action::move(z);
+				!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
+			} else {
+				.fail;
+			}
 		}
 	} else {
 		//.fail
 		.print("I WANT TO CLEAR BUT I HAVE NO ENERGY");
-		!action::move(z);
-		!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
+		if(not map::evaluating_positions(_)){
+			!action::move(z);
+			!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
+		} else{
+			.fail;
+		}
 	}.
 
 +!retrieve::move_to_goal : 
@@ -697,7 +705,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE");
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1);
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 10, DirectionObstacle1, 1);
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
@@ -708,10 +716,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction);
 			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 5);
+				!retrieve::go_around_obstacle(Direction, 10);
 			}
 		} else{
-			!retrieve::go_around_obstacle(Direction, 5);
+			!retrieve::go_around_obstacle(Direction, 10);
 		}
 		!retrieve::move_to_goal;
 	} else {
