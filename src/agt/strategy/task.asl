@@ -219,7 +219,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
 	addAvailablePos(MyX, MyY);
-	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
+	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
@@ -243,7 +243,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
 	addAvailablePos(MyX, MyY);
-	!get_to_pos_horiz(MyX,MyY,X,Y,LocalX,LocalY);
+	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
 	getMyPos(MyXNew,MyYNew);
 	?where_is_my_block(BlockX,BlockY,DetachPos);
 	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
@@ -257,29 +257,29 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		!!exploration::explore([n,s,e,w]);
 	}
 	.
-	
-+!find_empty_goal_close_to(OriginX, OriginY, Clusters, X, Y) :
-	.member(cluster(_, GoalList), Clusters) & .member(origin(OriginX, OriginY), GoalList)
-<-
-	getMyPos(MyX, MyY);
-	!get_closest_goal(Myx, MyY, GoalList, goal(X, Y), _);
-	.
-
-+!get_closest_goal(MyX, MyY, [], _, 10000000000).
-+!get_closest_goal(MyX, MyY, [origin(X, Y)|Goals], Goal, Distance) : true <- !get_closest_goal(MyX, MyY, Goals, Goal, Distance).
-+!get_closest_goal(MyX, MyY, [goal(X, Y)|Goals], Goal, Distance) :
-	true
-<- 
-	!get_closest_goal(MyX, MyY, Goals, Goal2, Distance2);
-	Distance1 = (math.abs(MyX-X)+math.abs(MyY-Y));
-	if(Distance1 < Distance2){
-		Goal = goal(X, Y);
-		Distance = Distance1;
-	} else{
-		Goal =  Goal2;
-		Distance = Distance2;
-	}
-	.
+//	
+//+!find_empty_goal_close_to(OriginX, OriginY, Clusters, X, Y) :
+//	.member(cluster(_, GoalList), Clusters) & .member(origin(OriginX, OriginY), GoalList)
+//<-
+//	getMyPos(MyX, MyY);
+//	!get_closest_goal(Myx, MyY, GoalList, goal(X, Y), _);
+//	.
+//
+//+!get_closest_goal(MyX, MyY, [], _, 10000000000).
+//+!get_closest_goal(MyX, MyY, [origin(X, Y)|Goals], Goal, Distance) : true <- !get_closest_goal(MyX, MyY, Goals, Goal, Distance).
+//+!get_closest_goal(MyX, MyY, [goal(X, Y)|Goals], Goal, Distance) :
+//	true
+//<- 
+//	!get_closest_goal(MyX, MyY, Goals, Goal2, Distance2);
+//	Distance1 = (math.abs(MyX-X)+math.abs(MyY-Y));
+//	if(Distance1 < Distance2){
+//		Goal = goal(X, Y);
+//		Distance = Distance1;
+//	} else{
+//		Goal =  Goal2;
+//		Distance = Distance2;
+//	}
+//	.
 	
 +!collect_block(Type,X,Y,LocalX,LocalY,CollectX,CollectY)[source(Origin)]
 	: true
@@ -308,7 +308,20 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!rotate_back
 	: not retrieve::block(0,1)
 <-
-	!action::rotate(cw);
+	if (retrieve::block(0,-1)) {
+		if (not (default::thing(1,0,Thing,_) & (Thing == entity | Thing == block))) {
+			!action::rotate(cw);
+		}
+		else {
+			!action::rotate(ccw);
+		}
+	}
+	elif (retrieve::block(1,0)) {
+		!action::rotate(cw);
+	}
+	else {
+		!action::rotate(ccw);
+	}	
 	!rotate_back;
 	.
 +!rotate_back.
