@@ -194,25 +194,25 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-retrieve::scouts_aux(_);
 	+retrieve::scouts_aux([]);
-	for(.range(H, -RangeW+3, RangeE, 3)){
+	for(.range(H, -RangeW+3, RangeE, 5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, -RangeN+3, RangeS, 3)){
+	for(.range(V, -RangeN+3, RangeS, 5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}		
-	for(.range(H, RangeE-3, -RangeW, -3)){
+	for(.range(H, RangeE-3, -RangeW, -5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, RangeS-3, -RangeN, -3)){
+	for(.range(V, RangeS-3, -RangeN, -5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
