@@ -43,8 +43,8 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
-	private int maxRetrievers = 2;
-	private int retrievers;
+	private int maxStockers = 2;
+	private int stockers;
 	
 	private String firstToStop;
 	
@@ -69,7 +69,7 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
-		retrievers = 0;
+		stockers = 0;
 		firstToStop = null;
 		pos  = 10;
 	}
@@ -88,19 +88,19 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION
 	void joinRetrievers(OpFeedbackParam<Boolean> flag){
-		if(this.retrievers >= this.maxRetrievers) {
+		if(this.stockers >= this.maxStockers) {
 			flag.set(false);
 		}
 		else {
-			this.retrievers++;
+			this.stockers++;
 			flag.set(true);
 		}
 	}
 	
-	@OPERATION
-	void removeRetriever(){
-		this.retrievers--;
-	}
+//	@OPERATION
+//	void removeRetriever(){
+//		this.retrievers--;
+//	}
 	
 	@OPERATION
 	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> side){

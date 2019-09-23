@@ -625,8 +625,15 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}.
 
 +!retrieve::move_to_goal : 
-	retrieve::retriever
+	retrieve::retriever & .my_name(Me)
 <- 
+	if(stop::first_to_stop(Me)){
+		getTargetGoal(Ag, GoalX, GoalY, SideStr);
+		.term2string(Side, SideStr);
+		.print("Chosen Goal position: ", GoalX, GoalY);
+		MyGoalX = GoalX; MyGoalY = GoalY;
+		-+retrieve::target(MyGoalX, MyGoalY);
+	}
 	getMyPos(MyX,MyY);
 	!retrieve::move_to_goal_aux(MyX, MyY).
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
@@ -644,6 +651,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	} else{
 		.my_name(Me);
 		if  (stop::first_to_stop(Me)) {
+			-moving_to_origin;
 			+task::origin;
 		}
 		else {
@@ -690,8 +698,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 //	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
-	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 
-	i_have_attached_block
+	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
 <-
 	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
@@ -749,7 +756,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::move_to_goal;
 	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :
-	not i_have_attached_block
+	not i_have_attached_block & not moving_to_origin
 <-
 	!retrieve::retrieve_block;
 	.

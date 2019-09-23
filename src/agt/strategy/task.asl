@@ -214,7 +214,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
 //	.print("@@@@ Received order for new task");
-	removeRetriever;
+//	removeRetriever;
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
 	getMyPos(MyX,MyY);
@@ -237,7 +237,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
 	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
-	removeRetriever;
+//	removeRetriever;
 //	.print("@@@@ Received order for new task");
 	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
