@@ -85,7 +85,7 @@ public class TeamArtifact extends Artifact {
 			this.firstToStop = agent;
 			flag.set(true);
 		}
-		logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!! "+firstToStop);
+		logger.info("!!!! First to stop "+firstToStop);
 	}
 	
 	@OPERATION
@@ -554,6 +554,47 @@ public class TeamArtifact extends Artifact {
 		list.set(arrayagents);
 	}
 	
+	@OPERATION 
+	void getAvailableBlocks(OpFeedbackParam<Literal[]> list){
+		List<Literal> agents 		= new ArrayList<Literal>();
+		for (Map.Entry<String, Stocker> entry : stockerBlocks.entrySet()) {
+				if (!entry.getValue().b1.isEmpty()) {
+					Literal literal = ASSyntax.createLiteral("agent");
+					Atom name = new Atom(entry.getKey());
+					Atom type = new Atom(entry.getValue().b1);
+					literal.addTerm(name);
+					literal.addTerm(type);
+					agents.add(literal);
+				}
+				if (!entry.getValue().b2.isEmpty()) {
+					Literal literal = ASSyntax.createLiteral("agent");
+					Atom name = new Atom(entry.getKey());
+					Atom type = new Atom(entry.getValue().b2);
+					literal.addTerm(name);
+					literal.addTerm(type);
+					agents.add(literal);
+				}
+				if (!entry.getValue().b3.isEmpty()) {
+					Literal literal = ASSyntax.createLiteral("agent");
+					Atom name = new Atom(entry.getKey());
+					Atom type = new Atom(entry.getValue().b3);
+					literal.addTerm(name);
+					literal.addTerm(type);
+					agents.add(literal);
+				}
+				if (!entry.getValue().b4.isEmpty()) {
+					Literal literal = ASSyntax.createLiteral("agent");
+					Atom name = new Atom(entry.getKey());
+					Atom type = new Atom(entry.getValue().b4);
+					literal.addTerm(name);
+					literal.addTerm(type);
+					agents.add(literal);
+				}
+		}
+		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
+		list.set(arrayagents);
+	}
+	
 	@OPERATION
 	void getBlocks(OpFeedbackParam<Literal[]> list) {
 		List<Literal> things = new ArrayList<Literal>();
@@ -592,6 +633,7 @@ public class TeamArtifact extends Artifact {
 		map10.clear();
 		availablePositions.clear();
 		ourBlocks.clear();
+		stockerBlocks.clear();
 		this.init();
 	}
 	

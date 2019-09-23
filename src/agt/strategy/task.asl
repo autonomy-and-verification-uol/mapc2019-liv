@@ -1,11 +1,10 @@
-
 evaluate_task([], AgList, CommitListTemp, CommitList) :- CommitList = CommitListTemp.
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- .member(agent(Ag, Type), AgList) & .delete(agent(Ag, Type), AgList, NewAgList) & evaluate_task(ReqList, NewAgList, [agent(Ag,Type,X,Y)|CommitListTemp], CommitList).
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- not .member(agent(Ag, Type), AgList) & CommitList = [].
 
-can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(0,1,Type), ReqList) & .delete(req(0,1,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,0,1)].
-can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(X,Y,Type), ReqList) & .delete(req(X,Y,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,X,Y)].
-can_contribute(ReqList,CommitListTemp,ReqList) :- CommitListTemp = [].
+//can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(0,1,Type), ReqList) & .delete(req(0,1,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,0,1)].
+//can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(X,Y,Type), ReqList) & .delete(req(X,Y,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,X,Y)].
+//can_contribute(ReqList,CommitListTemp,ReqList) :- CommitListTemp = [].
 
 sort_committed([], CommitListTemp, CommitListSort) :- CommitListSort = CommitListTemp.
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X >= 0 & Y >= 0 & sort_committed(CommitList, [agent(X+Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
@@ -38,61 +37,62 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) & .count(task::stocker(_)[source(_)],2)
 <-
 	.print("@@@@@@@@@@@@@@@@@@ ", Id, "  ",Deadline);
-	?can_contribute(ReqList,CommitListTemp,ReqListNew);
-	.print("I can commit to ",CommitListTemp);
-	.print("New req list ",ReqListNew);
-	getAvailableAgent(AgList);
-	?evaluate_task(ReqListNew, AgList, [], CommitList);
+//	?can_contribute(ReqList,CommitListTemp,ReqListNew);
+//	.print("I can commit to ",CommitListTemp);
+//	.print("New req list ",ReqListNew);
+	getAvailableBlocks(AgList);
+	?evaluate_task(ReqList, AgList, [], CommitList);
 	.print("New task required length ",.length(ReqList));
 	.print("Committed length ",.length(CommitList));
-	if (.length(ReqList) == .length(CommitList) + .length(CommitListTemp)) {
-		if (not .empty(CommitListTemp)) {
-			.concat(CommitList,CommitListTemp,CommitListConcat);
-			?sort_committed(CommitListConcat,[],NewCommitList);
-			if (not .member(agent(Me,Type,0,1),CommitListTemp) & not .empty(CommitListTemp)) {
-				+help;
-			}
-		}
-		else {
-			?sort_committed(CommitList,[],NewCommitList);
-		}
+//	if (.length(ReqList) == .length(CommitList) + .length(CommitListTemp)) {
+	if (.length(ReqList) == .length(CommitList)) {
+//		if (not .empty(CommitListTemp)) {
+//			.concat(CommitList,CommitListTemp,CommitListConcat);
+//			?sort_committed(CommitListConcat,[],NewCommitList);
+//			if (not .member(agent(Me,Type,0,1),CommitListTemp) & not .empty(CommitListTemp)) {
+//				+help;
+//			}
+//		}
+//		else {
+		?sort_committed(CommitList,[],NewCommitList);
+//		}
 		.sort(NewCommitList,CommitListSort);
-		if (task::help) {
-			-help;
-			.print("New commit list sorted ",CommitListSort);
-			.nth(Pos,CommitListSort,agent(Sum,Me,Type,MyX,MyY));
-			+help(MyX,MyY);
-			.nth(Pos-1,CommitListSort,agent(_,Helper,_,_,_));
-			.send(Helper,tell,task::help);
-			.delete(Pos,CommitListSort,CommitListSortDelete);
-			.sort([agent(Sum,Helper,Type,MyX,MyY)|CommitListSortDelete],CommitListSortNew);
-		}
-		else {
-			CommitListSortNew = CommitListSort;
-		}
-		+committed(Id,CommitListSortNew);
-		.print("New commit list sorted ",CommitListSortNew);
+//		if (task::help) {
+//			-help;
+//			.print("New commit list sorted ",CommitListSort);
+//			.nth(Pos,CommitListSort,agent(Sum,Me,Type,MyX,MyY));
+//			+help(MyX,MyY);
+//			.nth(Pos-1,CommitListSort,agent(_,Helper,_,_,_));
+//			.send(Helper,tell,task::help);
+//			.delete(Pos,CommitListSort,CommitListSortDelete);
+//			.sort([agent(Sum,Helper,Type,MyX,MyY)|CommitListSortDelete],CommitListSortNew);
+//		}
+//		else {
+//			CommitListSortNew = CommitListSort;
+//		}
+		+committed(Id,CommitListSort);
+		.print("New commit list sorted ",CommitListSort);
 		.print("Task ",Id," with deadline ",Deadline," , reward ",Reward," and requirements ",ReqList," is eligible to be performed");
 		.print("Agents committed: ",CommitList);
 		.print("Agent list used: ",AgList);
 //		getMyPos(MyX,MyY);
-		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
-//			if (Me \== Ag) {
-//				if (not task::helper(_) & not .member(agent(Me,Type,0,1),CommitListTemp)) {
-//					+helper(Ag);
-//				}
-//				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
-				removeAvailableAgent(Ag);
-//			}
-		}
-		getAvailableAgent(AgListNew);
-		.print("Remaining agent list: ",AgListNew);
-		if (.member(agent(Me,Type,X,Y), CommitListTemp)) {
-			!!perform_task_origin(X,Y);
-		}
-		else {
-			!!perform_task_origin;
-		}
+//		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
+////			if (Me \== Ag) {
+////				if (not task::helper(_) & not .member(agent(Me,Type,0,1),CommitListTemp)) {
+////					+helper(Ag);
+////				}
+////				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
+//				removeAvailableAgent(Ag);
+////			}
+//		}
+//		getAvailableAgent(AgListNew);
+//		.print("Remaining agent list: ",AgListNew);
+//		if (.member(agent(Me,Type,X,Y), CommitListTemp)) {
+//			!!perform_task_origin(X,Y);
+//		}
+//		else {
+//			!!perform_task_origin;
+//		}
 	}
 	.
 	

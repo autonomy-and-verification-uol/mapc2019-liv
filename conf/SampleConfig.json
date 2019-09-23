@@ -55,7 +55,7 @@
       "tasks" : {
         "size" : [2, 4],
         "duration" : [100, 200],
-        "probability" : 0.05
+        "probability" : 1.00
       },
 
       "events" : {
