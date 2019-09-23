@@ -30,6 +30,8 @@ public class TeamArtifact extends Artifact {
 
 	private static Map<Integer, Set<String>> actionsByStep   = new HashMap<Integer, Set<String>>();
 	
+	private Map<String, Stocker> stockerBlocks   = new HashMap<String, Stocker>();
+	
 	private Map<String, Set<Point>>  map1 	 	= new HashMap<String, Set<Point>>();
 	private Map<String, Set<Point>>  map2 	 	= new HashMap<String, Set<Point>>();
 	private Map<String, Set<Point>>  map3 	 	= new HashMap<String, Set<Point>>();
@@ -188,6 +190,34 @@ public class TeamArtifact extends Artifact {
 			this.availablePositions.add(new Point(targetGoalX+5, targetGoalY+4));
 		}
 		*/
+	}
+	
+	@OPERATION
+	void addStocker(String agent, int x, int y, String gate) {
+		this.stockerBlocks.put(agent, new Stocker(new Point(x, y), gate));
+	}
+	
+	@OPERATION
+	void addStockerBlock(String agent, String type) {
+		if (this.stockerBlocks.get(agent).b1.isEmpty()) {
+			this.stockerBlocks.get(agent).b1 = type;
+		}
+		else if (this.stockerBlocks.get(agent).b2.isEmpty()) {
+			this.stockerBlocks.get(agent).b2 = type;
+		}
+		else if (this.stockerBlocks.get(agent).b3.isEmpty()) {
+			this.stockerBlocks.get(agent).b3 = type;
+		}
+		else if (this.stockerBlocks.get(agent).b4.isEmpty()) {
+			this.stockerBlocks.get(agent).b4 = type;
+		}
+		else {
+			logger.info("Already have 4 blocks, should never happen!");
+		}
+//		logger.info("!! B1 "+this.stockerBlocks.get(agent).b1);
+//		logger.info("!! B2 "+this.stockerBlocks.get(agent).b2);
+//		logger.info("!! B3 "+this.stockerBlocks.get(agent).b3);
+//		logger.info("!! B4 "+this.stockerBlocks.get(agent).b4);
 	}
 		
 	@OPERATION
@@ -349,6 +379,23 @@ public class TeamArtifact extends Artifact {
 			}
 		}
 	}*/
+	
+	private class Stocker extends Point{
+		private String gate;
+		private Point p;
+		private String b1;
+		private String b2;
+		private String b3;
+		private String b4;
+		public Stocker(Point p, String gate) {
+			this.p = p;
+			this.gate = gate;
+			this.b1 = "";
+			this.b2 = "";
+			this.b3 = "";
+			this.b4 = "";
+		}
+	}
 	
 	private static class OriginPoint extends Point{
 		private String evaluated = "boh";

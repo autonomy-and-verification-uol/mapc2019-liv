@@ -439,6 +439,19 @@ most_needed_type(Dispensers, AgList, Type) :-
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		getAvailablePos(MyGoalX, MyGoalY);
+		if (MyGoalY < GoalY) {
+			StockerBlockPos = s;
+		}
+		elif (MyGoalY > GoalY) {
+			StockerBlockPos = n;
+		}
+		elif (MyGoalX > GoalX) {
+			StockerBlockPos = w;
+		}
+		else {
+			StockerBlockPos = e;
+		}
+		+gate(StockerBlockPos);
 //		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 //		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
 //		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
@@ -637,7 +650,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getMyPos(MyX,MyY);
 	!retrieve::move_to_goal_aux(MyX, MyY).
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
-	retrieve::retriever & retrieve::target(TargetX, TargetY)
+	retrieve::retriever & retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
 <-
 	if(retrieve::block(0, -1)){
 		!action::rotate(cw);
@@ -655,8 +668,15 @@ most_needed_type(Dispensers, AgList, Type) :-
 			+task::origin;
 		}
 		else {
+			?retrieve::block(X,Y);
+			?default::thing(X,Y,block,Type);
 			?default::thing(0,1,block,Type);
-			addAvailableAgent(Me,Type);
+			?gate(Gate);
+			getMyPos(MyX,MyY);
+			addStocker(Me, MyX, MyY, Gate);
+			addStockerBlock(Me, Type);
+//			addAvailableAgent(Me,Type);
+			.send(Ag, tell, task::stocker(Me));
 		}
 		!default::always_skip;
 	}
