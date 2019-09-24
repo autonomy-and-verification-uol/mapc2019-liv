@@ -48,6 +48,9 @@ public class TeamArtifact extends Artifact {
 	private int maxStockers = 2;
 	private int stockers;
 	
+	private int maxHelpers = 1;
+	private int helpers;
+	
 	private String firstToStop;
 	
 	private int pos;
@@ -72,6 +75,7 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
 		stockers = 0;
+		helpers = 0;
 		firstToStop = null;
 		pos  = 10;
 	}
@@ -89,13 +93,17 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void joinRetrievers(OpFeedbackParam<Boolean> flag){
-		if(this.stockers >= this.maxStockers) {
-			flag.set(false);
+	void joinRetrievers(OpFeedbackParam<String> flag){
+		if(this.stockers < this.maxStockers) {
+			this.stockers++;
+			flag.set("stocker");
+		}
+		else if (this.helpers < this.maxHelpers) {
+			this.helpers++;
+			flag.set("helper");
 		}
 		else {
-			this.stockers++;
-			flag.set(true);
+			flag.set("retriever");
 		}
 	}
 	

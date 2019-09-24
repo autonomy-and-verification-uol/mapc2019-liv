@@ -65,7 +65,7 @@
 //	-common::escape;
 //	!action::forget_old_action;
 //	+retrieve::retriever;
-	if (Flag) {
+	if (Flag == "stocker") {
 		.print("Removing explorer");
 		-exploration::explorer;
 		-exploration::special(_);
@@ -76,12 +76,25 @@
 		+retrieve::stocker;
 		!!retrieve::retrieve_block;
 	}
+	elif (Flag == "helper") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::helper;
+		+retrieve::moving_to_origin;
+		!!retrieve::move_to_goal;
+//		!!retrieve::retrieve_block;
+	}
 	else {
 		-stop;
 	}
 //	!!retrieve::retrieve_block;
 	.
-+stop: true <- -stop::stop.
++stop : true <- -stop::stop.
 
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag)[source(_)] :

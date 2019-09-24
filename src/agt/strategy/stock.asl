@@ -636,13 +636,24 @@ most_needed_type(Dispensers, AgList, Type) :-
 		!action::move(z);
 		!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 	}.
+	
++!retrieve::move_to_goal : 
+	retrieve::retriever & .my_name(Me) & task::helper
+<- 
+	getTargetGoal(_, GoalX, GoalY, _);
+//	.term2string(Side, SideStr);
+	.print("Chosen Goal position: ", GoalX+1, GoalY);
+	MyGoalX = GoalX+1; MyGoalY = GoalY;
+	-+retrieve::target(MyGoalX, MyGoalY);
+	getMyPos(MyX,MyY);
+	!retrieve::move_to_goal_aux(MyX, MyY).
 
 +!retrieve::move_to_goal : 
 	retrieve::retriever & .my_name(Me)
 <- 
 	if(stop::first_to_stop(Me)){
-		getTargetGoal(Ag, GoalX, GoalY, SideStr);
-		.term2string(Side, SideStr);
+		getTargetGoal(_, GoalX, GoalY, _);
+//		.term2string(Side, SideStr);
 		.print("Chosen Goal position: ", GoalX, GoalY);
 		MyGoalX = GoalX; MyGoalY = GoalY;
 		-+retrieve::target(MyGoalX, MyGoalY);
@@ -666,6 +677,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 		if  (stop::first_to_stop(Me)) {
 			-moving_to_origin;
 			+task::origin;
+		}
+		elif (task::helper) {
+			-moving_to_origin;
+			.send(Ag, tell, task::helper(Me));
 		}
 		else {
 			?retrieve::block(X,Y);
