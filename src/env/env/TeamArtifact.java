@@ -397,6 +397,7 @@ public class TeamArtifact extends Artifact {
 		private String b4;
 		public Stocker(Point p, String gate) {
 			this.p = p;
+//			logger.info("Adding new stocker at "+p);
 			this.gate = gate;
 			this.b1 = "";
 			this.b2 = "";
@@ -601,6 +602,21 @@ public class TeamArtifact extends Artifact {
 		}
 		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
 		list.set(arrayagents);
+	}
+	
+	@OPERATION 
+	void getStockerPos(String stocker, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> gate){
+		x.set(stockerBlocks.get(stocker).p.x);
+		y.set(stockerBlocks.get(stocker).p.y);
+//		logger.info("Got stocker "+stocker+" X = "+stockerBlocks.get(stocker).p.x+" Y = "+stockerBlocks.get(stocker).p.y);
+		
+		gate.set(stockerBlocks.get(stocker).gate);
+	}
+	
+	@OPERATION 
+	void updateStockerPos(String stocker, int ox, int oy){
+		stockerBlocks.get(stocker).p.x = stockerBlocks.get(stocker).p.x + ox;
+		stockerBlocks.get(stocker).p.x = stockerBlocks.get(stocker).p.y + oy;
 	}
 	
 	@OPERATION

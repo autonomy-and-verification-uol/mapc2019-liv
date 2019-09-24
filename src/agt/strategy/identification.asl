@@ -158,6 +158,9 @@ i_met_new_agent(Iknow, IdList) :-
 	+map::myMap(MapOther);
 	getMyPos(MyX,MyY);
 	updateMyPos(MyX+OriginX,MyY+OriginY);
+	if (task::stocker) {
+		updateStockerPos(Me,OriginX,OriginY);
+	}
 	if(map::evaluating_cluster([origin(XN, YN), origin(XS, YS), origin(XW, YW), origin(XE, YE)])){
 		-map::evaluating_cluster(_);
 		+map::evaluating_cluster([origin(XN+OriginX, YN+OriginY), origin(XS+OriginX, YS+OriginY), origin(XW+OriginX, YW+OriginY), origin(XE+OriginX, YE+OriginY)]);

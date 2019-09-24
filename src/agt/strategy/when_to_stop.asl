@@ -73,7 +73,7 @@
 		-common::escape;
 		!action::forget_old_action;
 		+retrieve::retriever;
-		+retrieve::stocker;
+		+task::stocker;
 		!!retrieve::retrieve_block;
 	}
 	elif (Flag == "helper") {
@@ -149,7 +149,7 @@
 			-common::escape;
 			+retrieve::retriever;
 			!action::forget_old_action;
-			+retrieve::stocker;
+			+task::stocker;
 			!!retrieve::retrieve_block;
 		}
 //		!!retrieve::retrieve_block;

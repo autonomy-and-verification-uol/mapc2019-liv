@@ -24,7 +24,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 500,
-      "randomSeed" : 19,
+      "randomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
