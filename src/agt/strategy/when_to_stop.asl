@@ -23,8 +23,7 @@
 	//.length(GoalList, N);
 	//if(N > 5){
 	if(.member(cluster(_, GoalList), Clusters) & .member(Side, [n,e,w,s]) &
-		.member(origin(Side, GoalX, GoalY), GoalList) & 
-		not .member(origin(boh, _, _), GoalList)
+		.member(origin(Side, GoalX, GoalY), GoalList)// & not .member(origin(boh, _, _), GoalList)
 	){
 		firstToStop(Me,Flag);
 		if (Flag) {

@@ -254,11 +254,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(_, X, Y), Positions)
 <-
-	if(map::myMap(Leader1)){.print("Leader1: ", Leader1);}
 	getMyPos(MyX, MyY);
-	if(map::myMap(Leader2)){.print("Leader2: ", Leader2);}
 	getGoalClusters(Leader, Clusters);
-	if(map::myMap(Leader3)){.print("Leader3: ", Leader3);}
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
 		.member(origin(boh, _, _), GoalList)
 	){
@@ -266,9 +263,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		!map::move_to_evaluating_pos_1(OriginSide);
 	} else{
 		-map::evaluating_positions(_);
-		if(map::myMap(Leader4)){.print("Leader4: ", Leader4);}
 		.print("Positions: ", Positions);
-		.print("Stop evaluating the cluster2: (", X, ", ", Y, ") ", Clusters);
+		.print("Stop evaluating the cluster2: (", MyX, ", ", MyY, ") ", " (", X, ", ", Y, ") ", Clusters);
 	}
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
@@ -282,14 +278,28 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::scouts_found(ScoutsList) & .member(origin(OriginSide, OriginX, OriginY), Positions)
 <-
 	if(
-		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _))
+		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _)
+			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)
+		)
 	) {
-		.print("Scout found");
-		-map::scouts_found(_);
-		+map::scouts_found([scout(OriginSide, -OriginX, -OriginY)|ScoutsList]);
-	} else{
+		!action::clear(0, -2);
+		if(not default::lastActionResult(failed_target)){
+			!action::clear(0, 2);
+			if(not default::lastActionResult(failed_target)){
+				!action::clear(-2, 0);
+				if(not default::lastActionResult(failed_target)){
+					!action::clear(2, 0);
+					if(not default::lastActionResult(failed_target)){
+						.print("Scout found");
+						-map::scouts_found(_);
+						+map::scouts_found([scout(OriginSide, -OriginX, -OriginY)|ScoutsList]);
+					} 
+				}
+			}
+		}
+	} /*else{
 		.print("Scout rejected");
-	}
+	}*/
 	/*elif((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))) {
 		.fail;
 	}

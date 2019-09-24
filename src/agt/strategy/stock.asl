@@ -663,13 +663,13 @@ most_needed_type(Dispensers, AgList, Type) :-
 	retrieve::retriever & retrieve::target(TargetX, TargetY)
 <-
 	if(retrieve::block(0, -1)){
-		!action::rotate(cw);
+		!retrieve::smart_rotate(n, s);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(retrieve::block(-1, 0)){
-		!action::rotate(ccw);
+		!retrieve::smart_rotate(w, s);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} elif(retrieve::block(1, 0)){
-		!action::rotate(cw);
+		!retrieve::smart_rotate(e, s);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
 		.my_name(Me);
