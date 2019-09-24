@@ -185,6 +185,30 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	!perform_task_origin_next;
 //	.
 
++!request_block(Type, Gate)[source(Help)]
+	: retrieve::block(X, Y) & default::thing(X, Y, block, Type) & get_direction(X, Y, Gate).
++!request_block(Type, Gate)[source(Help)]
+	: retrieve::block(X, Y) & default::thing(X, Y, block, Type) & get_direction(GX, GY, Gate)
+<-
+	!action::forget_old_action(default,always_skip);
+	while (not default::thing(GX, GY, block, Type)) {
+		!action::rotate(cw);
+	}
+	!default::always_skip;
+	.
+
++!help_detach(Gate)[source(Help)]
+	: get_direction(GX, GY, Gate) & default::thing(GX, GY, block, Type) & .my_name(Me)
+<-
+	!action::forget_old_action(default,always_skip);
+	!action::detach(Gate);
+	if (default::lastAction(detach) & default::lastActionResult(success)) {
+		.send(Help, tell, task::detach_complete);
+		removeStockerBlock(Me, Type);
+	}
+	!default::always_skip;
+	.
+
 +!help_attach(ConX,ConY)[source(Help)]
 	: no_block
 <-
@@ -239,7 +263,15 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	}
 	getMyPos(MyX,MyY);
 //	addAvailablePos(MyX, MyY);
+	.send(Stocker, achieve, task::request_block(Type, Gate));
 	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	.send(Stocker, achieve, task::help_detach(Gate));
+	?exploration::remove_opposite(Gate,OppositeGate);
+	!action::attach(OppositeGate);
+	.wait(task::detach_complete[source(Stocker)]);
+	-task::detach_complete[source(Stocker)];
+	.print("@@@@@ Detach complete");
+	!rotate_back;
 	getMyPos(MyXNew,MyYNew);
 //	?where_is_my_block(BlockX,BlockY,DetachPos);
 //	.send(Origin, achieve, task::help_attach(LocalX,LocalY));

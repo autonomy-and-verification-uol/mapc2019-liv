@@ -47,7 +47,7 @@
 	.
 
 +!always_skip :
-	not task::origin & not task::helper &
+	not task::origin & not task::helper & not task::stocker &
 	not retrieve::block(0, 1) & retrieve::retriever
 <-
 	getMyPos(MyX, MyY);

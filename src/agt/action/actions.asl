@@ -62,7 +62,7 @@
 +!attach(Direction)
 <-
 	!action::commit_action(attach(Direction));
-	if (default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
+	if (default::lastAction(attach) & default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
 		+retrieve::block(X,Y);
 	}
 	.
@@ -76,7 +76,7 @@
 +!detach(Direction)
 <-
 	!action::commit_action(detach(Direction));
-	if (default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
+	if (default::lastAction(detach) & default::lastActionResult(success) & common::direction_block(Direction,X,Y)) {
 		-retrieve::block(X,Y);
 	}
 	.
@@ -89,7 +89,7 @@
 +!rotate(Direction)
 <-
 	!action::commit_action(rotate(Direction));
-	if (default::lastActionResult(success) & retrieve::block(X,Y) & common::rotate_direction(Direction,NewX,NewY)) {
+	if (default::lastAction(rotate) & default::lastActionResult(success) & retrieve::block(X,Y) & common::rotate_direction(Direction,NewX,NewY)) {
 		-retrieve::block(X,Y);
 		+retrieve::block(NewX,NewY);
 	}
@@ -140,8 +140,8 @@
 +!submit(Task)
 <-
 	!action::commit_action(submit(Task));
-	if (default::lastActionResult(success) & not retrieve::block(0,-1) & retrieve::block(0,1)) {
-		-retrieve::block(0,1);
+	if (default::submit(submit) & default::lastActionResult(success)) {
+		.abolish(retrieve::block(_,_));
 	}
 	.
 -!submit(Task)[code(.fail(action(Action),result(failed_target)))] <- .print("There is no active task named ",Task).

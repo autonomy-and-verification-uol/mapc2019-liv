@@ -227,6 +227,29 @@ public class TeamArtifact extends Artifact {
 //		logger.info("!! B3 "+this.stockerBlocks.get(agent).b3);
 //		logger.info("!! B4 "+this.stockerBlocks.get(agent).b4);
 	}
+	
+	@OPERATION
+	void removeStockerBlock(String agent, String type) {
+		if (this.stockerBlocks.get(agent).b1.equals(type)) {
+			this.stockerBlocks.get(agent).b1 = "";
+		}
+		else if (this.stockerBlocks.get(agent).b2.equals(type)) {
+			this.stockerBlocks.get(agent).b2 = "";
+		}
+		else if (this.stockerBlocks.get(agent).b3.equals(type)) {
+			this.stockerBlocks.get(agent).b3 = "";
+		}
+		else if (this.stockerBlocks.get(agent).b4.equals(type)) {
+			this.stockerBlocks.get(agent).b4 = "";
+		}
+		else {
+			logger.info("Couldn't remove a block, should never happen!");
+		}
+//		logger.info("!! B1 "+this.stockerBlocks.get(agent).b1);
+//		logger.info("!! B2 "+this.stockerBlocks.get(agent).b2);
+//		logger.info("!! B3 "+this.stockerBlocks.get(agent).b3);
+//		logger.info("!! B4 "+this.stockerBlocks.get(agent).b4);
+	}
 		
 	@OPERATION
 	void getAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {

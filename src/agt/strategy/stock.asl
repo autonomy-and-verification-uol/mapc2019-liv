@@ -673,27 +673,27 @@ most_needed_type(Dispensers, AgList, Type) :-
 		!action::rotate(cw);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
-		.my_name(Me);
-		if  (stop::first_to_stop(Me)) {
-			-moving_to_origin;
-			+task::origin;
-		}
-		elif (task::helper) {
-			-moving_to_origin;
-			.send(Ag, tell, task::helper(Me));
-		}
-		else {
-			?retrieve::block(X,Y);
-			?default::thing(X,Y,block,Type);
-			?default::thing(0,1,block,Type);
-			?gate(Gate);
-			getMyPos(MyX,MyY);
-			addStocker(Me, MyX, MyY, Gate);
-			addStockerBlock(Me, Type);
+	.my_name(Me);
+	if  (stop::first_to_stop(Me)) {
+		-moving_to_origin;
+		+task::origin;
+	}
+	elif (task::helper) {
+		-moving_to_origin;
+		.send(Ag, tell, task::helper(Me));
+	}
+	else {
+		?retrieve::block(X,Y);
+		?default::thing(X,Y,block,Type);
+		?gate(Gate);
+		getMyPos(MyX,MyY);
+		addStocker(Me, MyX, MyY, Gate);
+		+task::stocker_in_position;
+		addStockerBlock(Me, Type);
 //			addAvailableAgent(Me,Type);
-			.send(Ag, tell, task::stocker(Me));
-		}
-		!default::always_skip;
+		.send(Ag, tell, task::stocker(Me));
+	}
+	!default::always_skip;
 	}
 //	STOCKERS
 //	.my_name(Me);
