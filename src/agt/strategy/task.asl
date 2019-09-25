@@ -325,7 +325,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyXNew2,MyYNew2);
 	?retrieve::block(BX,BY);
 	?get_direction(BX,BY,DetachPos);
-	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
+	.send(Origin, achieve, task::help_connect(MyXNew2+BX,MyYNew2+BY));
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Origin,BX,BY);
 	}
@@ -381,7 +381,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	.
 	
 +!rotate_back
-	: not retrieve::block(0,1)
+	: retrieve::block(X,Y) & not retrieve::block(0,1)
 <-
 	if (retrieve::block(0,-1)) {
 		if (not (default::thing(1,0,Thing,_) & (Thing == entity | Thing == block))) {
