@@ -117,61 +117,61 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	!go_around(OldDir, OldDir);
 	.
 	
-+!go_around(n, Dir)
-	: common::avoid(Av) & Av < 3 & retrieve::block(0,-1)
-<-
+//+!go_around(n, Dir)
+//	: common::avoid(Av) & Av < 3 & retrieve::block(0,-1)
+//<-
 //	-avoid(Av);
 //	+avoid(Av+1);
-	!retrieve::smart_move(Dir);
-//	!action::move(OldDir);
-	if (default::lastActionResult(failed_path)) {
-		!retrieve::smart_move(Dir);
-//		!action::move(OldDir);
-	}
-	!go_around(n, Dir);
-	.
-	
-+!go_around(s, Dir)
-	: common::avoid(Av) & Av < 3 & retrieve::block(0,1)
-<-
+//	!retrieve::smart_move(Dir);
+////	!action::move(OldDir);
+//	if (default::lastActionResult(failed_path)) {
+//		!retrieve::smart_move(Dir);
+////		!action::move(OldDir);
+//	}
+//	!go_around(n, Dir);
+//	.
+//	
+//+!go_around(s, Dir)
+//	: common::avoid(Av) & Av < 3 & retrieve::block(0,1)
+//<-
 //	-avoid(Av);
 //	+avoid(Av+1);
-	!retrieve::smart_move(Dir);
-//	!action::move(OldDir);
-	if (default::lastActionResult(failed_path)) {
-		!retrieve::smart_move(Dir);
-//		!action::move(OldDir);
-	}
-	!go_around(s, Dir);
-	.
-	
-+!go_around(e, Dir)
-	: common::avoid(Av) & Av < 3 & retrieve::block(1,0)
-<-
+//	!retrieve::smart_move(Dir);
+////	!action::move(OldDir);
+//	if (default::lastActionResult(failed_path)) {
+//		!retrieve::smart_move(Dir);
+////		!action::move(OldDir);
+//	}
+//	!go_around(s, Dir);
+//	.
+//	
+//+!go_around(e, Dir)
+//	: common::avoid(Av) & Av < 3 & retrieve::block(1,0)
+//<-
 //	-avoid(Av);
 //	+avoid(Av+1);
-	!retrieve::smart_move(Dir);
-//	!action::move(OldDir);
-	if (default::lastActionResult(failed_path)) {
-		!retrieve::smart_move(Dir);
-//		!action::move(OldDir);
-	}
-	!go_around(e, Dir);
-	.
-	
-+!go_around(w, Dir)
-	: common::avoid(Av) & Av < 3 & retrieve::block(-1,0)
-<-
+//	!retrieve::smart_move(Dir);
+////	!action::move(OldDir);
+//	if (default::lastActionResult(failed_path)) {
+//		!retrieve::smart_move(Dir);
+////		!action::move(OldDir);
+//	}
+//	!go_around(e, Dir);
+//	.
+//	
+//+!go_around(w, Dir)
+//	: common::avoid(Av) & Av < 3 & retrieve::block(-1,0)
+//<-
 //	-avoid(Av);
 //	+avoid(Av+1);
-	!retrieve::smart_move(Dir);
-//	!action::move(OldDir);
-	if (default::lastActionResult(failed_path)) {
-		!retrieve::smart_move(Dir);
-//		!action::move(OldDir);
-	}
-	!go_around(w, Dir);
-	.
+//	!retrieve::smart_move(Dir);
+////	!action::move(OldDir);
+//	if (default::lastActionResult(failed_path)) {
+//		!retrieve::smart_move(Dir);
+////		!action::move(OldDir);
+//	}
+//	!go_around(w, Dir);
+//	.
 	
 +!go_around(OldDir, Dir)
 	: common::avoid(Av) & Av < 3

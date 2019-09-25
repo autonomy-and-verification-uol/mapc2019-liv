@@ -227,7 +227,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyX,MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
-	!action::connect(Help,X,Y);
+	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
+		!action::connect(Help,X,Y);
+	}
 //	-connect(X,Y);
 //	.print(ConX-MyX);
 //	.print(ConY-MyY);
@@ -238,7 +240,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!perform_task(Stocker,Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
 //	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
-//	.print("@@@@ Received order for new task");
+	.print("@@@@ Received order for new task, origin does not have a block");
 //	removeRetriever;
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
@@ -273,41 +275,62 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.print("@@@@@ Detach complete");
 	!rotate_back;
 	getMyPos(MyXNew,MyYNew);
-//	?where_is_my_block(BlockX,BlockY,DetachPos);
-//	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
-////	!action::connect(Origin,BlockX,BlockY);
-//	!action::detach(DetachPos);
-//	if (not task::help) {
-////		!retrieve::retrieve_block;
-//		-retrieve::retriever;
-//		-stop::stop;
-//		+exploration::explorer;
-//		!!exploration::explore([n,s,e,w]);
-//	}
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
+	?retrieve::block(BX,BY);
+	?get_direction(BX,BY,DetachPos);
+	!action::detach(DetachPos);
+//	!default::always_skip;
 	.
 	
 +!perform_task(Stocker,Type,X,Y,LocalX,LocalY)[source(Origin)]
-	: retrieve::block(0,1) & default::thing(0,1, block, Type)
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
 //	removeRetriever;
-//	.print("@@@@ Received order for new task");
+	.print("@@@@ Received order for new task, origin already has a block.");
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
+	getStockerPos(Stocker,StockerX,StockerY,GateS);
+	.term2string(Gate,GateS);
+	?get_direction(GateX,GateY,Gate);
+	if (Gate == s) {
+		AddPosX = 0;
+		AddPosY = 1; 
+	}
+	elif (Gate == n) {
+		AddPosX = 0;
+		AddPosY = -1; 
+	}
+	elif (Gate == w) {
+		AddPosX = -1;
+		AddPosY = 0; 
+	}
+	else {
+		AddPosX = 1;
+		AddPosY = 0; 
+	}
 	getMyPos(MyX,MyY);
 //	addAvailablePos(MyX, MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
+	.send(Stocker, achieve, task::request_block(Type, Gate));
+	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	.send(Stocker, achieve, task::help_detach(Gate));
+	?exploration::remove_opposite(Gate,OppositeGate);
+	!action::attach(OppositeGate);
+	.wait(task::detach_complete[source(Stocker)]);
+	-task::detach_complete[source(Stocker)];
+	.print("@@@@@ Detach complete");
+	!rotate_back;
 	getMyPos(MyXNew,MyYNew);
-	?where_is_my_block(BlockX,BlockY,DetachPos);
-	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
-	!action::connect(Origin,BlockX,BlockY);
-	!action::detach(DetachPos);
-	if (not task::help) {
-//		!retrieve::retrieve_block;
-		-retrieve::retriever;
-		-stop::stop;
-		+exploration::explorer;
-		!!exploration::explore([n,s,e,w]);
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	getMyPos(MyXNew2,MyYNew2);
+	?retrieve::block(BX,BY);
+	?get_direction(BX,BY,DetachPos);
+	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
+	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
+		!action::connect(Origin,BX,BY);
 	}
+	!action::detach(DetachPos);
+//	!default::always_skip;
 	.
 //	
 //+!find_empty_goal_close_to(OriginX, OriginY, Clusters, X, Y) :

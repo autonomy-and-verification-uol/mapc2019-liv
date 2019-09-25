@@ -54,6 +54,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y, UniqueString));
 	.
 
+-!map::evaluate(_, _) : retrieve::retriever <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; !!retrieve::move_to_goal.
 -!map::evaluate(_, _) : true <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
 +!map::evaluate(GoalLocalX, GoalLocalY) :
 	true
@@ -114,8 +115,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::get_clusters(Clusters);
 	.print("Clusters: ", Clusters);
 	
-	+exploration::explorer;
-	!!exploration::explore([n,s,w,e]);
+	if (not retrieve::retriever) {
+		+exploration::explorer;
+		!!exploration::explore([n,s,w,e]);
+	}
 	.
 
 +!map::update_origin_evaluation(Side, Value) :

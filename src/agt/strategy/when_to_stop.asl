@@ -142,16 +142,30 @@
 //		-common::escape;
 //		+retrieve::retriever;
 //		!action::forget_old_action;
-		if (Flag) {
-			-exploration::explorer;
-			-exploration::special(_);
-			-common::avoid(_);
-			-common::escape;
-			+retrieve::retriever;
-			!action::forget_old_action;
-			+task::stocker;
-			!!retrieve::retrieve_block;
-		}
+	if (Flag == "stocker") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::stocker;
+		!!retrieve::retrieve_block;
+	}
+	elif (Flag == "helper") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::helper;
+		+retrieve::moving_to_origin;
+		!!retrieve::move_to_goal;
+//		!!retrieve::retrieve_block;
+	}
 //		!!retrieve::retrieve_block;
 	}
 	.
