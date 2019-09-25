@@ -1,4 +1,3 @@
-
 check_obstacle(n) :- default::obstacle(0,-1) | default::obstacle(0,-2) | default::thing(0,-1,block,_) | default::thing(0,-2,block,_). //| default::obstacle(0,-3) | default::obstacle(0,-4) | default::obstacle(0,-5).
 check_obstacle(s) :- default::obstacle(0,1) | default::obstacle(0,2) | default::thing(0,1,block,_) | default::thing(0,2,block,_). //| default::obstacle(0,3) | default::obstacle(0,4) | default::obstacle(0,5).
 check_obstacle(e) :- default::obstacle(1,0) | default::obstacle(2,0) | default::thing(1,0,block,_) | default::thing(2,0,block,_). //| default::obstacle(3,0) | default::obstacle(4,0) | default::obstacle(5,0).
@@ -25,7 +24,6 @@ check_obstacle_special_1(w, 2) :- retrieve::block(-1, 0) & (default::obstacle(-2
 check_obstacle_special_1(w, 2) :- not(retrieve::block(-1, 0)) & (default::obstacle(-1, 0) | default::obstacle(-2, 0) | (default::thing(-1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(-2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
 check_obstacle_special_1(e, 2) :- retrieve::block(1, 0) & (default::obstacle(2, 0) | default::obstacle(3, 0) | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(3, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
 check_obstacle_special_1(e, 2) :- not(retrieve::block(1, 0)) & (default::obstacle(1, 0) | default::obstacle(2, 0) | (default::thing(1, 0, Type, _) & Type \== dispenser & Type \== marker) | (default::thing(2, 0, Type1, _) & Type1 \== dispenser & Type1 \== marker)).
-
 
 check_obstacle_all(n) :- default::obstacle(0,-1) | default::thing(0, -1, Thing, _) & (Thing == entity | Thing == block).
 check_obstacle_all(s) :- default::obstacle(0,1) | default::thing(0, 1, Thing, _) & (Thing == entity | Thing == block).
@@ -63,8 +61,6 @@ remove_opposite(n,s) :- true.
 remove_opposite(s,n) :- true.
 remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
-
-
 
 +!explore(DirList) 
 	: explorer & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)

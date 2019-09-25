@@ -1,11 +1,10 @@
-
 evaluate_task([], AgList, CommitListTemp, CommitList) :- CommitList = CommitListTemp.
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- .member(agent(Ag, Type), AgList) & .delete(agent(Ag, Type), AgList, NewAgList) & evaluate_task(ReqList, NewAgList, [agent(Ag,Type,X,Y)|CommitListTemp], CommitList).
 evaluate_task([req(X,Y,Type)|ReqList], AgList, CommitListTemp, CommitList) :- not .member(agent(Ag, Type), AgList) & CommitList = [].
 
-can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(0,1,Type), ReqList) & .delete(req(0,1,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,0,1)].
-can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(X,Y,Type), ReqList) & .delete(req(X,Y,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,X,Y)].
-can_contribute(ReqList,CommitListTemp,ReqList) :- CommitListTemp = [].
+//can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(0,1,Type), ReqList) & .delete(req(0,1,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,0,1)].
+//can_contribute(ReqList,CommitListTemp,ReqListNew) :- default::thing(0,1, block, Type) & .member(req(X,Y,Type), ReqList) & .delete(req(X,Y,Type),ReqList,ReqListNew) & .my_name(Ag) & CommitListTemp = [agent(Ag,Type,X,Y)].
+//can_contribute(ReqList,CommitListTemp,ReqList) :- CommitListTemp = [].
 
 sort_committed([], CommitListTemp, CommitListSort) :- CommitListSort = CommitListTemp.
 sort_committed([agent(Ag,Type,X,Y)|CommitList], CommitListTemp, CommitListSort) :- X >= 0 & Y >= 0 & sort_committed(CommitList, [agent(X+Y,Ag,Type,X,Y)|CommitListTemp], CommitListSort).
@@ -35,64 +34,65 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
-	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_))
+	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) & .count(task::stocker(_)[source(_)],2) & helper(HelperAg)
 <-
 	.print("@@@@@@@@@@@@@@@@@@ ", Id, "  ",Deadline);
-	?can_contribute(ReqList,CommitListTemp,ReqListNew);
-	.print("I can commit to ",CommitListTemp);
-	.print("New req list ",ReqListNew);
-	getAvailableAgent(AgList);
-	?evaluate_task(ReqListNew, AgList, [], CommitList);
+//	?can_contribute(ReqList,CommitListTemp,ReqListNew);
+//	.print("I can commit to ",CommitListTemp);
+//	.print("New req list ",ReqListNew);
+	getAvailableBlocks(AgList);
+	?evaluate_task(ReqList, AgList, [], CommitList);
 	.print("New task required length ",.length(ReqList));
 	.print("Committed length ",.length(CommitList));
-	if (.length(ReqList) == .length(CommitList) + .length(CommitListTemp)) {
-		if (not .empty(CommitListTemp)) {
-			.concat(CommitList,CommitListTemp,CommitListConcat);
-			?sort_committed(CommitListConcat,[],NewCommitList);
-			if (not .member(agent(Me,Type,0,1),CommitListTemp) & not .empty(CommitListTemp)) {
-				+help;
-			}
-		}
-		else {
-			?sort_committed(CommitList,[],NewCommitList);
-		}
+//	if (.length(ReqList) == .length(CommitList) + .length(CommitListTemp)) {
+	if (.length(ReqList) == .length(CommitList)) {
+//		if (not .empty(CommitListTemp)) {
+//			.concat(CommitList,CommitListTemp,CommitListConcat);
+//			?sort_committed(CommitListConcat,[],NewCommitList);
+//			if (not .member(agent(Me,Type,0,1),CommitListTemp) & not .empty(CommitListTemp)) {
+//				+help;
+//			}
+//		}
+//		else {
+		?sort_committed(CommitList,[],NewCommitList);
+//		}
 		.sort(NewCommitList,CommitListSort);
-		if (task::help) {
-			-help;
-			.print("New commit list sorted ",CommitListSort);
-			.nth(Pos,CommitListSort,agent(Sum,Me,Type,MyX,MyY));
-			+help(MyX,MyY);
-			.nth(Pos-1,CommitListSort,agent(_,Helper,_,_,_));
-			.send(Helper,tell,task::help);
-			.delete(Pos,CommitListSort,CommitListSortDelete);
-			.sort([agent(Sum,Helper,Type,MyX,MyY)|CommitListSortDelete],CommitListSortNew);
-		}
-		else {
-			CommitListSortNew = CommitListSort;
-		}
-		+committed(Id,CommitListSortNew);
-		.print("New commit list sorted ",CommitListSortNew);
+//		if (task::help) {
+//			-help;
+//			.print("New commit list sorted ",CommitListSort);
+//			.nth(Pos,CommitListSort,agent(Sum,Me,Type,MyX,MyY));
+//			+help(MyX,MyY);
+//			.nth(Pos-1,CommitListSort,agent(_,Helper,_,_,_));
+//			.send(Helper,tell,task::help);
+//			.delete(Pos,CommitListSort,CommitListSortDelete);
+//			.sort([agent(Sum,Helper,Type,MyX,MyY)|CommitListSortDelete],CommitListSortNew);
+//		}
+//		else {
+//			CommitListSortNew = CommitListSort;
+//		}
+		+committed(Id,CommitListSort);
+		.print("New commit list sorted ",CommitListSort);
 		.print("Task ",Id," with deadline ",Deadline," , reward ",Reward," and requirements ",ReqList," is eligible to be performed");
 		.print("Agents committed: ",CommitList);
 		.print("Agent list used: ",AgList);
 //		getMyPos(MyX,MyY);
-		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
-//			if (Me \== Ag) {
-//				if (not task::helper(_) & not .member(agent(Me,Type,0,1),CommitListTemp)) {
-//					+helper(Ag);
-//				}
-//				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
-				removeAvailableAgent(Ag);
-//			}
-		}
-		getAvailableAgent(AgListNew);
-		.print("Remaining agent list: ",AgListNew);
-		if (.member(agent(Me,Type,X,Y), CommitListTemp)) {
-			!!perform_task_origin(X,Y);
-		}
-		else {
-			!!perform_task_origin;
-		}
+//		for (.member(agent(Ag,TypeAux,X,Y), CommitList)) {
+////			if (Me \== Ag) {
+////				if (not task::helper(_) & not .member(agent(Me,Type,0,1),CommitListTemp)) {
+////					+helper(Ag);
+////				}
+////				.send(Ag,achieve,task::perform_task(TypeAux,MyX+X,MyY+Y-1,ReqList));
+//				removeAvailableAgent(Ag);
+////			}
+//		}
+//		getAvailableAgent(AgListNew);
+//		.print("Remaining agent list: ",AgListNew);
+//		if (.member(agent(Me,Type,X,Y), CommitListTemp)) {
+//			!!perform_task_origin(X,Y);
+//		}
+//		else {
+		!!perform_task_origin;
+//		}
 	}
 	.
 	
@@ -104,9 +104,10 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	+committed(Id,CommitListSort);
 	.print("New commit list ",CommitListSort);
 	.
-	
+
+@next_job_task[atomic]
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) & not .empty(CommitListSort)
+	: committed(Id,CommitListSort) & not .empty(CommitListSort) & helper(HelperAg)
 <-
 	.nth(0,CommitListSort,agent(Sum,Ag,TypeAg,X,Y));
 	.delete(0,CommitListSort,CommitListSortNew);
@@ -114,19 +115,19 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyX,MyY);
 	?check_pos(X,Y,NewX,NewY);
 	if (task::no_block) {
-		.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
+	.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
 	}
 	else {
-		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
-			-help(HelpX,HelpY);
-			.send(Ag,achieve,task::collect_block(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,MyX-1,MyY-1));
-			!action::detach(n);
-		}
-		else {
-			.send(Ag,achieve,task::perform_task(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
-		}
+//		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
+//			-help(HelpX,HelpY);
+//			.send(Ag,achieve,task::collect_block(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,MyX-1,MyY-1));
+//			!action::detach(n);
+//		}
+//		else {
+		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+//		}
 	}
-	!default::always_skip;
+	!!default::always_skip;
 	.
 +!perform_task_origin_next
 	: committed(Id,CommitListSort) //& connect(X,Y)
@@ -134,39 +135,39 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::submit(Id);
 	-committed(Id,CommitListSort);
 //	-connect(X,Y);
-	!verify_block;
+//	!verify_block;
 	!default::always_skip;
 	.
 
-// Update this plan after adding the belief for attached blocks
-+!verify_block
-	: retrieve::block(0,-1) & default::thing(0,-1, block, Type)
-<-
-	!action::rotate(cw);
-	!action::rotate(cw);
-	.
-+!verify_block.	
+//// Update this plan after adding the belief for attached blocks
+//+!verify_block
+//	: retrieve::block(0,-1) & default::thing(0,-1, block, Type)
+//<-
+//	!action::rotate(cw);
+//	!action::rotate(cw);
+//	.
+//+!verify_block.	
 	
-+!perform_task_origin(0,1)
-	: retrieve::block(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
-<-
-	.delete(agent(1,Me,Type,0,1),CommitListSort,CommitListSortNew);
-	.nth(0,CommitListSortNew,agent(Sum,Ag,TypeAg,X,Y));
-	.delete(0,CommitListSortNew,CommitListSortNewNew);
-	!update_commitlist(CommitListSortNewNew);
-	getMyPos(MyX,MyY);
-//	+connect(0,1);
-	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
-	.
-+!perform_task_origin
-	: retrieve::block(0,1) & default::thing(0,1, block, Type)
-<-
-	!action::forget_old_action(default,always_skip);
-	!action::rotate(cw);
-	!action::rotate(cw);
-	+no_block;
-	!perform_task_origin_next;
-	.
+//+!perform_task_origin(0,1)
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type) & committed(Id,CommitListSort) & .my_name(Me)
+//<-
+//	.delete(agent(1,Me,Type,0,1),CommitListSort,CommitListSortNew);
+//	.nth(0,CommitListSortNew,agent(Sum,Ag,TypeAg,X,Y));
+//	.delete(0,CommitListSortNew,CommitListSortNewNew);
+//	!update_commitlist(CommitListSortNewNew);
+//	getMyPos(MyX,MyY);
+////	+connect(0,1);
+//	.send(Ag,achieve,task::perform_task(TypeAg,MyX+X,MyY+Y-1,MyX+X,MyY+Y));
+//	.
+//+!perform_task_origin
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type)
+//<-
+//	!action::forget_old_action(default,always_skip);
+//	!action::rotate(cw);
+//	!action::rotate(cw);
+//	+no_block;
+//	!perform_task_origin_next;
+//	.
 +!perform_task_origin
 	: true
 <-
@@ -174,14 +175,38 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	+no_block;
 	!perform_task_origin_next;
 	.
-+!perform_task_origin(X,Y)
-	: retrieve::block(0,1) & default::thing(0,1, block, Type) & help(X,Y)
+//+!perform_task_origin(X,Y)
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type) & help(X,Y)
+//<-
+//	!action::forget_old_action(default,always_skip);
+//	!action::rotate(cw);
+//	!action::rotate(cw);
+//	+no_block;
+//	!perform_task_origin_next;
+//	.
+
++!request_block(Type, Gate)[source(Help)]
+	: retrieve::block(X, Y) & default::thing(X, Y, block, Type) & get_direction(X, Y, Gate).
++!request_block(Type, Gate)[source(Help)]
+	: retrieve::block(X, Y) & default::thing(X, Y, block, Type) & get_direction(GX, GY, Gate)
 <-
 	!action::forget_old_action(default,always_skip);
-	!action::rotate(cw);
-	!action::rotate(cw);
-	+no_block;
-	!perform_task_origin_next;
+	while (not default::thing(GX, GY, block, Type)) {
+		!action::rotate(cw);
+	}
+	!default::always_skip;
+	.
+
++!help_detach(Gate)[source(Help)]
+	: get_direction(GX, GY, Gate) & default::thing(GX, GY, block, Type) & .my_name(Me)
+<-
+	!action::forget_old_action(default,always_skip);
+	!action::detach(Gate);
+	if (default::lastAction(detach) & default::lastActionResult(success)) {
+		.send(Help, tell, task::detach_complete);
+		removeStockerBlock(Me, Type);
+	}
+	!default::always_skip;
 	.
 
 +!help_attach(ConX,ConY)[source(Help)]
@@ -202,7 +227,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getMyPos(MyX,MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
-	!action::connect(Help,X,Y);
+	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
+		!action::connect(Help,X,Y);
+	}
 //	-connect(X,Y);
 //	.print(ConX-MyX);
 //	.print(ConY-MyY);
@@ -210,52 +237,100 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!perform_task_origin_next;
 	.
 	
-+!perform_task(Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
-	: retrieve::block(0,1) & default::thing(0,1, block, Type)
++!perform_task(Stocker,Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
-//	.print("@@@@ Received order for new task");
-	removeRetriever;
-	removeBlock(Type);
+	.print("@@@@ Received order for new task, origin does not have a block");
+//	removeRetriever;
+//	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
-	getMyPos(MyX,MyY);
-	addAvailablePos(MyX, MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
-	getMyPos(MyXNew,MyYNew);
-	?where_is_my_block(BlockX,BlockY,DetachPos);
-	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
-//	!action::connect(Origin,BlockX,BlockY);
-	!action::detach(DetachPos);
-	if (not task::help) {
-//		!retrieve::retrieve_block;
-		-retrieve::retriever;
-		-stop::stop;
-		+exploration::explorer;
-		!!exploration::explore([n,s,e,w]);
+	getStockerPos(Stocker,StockerX,StockerY,GateS);
+	.term2string(Gate,GateS);
+	?get_direction(GateX,GateY,Gate);
+	if (Gate == s) {
+		AddPosX = 0;
+		AddPosY = 1; 
 	}
+	elif (Gate == n) {
+		AddPosX = 0;
+		AddPosY = -1; 
+	}
+	elif (Gate == w) {
+		AddPosX = -1;
+		AddPosY = 0; 
+	}
+	else {
+		AddPosX = 1;
+		AddPosY = 0; 
+	}
+	getMyPos(MyX,MyY);
+//	addAvailablePos(MyX, MyY);
+	.send(Stocker, achieve, task::request_block(Type, Gate));
+	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	.send(Stocker, achieve, task::help_detach(Gate));
+	?exploration::remove_opposite(Gate,OppositeGate);
+	!action::attach(OppositeGate);
+	.wait(task::detach_complete[source(Stocker)]);
+	-task::detach_complete[source(Stocker)];
+	.print("@@@@@ Detach complete");
+	!rotate_back;
+	getMyPos(MyXNew,MyYNew);
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
+	?retrieve::block(BX,BY);
+	?get_direction(BX,BY,DetachPos);
+	!action::detach(DetachPos);
+//	!default::always_skip;
 	.
 	
-+!perform_task(Type,X,Y,LocalX,LocalY)[source(Origin)]
-	: retrieve::block(0,1) & default::thing(0,1, block, Type)
++!perform_task(Stocker,Type,X,Y,LocalX,LocalY)[source(Origin)]
+//	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
-	removeRetriever;
-//	.print("@@@@ Received order for new task");
-	removeBlock(Type);
+//	removeRetriever;
+	.print("@@@@ Received order for new task, origin already has a block.");
+//	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
-	getMyPos(MyX,MyY);
-	addAvailablePos(MyX, MyY);
-	!get_to_pos_vert(MyX,MyY,X,Y,LocalX,LocalY);
-	getMyPos(MyXNew,MyYNew);
-	?where_is_my_block(BlockX,BlockY,DetachPos);
-	.send(Origin, achieve, task::help_connect(MyXNew+BlockX,MyYNew+BlockY));
-	!action::connect(Origin,BlockX,BlockY);
-	!action::detach(DetachPos);
-	if (not task::help) {
-//		!retrieve::retrieve_block;
-		-retrieve::retriever;
-		-stop::stop;
-		+exploration::explorer;
-		!!exploration::explore([n,s,e,w]);
+	getStockerPos(Stocker,StockerX,StockerY,GateS);
+	.term2string(Gate,GateS);
+	?get_direction(GateX,GateY,Gate);
+	if (Gate == s) {
+		AddPosX = 0;
+		AddPosY = 1; 
 	}
+	elif (Gate == n) {
+		AddPosX = 0;
+		AddPosY = -1; 
+	}
+	elif (Gate == w) {
+		AddPosX = -1;
+		AddPosY = 0; 
+	}
+	else {
+		AddPosX = 1;
+		AddPosY = 0; 
+	}
+	getMyPos(MyX,MyY);
+//	addAvailablePos(MyX, MyY);
+	.send(Stocker, achieve, task::request_block(Type, Gate));
+	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	.send(Stocker, achieve, task::help_detach(Gate));
+	?exploration::remove_opposite(Gate,OppositeGate);
+	!action::attach(OppositeGate);
+	.wait(task::detach_complete[source(Stocker)]);
+	-task::detach_complete[source(Stocker)];
+	.print("@@@@@ Detach complete");
+	!rotate_back;
+	getMyPos(MyXNew,MyYNew);
+	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	getMyPos(MyXNew2,MyYNew2);
+	?retrieve::block(BX,BY);
+	?get_direction(BX,BY,DetachPos);
+	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
+	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
+		!action::connect(Origin,BX,BY);
+	}
+	!action::detach(DetachPos);
+//	!default::always_skip;
 	.
 //	
 //+!find_empty_goal_close_to(OriginX, OriginY, Clusters, X, Y) :
@@ -281,29 +356,29 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	}
 //	.
 	
-+!collect_block(Type,X,Y,LocalX,LocalY,CollectX,CollectY)[source(Origin)]
-	: true
-<-
-//	.print("@@@@ Received order for new task");
-//	!action::forget_old_action(default,always_skip);
-	getMyPos(MyX,MyY);
-	!get_to_pos_horiz(MyX,MyY,CollectX,CollectY,CollectX+1,CollectY);
-	!action::attach(e);
-	!action::rotate(cw);
-	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
-	getMyPos(MyXNewNew,MyYNewNew);
-	?where_is_my_block(BlockX,BlockY,DetachPos);
-	.send(Origin, achieve, task::help_connect(MyXNewNew+BlockX,MyYNewNew+BlockY));
-	!action::connect(Origin,BlockX,BlockY);
-	!action::detach(DetachPos);
-	-help[source(_)];
-//	!retrieve::retrieve_block;
-	-retrieve::retriever;
-	-stop::stop;
-	+exploration::explorer;
-	!!exploration::explore([n,s,e,w]);
-	.
+//+!collect_block(Type,X,Y,LocalX,LocalY,CollectX,CollectY)[source(Origin)]
+//	: true
+//<-
+////	.print("@@@@ Received order for new task");
+////	!action::forget_old_action(default,always_skip);
+//	getMyPos(MyX,MyY);
+//	!get_to_pos_horiz(MyX,MyY,CollectX,CollectY,CollectX+1,CollectY);
+//	!action::attach(e);
+//	!action::rotate(cw);
+//	getMyPos(MyXNew,MyYNew);
+//	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+//	getMyPos(MyXNewNew,MyYNewNew);
+//	?where_is_my_block(BlockX,BlockY,DetachPos);
+//	.send(Origin, achieve, task::help_connect(MyXNewNew+BlockX,MyYNewNew+BlockY));
+//	!action::connect(Origin,BlockX,BlockY);
+//	!action::detach(DetachPos);
+//	-help[source(_)];
+////	!retrieve::retrieve_block;
+//	-retrieve::retriever;
+//	-stop::stop;
+//	+exploration::explorer;
+//	!!exploration::explore([n,s,e,w]);
+//	.
 	
 +!rotate_back
 	: not retrieve::block(0,1)

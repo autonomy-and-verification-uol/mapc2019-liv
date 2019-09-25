@@ -439,6 +439,19 @@ most_needed_type(Dispensers, AgList, Type) :-
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		getAvailablePos(MyGoalX, MyGoalY);
+		if (MyGoalY < GoalY) {
+			StockerBlockPos = s;
+		}
+		elif (MyGoalY > GoalY) {
+			StockerBlockPos = n;
+		}
+		elif (MyGoalX > GoalX) {
+			StockerBlockPos = w;
+		}
+		else {
+			StockerBlockPos = e;
+		}
+		+gate(StockerBlockPos);
 //		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 //		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
 //		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
@@ -653,14 +666,32 @@ most_needed_type(Dispensers, AgList, Type) :-
 			.fail;
 		}
 	}.
+	
++!retrieve::move_to_goal : 
+	retrieve::retriever & .my_name(Me) & task::helper
+<- 
+	getTargetGoal(_, GoalX, GoalY, _);
+//	.term2string(Side, SideStr);
+	.print("Chosen Goal position: ", GoalX+1, GoalY);
+	MyGoalX = GoalX+1; MyGoalY = GoalY;
+	-+retrieve::target(MyGoalX, MyGoalY);
+	getMyPos(MyX,MyY);
+	!retrieve::move_to_goal_aux(MyX, MyY).
 
 +!retrieve::move_to_goal : 
-	retrieve::retriever
+	retrieve::retriever & .my_name(Me)
 <- 
+	if(stop::first_to_stop(Me)){
+		getTargetGoal(_, GoalX, GoalY, _);
+//		.term2string(Side, SideStr);
+		.print("Chosen Goal position: ", GoalX, GoalY);
+		MyGoalX = GoalX; MyGoalY = GoalY;
+		-+retrieve::target(MyGoalX, MyGoalY);
+	}
 	getMyPos(MyX,MyY);
 	!retrieve::move_to_goal_aux(MyX, MyY).
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
-	retrieve::retriever & retrieve::target(TargetX, TargetY)
+	retrieve::retriever & retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
 <-
 	if(retrieve::block(0, -1)){
 		!retrieve::smart_rotate(n, s);
@@ -672,15 +703,27 @@ most_needed_type(Dispensers, AgList, Type) :-
 		!retrieve::smart_rotate(e, s);
 		!retrieve::move_to_goal_aux(TargetX, TargetY);
 	} else{
-		.my_name(Me);
-		if  (stop::first_to_stop(Me)) {
-			+task::origin;
-		}
-		else {
-			?default::thing(0,1,block,Type);
-			addAvailableAgent(Me,Type);
-		}
-		!default::always_skip;
+	.my_name(Me);
+	if  (stop::first_to_stop(Me)) {
+		-moving_to_origin;
+		+task::origin;
+	}
+	elif (task::helper) {
+		-moving_to_origin;
+		.send(Ag, tell, task::helper(Me));
+	}
+	else {
+		?retrieve::block(X,Y);
+		?default::thing(X,Y,block,Type);
+		?gate(Gate);
+		getMyPos(MyX,MyY);
+		addStocker(Me, MyX, MyY, Gate);
+		+task::stocker_in_position;
+		addStockerBlock(Me, Type);
+//			addAvailableAgent(Me,Type);
+		.send(Ag, tell, task::stocker(Me));
+	}
+	!default::always_skip;
 	}
 //	STOCKERS
 //	.my_name(Me);
@@ -720,8 +763,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 //	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
-	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & 
-	i_have_attached_block
+	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
 <-
 	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
@@ -779,7 +821,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::move_to_goal;
 	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :
-	not i_have_attached_block
+	not i_have_attached_block & not moving_to_origin
 <-
 	!retrieve::retrieve_block;
 	.

@@ -41,7 +41,8 @@
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 			initAvailablePos(Leader);
-			!!retrieve::retrieve_block;
+			+retrieve::moving_to_origin;
+			!!retrieve::move_to_goal;
 		}
 		else{
 			-stop::stop;
@@ -56,29 +57,43 @@
 	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	joinRetrievers(Flag);
-//		.print("Removing explorer");
-//		-exploration::explorer;
-//		-exploration::special(_);
-//		-common::avoid(_);
-//		-common::escape;
-//		!action::forget_old_action;
-	if (Flag) {
+//	.print("Removing explorer");
+//	-exploration::explorer;
+//	-exploration::special(_);
+//	-common::avoid(_);
+//	-common::escape;
+//	!action::forget_old_action;
+//	+retrieve::retriever;
+	if (Flag == "stocker") {
 		.print("Removing explorer");
 		-exploration::explorer;
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		.print("Adding retriever");
 		+retrieve::retriever;
+		+task::stocker;
 		!!retrieve::retrieve_block;
+	}
+	elif (Flag == "helper") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::helper;
+		+retrieve::moving_to_origin;
+		!!retrieve::move_to_goal;
+//		!!retrieve::retrieve_block;
 	}
 	else {
 		-stop;
-//		!!default::always_skip;
 	}
+//	!!retrieve::retrieve_block;
 	.
-+stop: true <- -stop::stop.
++stop : true <- -stop::stop.
 
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag)[source(_)] :
@@ -120,18 +135,37 @@
 	.print("Leader: ", Leader, " Leader1: ", Leader1);
 	if(Leader == Leader1){
 		joinRetrievers(Flag);
-		if (Flag) {
-			-exploration::explorer;
-			-exploration::special(_);
-			-common::avoid(_);
-			-common::escape;
-			+retrieve::retriever;
-			!action::forget_old_action;
-			!!retrieve::retrieve_block;
-		}
-//		else {
-//			!!default::always_skip;
-//		}
+//		-exploration::explorer;
+//		-exploration::special(_);
+//		-common::avoid(_);
+//		-common::escape;
+//		+retrieve::retriever;
+//		!action::forget_old_action;
+	if (Flag == "stocker") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::stocker;
+		!!retrieve::retrieve_block;
+	}
+	elif (Flag == "helper") {
+		.print("Removing explorer");
+		-exploration::explorer;
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		+retrieve::retriever;
+		+task::helper;
+		+retrieve::moving_to_origin;
+		!!retrieve::move_to_goal;
+//		!!retrieve::retrieve_block;
+	}
+//		!!retrieve::retrieve_block;
 	}
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").

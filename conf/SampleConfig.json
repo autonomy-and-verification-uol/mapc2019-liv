@@ -24,7 +24,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 
       "steps" : 500,
-      "NorandomSeed" : 105,
+      "randomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 
@@ -55,7 +55,7 @@
       "tasks" : {
         "size" : [2, 4],
         "duration" : [100, 200],
-        "probability" : 0.05
+        "probability" : 1.00
       },
 
       "events" : {
