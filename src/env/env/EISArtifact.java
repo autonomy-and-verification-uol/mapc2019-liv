@@ -6,6 +6,7 @@ import jason.asSyntax.*;
 
 
 import java.awt.Point;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -114,7 +116,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	
 	
 	@INTERNAL_OPERATION
-	void receiving(String agent) throws JasonException {
+	void receiving(String agent) throws JasonException{
 		lastStep = -1;
 		Collection<Percept> previousPercepts = new ArrayList<Percept>();
 		
@@ -158,7 +160,8 @@ public class EISArtifact extends Artifact implements AgentListener {
 		return -10;
 	}
 	
-	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException {
+	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException{
+		
 		for (Percept old: previousPercepts) {
 			if (step_obs_prop.contains(old.getName())) {
 				if (!percepts.contains(old) || old.getName().equals("lastAction") || old.getName().equals("lastActionResult") || old.getName().equals("lastActionParams") || old.getName().equals("goal") || old.getName().equals("thing")) { // not perceived anymore
@@ -309,5 +312,21 @@ public class EISArtifact extends Artifact implements AgentListener {
 	
     @Override
     public void handlePercept(String agent, Percept percept) {}
+    
+    //just for testing
+    public void callPlanner() throws IOException {
+    	
+    	ProcessBuilder pb = new ProcessBuilder("./run.sh", "domain_mapc.pddl", "problem_mapc.pddl", EISArtifact.class.getName());
+    	pb.directory(new File("./planner"));
+		Process p = pb.start();
+		Scanner s = new Scanner(p.getInputStream());
+		while(s.hasNextLine()) {
+			String newString = s.nextLine();
+			String[] split = newString.split("[(]", 2);
+			System.out.print(split[0]);
+			System.out.println(" -- " + split[1].substring(0, split[1].length() - 1));
+		}
+		s.close();
+    }
    
 }
