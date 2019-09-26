@@ -38,7 +38,10 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private Map<String, String> agentToEntity;
 	private List<Literal> start = new ArrayList<Literal>();
 	private List<Literal> percs = new ArrayList<Literal>();
-	private List<Literal> signalList = new ArrayList<Literal>();
+//	private List<Literal> signalList = new ArrayList<Literal>();
+	
+	private List<Literal> obstacleList = new ArrayList<Literal>();
+	private List<Literal> blockList = new ArrayList<Literal>();
 	
 	private Point mypos = new Point(0,0);
 	
@@ -182,6 +185,8 @@ public class EISArtifact extends Artifact implements AgentListener {
 		Literal lastActionResult 	= null;
 		Literal lastActionParams	= null;
 		Literal actionID 			= null;
+		obstacleList.clear();
+		blockList.clear();
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
 				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams") || percept.getName().equals("goal") || percept.getName().equals("thing")) { // really new perception 
@@ -191,7 +196,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 					} else if (percept.getName().equals("simEnd")) {
 						defineObsProperty(percept.getName(), (Object[]) literal.getTermsArray());
 						cleanObsProps(match_obs_prop);
-						lastStep = -1;						
+						lastStep = -1;
 						break;
 					} else {
 						if (percept.getName().equals("lastActionResult")) {
@@ -200,7 +205,11 @@ public class EISArtifact extends Artifact implements AgentListener {
 						else if (percept.getName().equals("lastAction")) { lastAction = literal; }
 						else if (percept.getName().equals("lastActionParams")) { lastActionParams = literal; }
 						else if (percept.getName().equals("actionID")) { actionID = literal; }
-						else { percs.add(literal); }
+						else {
+							if (percept.getName().equals("obstacle")) { obstacleList.add(literal); }
+							else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("block")) { blockList.add(literal); }
+							percs.add(literal); 
+						}
 					}
 				}
 			} if (match_obs_prop.contains(percept.getName())) {
@@ -208,6 +217,9 @@ public class EISArtifact extends Artifact implements AgentListener {
 				start.add(literal);
 			}
 		}
+		
+//		logger.info("@@@@ "+obstacleList);
+//		logger.info("@@@@ "+blockList);
 
 		if (!start.isEmpty()) {
 			for (Literal lit: start) {
@@ -232,12 +244,12 @@ public class EISArtifact extends Artifact implements AgentListener {
 				defineObsProperty(lit.getFunctor(), (Object[]) lit.getTermsArray());
 			}
 			percs.clear();
-			if (!signalList.isEmpty()) {
-				for (Literal lit: signalList) {
-					signal(agentIds.get(agent),lit.getFunctor(),(Object[]) lit.getTermsArray());
-				}
-				signalList.clear();
-			}
+//			if (!signalList.isEmpty()) {
+//				for (Literal lit: signalList) {
+//					signal(agentIds.get(agent),lit.getFunctor(),(Object[]) lit.getTermsArray());
+//				}
+//				signalList.clear();
+//			}
 			
 			defineObsProperty(actionID.getFunctor(), (Object[]) actionID.getTermsArray());
 		}
