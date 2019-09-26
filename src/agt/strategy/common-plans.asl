@@ -301,6 +301,20 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 -!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
 	
 
++!common::update_role_to(NewRole) :
+	common::my_role(MyRole)
+<-
+	.print("My role is now: ", NewRole);
+	-+common::previous_role(MyRole);
+	-+common::my_role(NewRole)
+	.
++!common::update_role_to(NewRole) :
+	true
+<-
+	.print("My role is now: ", NewRole);
+	-+common::my_role(NewRole)
+	.
+
 /*
 +!move_to_pos_aux(_, X, Y, X, Y).
 +!move_to_pos_aux(Leader, X, Y, MyX, MyY) :	

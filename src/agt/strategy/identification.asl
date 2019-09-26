@@ -130,7 +130,7 @@ i_met_new_agent(Iknow, IdList) :-
 		-action::reasoning_about_belief(AgRequested);
 	}
 	!stop::new_dispenser_or_merge;
-	if(not retrieve::retriever){
+	if(not common::my_role(retriever)){
 		!stop::check_join_group;
 	}
 	.
@@ -145,7 +145,7 @@ i_met_new_agent(Iknow, IdList) :-
 	+identification::identified(NewList);
 	!update_pos(Ag,NewOriginX,NewOriginY);
 	!stop::new_dispenser_or_merge;
-	if(not retrieve::retriever){
+	if(not common::my_role(retriever)){
 		!stop::check_join_group;
 	}
 	.
@@ -158,7 +158,7 @@ i_met_new_agent(Iknow, IdList) :-
 	+map::myMap(MapOther);
 	getMyPos(MyX,MyY);
 	updateMyPos(MyX+OriginX,MyY+OriginY);
-	if (task::stocker & task::stocker_in_position) {
+	if (common::my_role(stocker) & task::stocker_in_position) {
 		updateStockerPos(Me,OriginX,OriginY);
 	}
 	if(map::evaluating_cluster([origin(XN, YN), origin(XS, YS), origin(XW, YW), origin(XE, YE)])){
@@ -260,7 +260,7 @@ i_met_new_agent(Iknow, IdList) :-
 			!identification::remove_reasoning(AgRequested);
 		}
 		!stop::new_dispenser_or_merge;
-		if(not retrieve::retriever){
+		if(not common::my_role(retriever)){
 			!stop::check_join_group;
 		}
 	}

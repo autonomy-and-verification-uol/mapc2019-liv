@@ -32,6 +32,7 @@
 	+start;
 	.wait(1000);
 //	!always_skip;
+	//!common::update_role_to(explorer);
 	!!exploration::explore([n,s,e,w]);
 	.
 	
@@ -47,8 +48,8 @@
 	.
 
 +!always_skip :
-	not task::origin & not task::helper & not task::stocker &
-	not retrieve::block(0, 1) & retrieve::retriever
+	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
+	not retrieve::block(0, 1) & common::my_role(retriever)
 <-
 	getMyPos(MyX, MyY);
 	addAvailablePos(MyX, MyY);

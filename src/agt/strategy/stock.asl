@@ -194,27 +194,33 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-retrieve::scouts_aux(_);
 	+retrieve::scouts_aux([]);
-	for(.range(H, -RangeW+3, RangeE, 5)){
+	for(.range(H, 0, RangeE, 5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, -RangeN+3, RangeS, 5)){
+	for(.range(V, -RangeN+5, RangeS, 5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}		
-	for(.range(H, RangeE-3, -RangeW, -5)){
+	for(.range(H, RangeE-5, -RangeW, -5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, RangeS-3, -RangeN, -5)){
+	for(.range(V, RangeS-5, -RangeN, -5)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
+			-+retrieve::scouts_aux(Scouts1);
+		}
+	}
+	for(.range(H, -RangeW+5, 0, 5)){
+		if(H<0 & retrieve::scouts_aux(Scouts)){
+			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
@@ -266,8 +272,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("Target added: ", X, " ", Y);
 	!retrieve::fetch_block_to_goal.
 
--!retrieve::retrieve_block : retrieve::retriever <- !!retrieve::retrieve_block.
--!retrieve::retrieve_block : true <- true.
+-!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
+//-!retrieve::retrieve_block : true <- true.
 
 +!retrieve::decide_block_type_flat(Type) : 
 	true
@@ -421,12 +427,11 @@ most_needed_type(Dispensers, AgList, Type) :-
 */
 
 +!retrieve::fetch_block_to_goal : 
-	retrieve::retriever
+	true
 <- 
 	getMyPos(MyX,MyY);
 	!retrieve::fetch_block_to_goal_aux(MyX, MyY).
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::retriever &
 	retrieve::target(TargetX, TargetY) &
 	neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, Direction) &
 	.my_name(Me)
@@ -459,7 +464,6 @@ most_needed_type(Dispensers, AgList, Type) :-
 	-+retrieve::target(MyGoalX, MyGoalY);
 	!retrieve::move_to_goal.
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::retriever &
 	retrieve::target(TargetX, TargetY) &
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
 <-		
@@ -488,7 +492,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	!retrieve::fetch_block_to_goal.
 	
--!retrieve::fetch_block_to_goal : retrieve::retriever <- !!retrieve::fetch_block_to_goal.
+-!retrieve::fetch_block_to_goal : true <- !!retrieve::fetch_block_to_goal.
 
 -!retrieve::smart_move(Direction) : 
 	true 
@@ -513,8 +517,9 @@ most_needed_type(Dispensers, AgList, Type) :-
 	} elif(retrieve::block(0, 1)){
 		!retrieve::smart_rotate(s, Direction);
 	}
-		
+	if(common::my_role(Role)){.print("My current role1: ", Role)}	
 	!action::move(Direction);
+	if(common::my_role(Role1)){.print("My current role2: ", Role1)}
 	if(default::lastActionResult(success) & map::evaluating_positions(_)){
 		!map::update_evaluating_positions(Direction);
 	}
@@ -668,7 +673,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}.
 	
 +!retrieve::move_to_goal : 
-	retrieve::retriever & .my_name(Me) & task::helper
+	.my_name(Me) & common::my_role(helper)
 <- 
 	getTargetGoal(_, GoalX, GoalY, _);
 //	.term2string(Side, SideStr);
@@ -679,7 +684,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::move_to_goal_aux(MyX, MyY).
 
 +!retrieve::move_to_goal : 
-	retrieve::retriever & .my_name(Me)
+	.my_name(Me)
 <- 
 	if(stop::first_to_stop(Me)){
 		getTargetGoal(_, GoalX, GoalY, _);
@@ -691,7 +696,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getMyPos(MyX,MyY);
 	!retrieve::move_to_goal_aux(MyX, MyY).
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
-	retrieve::retriever & retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
+	retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
 <-
 	if(retrieve::block(0, -1)){
 		!retrieve::smart_rotate(n, s);
@@ -708,7 +713,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		-moving_to_origin;
 		+task::origin;
 	}
-	elif (task::helper) {
+	elif (common::my_role(helper)) {
 		-moving_to_origin;
 		.send(Ag, tell, task::helper(Me));
 	}
@@ -762,7 +767,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 //	!retrieve::move_to_goal_aux(MyX, MyY);
 //	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
-	retrieve::retriever & retrieve::target(TargetX, TargetY) & 
+	retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
 <-
 	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
@@ -826,7 +831,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::retrieve_block;
 	.
 
--!retrieve::move_to_goal : retrieve::retriever <- !!retrieve::move_to_goal.
+-!retrieve::move_to_goal : true <- !!retrieve::move_to_goal.
 
 +!retrieve::smart_rotate(Dir, Dir).
 +!retrieve::smart_rotate(FromDirBlock, ToDirBlock) :
