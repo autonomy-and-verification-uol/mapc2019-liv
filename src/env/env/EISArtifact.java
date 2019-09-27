@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -40,7 +41,10 @@ public class EISArtifact extends Artifact implements AgentListener {
 	private Map<String, String> agentToEntity;
 	private List<Literal> start = new ArrayList<Literal>();
 	private List<Literal> percs = new ArrayList<Literal>();
-	private List<Literal> signalList = new ArrayList<Literal>();
+//	private List<Literal> signalList = new ArrayList<Literal>();
+	
+	private List<Literal> obstacleList = new ArrayList<Literal>();
+	private List<Literal> blockList = new ArrayList<Literal>();
 	
 	private Point mypos = new Point(0,0);
 	
@@ -116,7 +120,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	
 	
 	@INTERNAL_OPERATION
-	void receiving(String agent) throws JasonException{
+	void receiving(String agent) throws JasonException {
 		lastStep = -1;
 		Collection<Percept> previousPercepts = new ArrayList<Percept>();
 		
@@ -160,8 +164,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		return -10;
 	}
 	
-	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException{
-		
+	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException {
 		for (Percept old: previousPercepts) {
 			if (step_obs_prop.contains(old.getName())) {
 				if (!percepts.contains(old) || old.getName().equals("lastAction") || old.getName().equals("lastActionResult") || old.getName().equals("lastActionParams") || old.getName().equals("goal") || old.getName().equals("thing")) { // not perceived anymore
@@ -185,6 +188,8 @@ public class EISArtifact extends Artifact implements AgentListener {
 		Literal lastActionResult 	= null;
 		Literal lastActionParams	= null;
 		Literal actionID 			= null;
+		obstacleList.clear();
+		blockList.clear();
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
 				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams") || percept.getName().equals("goal") || percept.getName().equals("thing")) { // really new perception 
@@ -194,7 +199,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 					} else if (percept.getName().equals("simEnd")) {
 						defineObsProperty(percept.getName(), (Object[]) literal.getTermsArray());
 						cleanObsProps(match_obs_prop);
-						lastStep = -1;						
+						lastStep = -1;
 						break;
 					} else {
 						if (percept.getName().equals("lastActionResult")) {
@@ -203,7 +208,11 @@ public class EISArtifact extends Artifact implements AgentListener {
 						else if (percept.getName().equals("lastAction")) { lastAction = literal; }
 						else if (percept.getName().equals("lastActionParams")) { lastActionParams = literal; }
 						else if (percept.getName().equals("actionID")) { actionID = literal; }
-						else { percs.add(literal); }
+						else {
+							if (percept.getName().equals("obstacle")) { obstacleList.add(literal); }
+							else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("block")) { blockList.add(literal); }
+							percs.add(literal); 
+						}
 					}
 				}
 			} if (match_obs_prop.contains(percept.getName())) {
@@ -211,6 +220,9 @@ public class EISArtifact extends Artifact implements AgentListener {
 				start.add(literal);
 			}
 		}
+		
+		logger.info("@@@@ "+obstacleList);
+		logger.info("@@@@ "+blockList);
 
 		if (!start.isEmpty()) {
 			for (Literal lit: start) {
@@ -235,12 +247,12 @@ public class EISArtifact extends Artifact implements AgentListener {
 				defineObsProperty(lit.getFunctor(), (Object[]) lit.getTermsArray());
 			}
 			percs.clear();
-			if (!signalList.isEmpty()) {
-				for (Literal lit: signalList) {
-					signal(agentIds.get(agent),lit.getFunctor(),(Object[]) lit.getTermsArray());
-				}
-				signalList.clear();
-			}
+//			if (!signalList.isEmpty()) {
+//				for (Literal lit: signalList) {
+//					signal(agentIds.get(agent),lit.getFunctor(),(Object[]) lit.getTermsArray());
+//				}
+//				signalList.clear();
+//			}
 			
 			defineObsProperty(actionID.getFunctor(), (Object[]) actionID.getTermsArray());
 		}
@@ -313,20 +325,151 @@ public class EISArtifact extends Artifact implements AgentListener {
     @Override
     public void handlePercept(String agent, Percept percept) {}
     
-    //just for testing
-    public void callPlanner() throws IOException {
+    //Planner related methods
+    
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY) {
+    	return null;
+    }
+    
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY, int blockX, int blockY) {
+    	return null;
+    }
+    
+    public LinkedList<String> getPlanBlockToGoal(int goalX, int goalY, int blockX, int blockY) {
+    	return null;
+    }
+    
+    public LinkedList<String> getPlan(boolean attached, String block) throws NoValueException, IOException{
     	
-    	ProcessBuilder pb = new ProcessBuilder("./run.sh", "domain_mapc.pddl", "problem_mapc.pddl", EISArtifact.class.getName());
+    	Set<String> nonEmptyCells = new HashSet<String>();
+    	
+    	String problemFileName = EISArtifact.class.getName() + "_problem.pddl";
+    	
+    	String outputFileName = EISArtifact.class.getName() + "_output";
+    	
+    	String preamble = "(define (problem " + EISArtifact.class.getName() + ")\n"
+    			+ "\t(:domain mapc)";
+    	
+    	List<String> blocks = new LinkedList<String>();
+    	List<String> obstacles = new LinkedList<String>();
+    	
+    	List<String> initBlocksObstacles = new LinkedList<String>();
+    	
+    	int blocks_number = 0;
+    	int obstacles_number = 0;
+    	
+    	//Analysing blocks list
+    	for(Literal l : this.blockList) {
+    		int x = (int)((NumberTerm) l.getTerm(0)).solve();
+    		int y = (int)((NumberTerm) l.getTerm(1)).solve();
+    		String cell = coordinate2String(x) + coordinate2String(y);
+    		String blockID = "b" + blocks_number;
+    		blocks_number++;
+    		nonEmptyCells.add(cell);
+    		blocks.add(blockID);
+    		initBlocksObstacles.add("( at " + blockID + " " + cell + ")");
+    	}
+    	
+    	//Analysing obstacles list
+    	for(Literal l : this.obstacleList) {
+    		int x = (int)((NumberTerm) l.getTerm(0)).solve();
+    		int y = (int)((NumberTerm) l.getTerm(1)).solve();
+    		String cell = coordinate2String(x) + coordinate2String(y);
+    		String obstaclesID = "o" + obstacles_number;
+    		obstacles_number++;
+    		nonEmptyCells.add(cell);
+    		obstacles.add(obstaclesID);
+    		initBlocksObstacles.add("( at " + obstaclesID + " " + cell + ")");
+    	}
+    	
+    	//Creating the :objects field
+    	StringBuffer objects = new StringBuffer("\t(:objects ");
+    	
+    	String blocks_declaration = "";
+    	
+    	for(String b : blocks)
+    		blocks_declaration += b + " ";
+    	
+    	if(!blocks_declaration.equals(""))
+    		objects.append(blocks_declaration + "- block\n");
+    	
+    	String obstacles_declaration = "";
+    	
+    	for(String o : obstacles)
+    		obstacles_declaration += o + " ";
+    	
+    	if(!obstacles_declaration.equals(""))
+    		objects.append("\t" + obstacles_declaration + "- obstacle)");
+    	
+    	//creating the :init field
+    	StringBuffer initString = new StringBuffer("\t(:init\n" +
+    			"\t\t(rotation cw n e)\n" + 
+    			"\t\t(rotation cw e s)\n" + 
+    			"\t\t(rotation cw s w)\n" + 
+    			"\t\t(rotation cw w n)\n" + 
+    			"\t\t(rotation ccw n w)\n" + 
+    			"\t\t(rotation ccw w s)\n" + 
+    			"\t\t(rotation ccw s e)\n" + 
+    			"\t\t(rotation ccw e n)\n" +
+    			"\t\t(at a p0p0)\n" +
+    			"\t\t(= (total-cost) 0)\n" );
+    	
+    	for(int i = -5; i < 6; i++) {
+    		int init_j = 5 - Math.abs(i);
+    		for(int j = -init_j; j < init_j + 1; j++) {
+    			String cellName = coordinate2String(j) + coordinate2String(i);
+    			if(!nonEmptyCells.contains(cellName))
+    				initString.append("\t\t(empty " + cellName + ")\n");
+    			
+    			if(	Math.abs(j) + Math.abs(i - 1) < 6 )
+    				initString.append("\t\t(adjacent n " + cellName + " " + coordinate2String(j) + coordinate2String(i - 1) + ")\n");
+    			
+    			if(	Math.abs(j + 1) + Math.abs(i) < 6 )
+    				initString.append("\t\t(adjacent e " + cellName + " " + coordinate2String(j + 1) + coordinate2String(i) + ")\n");
+    			
+    			if(	Math.abs(j) + Math.abs(i + 1) < 6 )
+    				initString.append("\t\t(adjacent s " + cellName + " " + coordinate2String(j) + coordinate2String(i + 1) + ")\n");
+    			
+    			if(	Math.abs(j - 1) + Math.abs(i) < 6 )
+    				initString.append("\t\t(adjacent w " + cellName + " " + coordinate2String(j - 1) + coordinate2String(i) + ")\n");
+    		}
+    	}
+    	
+    	for(String otherInit : initBlocksObstacles)
+    		initString.append("\t\t" + otherInit + "\n");
+    	initString.append("\t)\n");
+    	
+    	//goal
+    	String goal = "\t(:goal (at a p0p5))\n\t(:metric minimize (total-cost))\n)";
+    	
+    	
+    	return callPlanner(problemFileName, outputFileName);
+    }
+    
+    private LinkedList<String> callPlanner(String problem, String output) throws IOException {
+    	
+    	ProcessBuilder pb = new ProcessBuilder("./run.sh", "domain_mapc.pddl", problem, output);
     	pb.directory(new File("./planner"));
 		Process p = pb.start();
 		Scanner s = new Scanner(p.getInputStream());
+		LinkedList<String> plan = new LinkedList<String>();
+		
 		while(s.hasNextLine()) {
-			String newString = s.nextLine();
-			String[] split = newString.split("[(]", 2);
-			System.out.print(split[0]);
-			System.out.println(" -- " + split[1].substring(0, split[1].length() - 1));
+			String line = s.nextLine();
+			if(line.charAt(0) == 'N') {
+				s.close();
+				return null;
+			}
+			plan.add(line);
 		}
 		s.close();
+		
+		return plan;
     }
-   
+    
+    private String coordinate2String(int coordinate) {
+    	if(coordinate < 0)
+    		return "n" + Math.abs(coordinate);
+    	return "p" + coordinate;
+    }
 }
