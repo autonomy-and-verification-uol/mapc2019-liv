@@ -38,7 +38,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @perceivegoal[atomic]
 +default::goal(X,Y)
-	: not common::my_role(goal_evaluator)
+	: not map::evaluating_vertexes
 <-
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);

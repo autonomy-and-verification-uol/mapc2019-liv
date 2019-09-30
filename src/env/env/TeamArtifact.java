@@ -331,7 +331,7 @@ public class TeamArtifact extends Artifact {
 	@OPERATION
 	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> clusterInserterIn, OpFeedbackParam<Boolean> isANewCluster) {
 		Point p = new Point(x, y);
-		logger.info("Try to add point (" + x + ", " + y + ")");
+		logger.info("[" + name + "]: Try to add point (" + x + ", " + y + ")");
 		double minDistance = 5;
 		String myCluster = null;
 		int id = 0;
