@@ -7,6 +7,7 @@ import jason.asSyntax.*;
 
 import java.awt.Point;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -326,36 +327,56 @@ public class EISArtifact extends Artifact implements AgentListener {
     public void handlePercept(String agent, Percept percept) {}
     
     //Planner related methods
-    
-    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY) {
-    	return null;
+    // all coordinates are assumed to be visible to the agent
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
+    	return getPlan(goalStatement, null, 0);
     }
     
-    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY, int blockX, int blockY) {
-    	return null;
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
+    	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
+    	return getPlan(goalStatement, attachedBlockCell, 0);
     }
     
-    public LinkedList<String> getPlanBlockToGoal(int goalX, int goalY, int blockX, int blockY) {
-    	return null;
+    // to modify
+    public LinkedList<String> getPlanBlockToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
+    	String goalStatement = createGoalStatement("(at b0 " + goalCell + ")");
+    	return getPlan(goalStatement, attachedBlockCell, 1);
     }
     
-    public LinkedList<String> getPlan(boolean attached, String block) throws NoValueException, IOException{
+    private String createGoalStatement(String actualGoal) {
+    	return "\t(:goal " + actualGoal + ")";
+    }
+    
+    private LinkedList<String> getPlan(String goalStatement, String attachedBlockCoordinates, int blockCounter) throws NoValueException, IOException{
     	
     	Set<String> nonEmptyCells = new HashSet<String>();
     	
+    	nonEmptyCells.add("p0p0");
+    	
     	String problemFileName = EISArtifact.class.getName() + "_problem.pddl";
+    	
+    	File problemFile = new File(problemFileName);
+    	
+    	FileWriter problemFileWriter = new FileWriter(problemFile);
     	
     	String outputFileName = EISArtifact.class.getName() + "_output";
     	
     	String preamble = "(define (problem " + EISArtifact.class.getName() + ")\n"
-    			+ "\t(:domain mapc)";
+    			+ "\t(:domain mapc)\n";
+    	
+    	problemFileWriter.write(preamble);
     	
     	List<String> blocks = new LinkedList<String>();
     	List<String> obstacles = new LinkedList<String>();
     	
     	List<String> initBlocksObstacles = new LinkedList<String>();
     	
-    	int blocks_number = 0;
     	int obstacles_number = 0;
     	
     	//Analysing blocks list
@@ -363,8 +384,13 @@ public class EISArtifact extends Artifact implements AgentListener {
     		int x = (int)((NumberTerm) l.getTerm(0)).solve();
     		int y = (int)((NumberTerm) l.getTerm(1)).solve();
     		String cell = coordinate2String(x) + coordinate2String(y);
-    		String blockID = "b" + blocks_number;
-    		blocks_number++;
+    		String blockID = null;
+    		if(cell.equals(attachedBlockCoordinates))
+    			blockID = "b0";
+			else {
+				blockID = "b" + blockCounter;
+				blockCounter++;
+			}
     		nonEmptyCells.add(cell);
     		blocks.add(blockID);
     		initBlocksObstacles.add("( at " + blockID + " " + cell + ")");
@@ -383,67 +409,86 @@ public class EISArtifact extends Artifact implements AgentListener {
     	}
     	
     	//Creating the :objects field
-    	StringBuffer objects = new StringBuffer("\t(:objects ");
+    	String objects = "\t(:objects\n";
     	
-    	String blocks_declaration = "";
+    	String blocksDeclaration = "\t\t";
     	
     	for(String b : blocks)
-    		blocks_declaration += b + " ";
+    		blocksDeclaration += b + " ";
     	
-    	if(!blocks_declaration.equals(""))
-    		objects.append(blocks_declaration + "- block\n");
+    	if(!blocksDeclaration.equals(""))
+    		objects += blocksDeclaration + "- block\n";
     	
-    	String obstacles_declaration = "";
+    	String obstaclesDeclaration = "\t\t";
     	
     	for(String o : obstacles)
-    		obstacles_declaration += o + " ";
+    		obstaclesDeclaration += o + " ";
     	
-    	if(!obstacles_declaration.equals(""))
-    		objects.append("\t" + obstacles_declaration + "- obstacle)");
+    	if(!obstaclesDeclaration.equals(""))
+    		objects += "\t\t" + obstaclesDeclaration + "- obstacle\n";
     	
-    	//creating the :init field
-    	StringBuffer initString = new StringBuffer("\t(:init\n" +
-    			"\t\t(rotation cw n e)\n" + 
-    			"\t\t(rotation cw e s)\n" + 
-    			"\t\t(rotation cw s w)\n" + 
-    			"\t\t(rotation cw w n)\n" + 
-    			"\t\t(rotation ccw n w)\n" + 
-    			"\t\t(rotation ccw w s)\n" + 
-    			"\t\t(rotation ccw s e)\n" + 
-    			"\t\t(rotation ccw e n)\n" +
-    			"\t\t(at a p0p0)\n" +
-    			"\t\t(= (total-cost) 0)\n" );
+    	objects += "\t)\n";
+    	
+    	// writing objects to file
+    	if(!objects.toString().equals("\t(:objects\n\t\n"))
+    		problemFileWriter.write(objects.toString());
+    	
+    	// writing :init field
+    	problemFileWriter.write("\t(:init\n");
+    	problemFileWriter.write("\t\t(rotation cw n e)\n");
+    	problemFileWriter.write("\t\t(rotation cw e s)\n");
+    	problemFileWriter.write("\t\t(rotation cw s w)\n");
+    	problemFileWriter.write("\t\t(rotation cw w n)\n");
+    	problemFileWriter.write("\t\t(rotation ccw n w)\n");
+    	problemFileWriter.write("\t\t(rotation ccw w s)\n");
+    	problemFileWriter.write("\t\t(rotation ccw s e)\n");
+    	problemFileWriter.write("\t\t(rotation ccw e n)\n");
+    	problemFileWriter.write("\t\t(at a p0p0)\n");
+    	problemFileWriter.write("\t\t(= (total-cost) 0)\n");
+    	
+    	if(attachedBlockCoordinates == null)
+    		problemFileWriter.write("\t\t(alone a)\n");
+    	else
+    		problemFileWriter.write("\t\t(attached a b0)\n");
     	
     	for(int i = -5; i < 6; i++) {
     		int init_j = 5 - Math.abs(i);
     		for(int j = -init_j; j < init_j + 1; j++) {
     			String cellName = coordinate2String(j) + coordinate2String(i);
     			if(!nonEmptyCells.contains(cellName))
-    				initString.append("\t\t(empty " + cellName + ")\n");
+    				problemFileWriter.write("\t\t(empty " + cellName + ")\n");
     			
     			if(	Math.abs(j) + Math.abs(i - 1) < 6 )
-    				initString.append("\t\t(adjacent n " + cellName + " " + coordinate2String(j) + coordinate2String(i - 1) + ")\n");
+    				problemFileWriter.write("\t\t(adjacent n " + cellName + " " + coordinate2String(j) + coordinate2String(i - 1) + ")\n");
     			
     			if(	Math.abs(j + 1) + Math.abs(i) < 6 )
-    				initString.append("\t\t(adjacent e " + cellName + " " + coordinate2String(j + 1) + coordinate2String(i) + ")\n");
+    				problemFileWriter.write("\t\t(adjacent e " + cellName + " " + coordinate2String(j + 1) + coordinate2String(i) + ")\n");
     			
     			if(	Math.abs(j) + Math.abs(i + 1) < 6 )
-    				initString.append("\t\t(adjacent s " + cellName + " " + coordinate2String(j) + coordinate2String(i + 1) + ")\n");
+    				problemFileWriter.write("\t\t(adjacent s " + cellName + " " + coordinate2String(j) + coordinate2String(i + 1) + ")\n");
     			
     			if(	Math.abs(j - 1) + Math.abs(i) < 6 )
-    				initString.append("\t\t(adjacent w " + cellName + " " + coordinate2String(j - 1) + coordinate2String(i) + ")\n");
+    				problemFileWriter.write("\t\t(adjacent w " + cellName + " " + coordinate2String(j - 1) + coordinate2String(i) + ")\n");
     		}
     	}
     	
     	for(String otherInit : initBlocksObstacles)
-    		initString.append("\t\t" + otherInit + "\n");
-    	initString.append("\t)\n");
+    		problemFileWriter.write("\t\t" + otherInit + "\n");
+    	problemFileWriter.write("\t)\n");
     	
-    	//goal
-    	String goal = "\t(:goal (at a p0p5))\n\t(:metric minimize (total-cost))\n)";
+    	// writing goal
+    	problemFileWriter.write(goalStatement + "\n");
     	
+    	//metric + end bracket
+    	problemFileWriter.write("\t(:metric minimize (total-cost))\n)");
     	
-    	return callPlanner(problemFileName, outputFileName);
+    	problemFileWriter.flush();
+    	problemFileWriter.close();
+    	
+    	LinkedList<String> plan = callPlanner(problemFileName, outputFileName);
+    	problemFile.delete();
+    	
+    	return plan; 
     }
     
     private LinkedList<String> callPlanner(String problem, String output) throws IOException {
@@ -456,7 +501,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		
 		while(s.hasNextLine()) {
 			String line = s.nextLine();
-			if(line.charAt(0) == 'N') {
+			if(line.equals("NO PLAN")) {
 				s.close();
 				return null;
 			}
