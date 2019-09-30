@@ -130,12 +130,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!!default::always_skip;
 	.
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) //& connect(X,Y)
+	: committed(Id,CommitListSort) & helper(HelperAg)
 <-
 	!action::submit(Id);
 	-committed(Id,CommitListSort);
-//	-connect(X,Y);
-//	!verify_block;
+	.send(HelperAg,achieve,default::always_skip);
 	!default::always_skip;
 	.
 
