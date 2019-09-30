@@ -437,30 +437,40 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.my_name(Me)
 <-
 	!retrieve::create_and_attach_block(Direction);
-	getTargetGoal(Ag, GoalX, GoalY, SideStr);
-	.term2string(Side, SideStr);
-	.print("Chosen Goal position: ", GoalX, GoalY);
 	if(stop::first_to_stop(Me)){
+		getTargetGoal(Ag, GoalX, GoalY, SideStr);
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
-		getAvailablePos(MyGoalX, MyGoalY);
-		if (MyGoalY < GoalY) {
-			StockerBlockPos = s;
-		}
-		elif (MyGoalY > GoalY) {
-			StockerBlockPos = n;
-		}
-		elif (MyGoalX > GoalX) {
-			StockerBlockPos = w;
+		if (not common::my_role(retriever)) {
+			getAvailablePos(MyGoalX, MyGoalY);
+			if (MyGoalY < GoalY) {
+				StockerBlockPos = s;
+			}
+			elif (MyGoalY > GoalY) {
+				StockerBlockPos = n;
+			}
+			elif (MyGoalX > GoalX) {
+				StockerBlockPos = w;
+			}
+			else {
+				StockerBlockPos = e;
+			}
+			+gate(StockerBlockPos);
 		}
 		else {
-			StockerBlockPos = e;
+			getTargetGoal(Ag, GoalX, GoalY, SideStr);
+			.random(RX);
+			RandomX = math.floor(RX * 10);
+			.random(RY);
+			RandomY = math.floor(RY * 10);
+			MyGoalX = GoalX + RandomX;
+			MyGoalY = GoalY + RandomY;
 		}
-		+gate(StockerBlockPos);
 //		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 //		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
 //		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
 	}
+	.print("Chosen Goal position: ", MyGoalX, MyGoalY);
 	-+retrieve::target(MyGoalX, MyGoalY);
 	!retrieve::move_to_goal.
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
@@ -717,7 +727,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		-moving_to_origin;
 		.send(Ag, tell, task::helper(Me));
 	}
-	else {
+	elif (common::my_role(stocker)) {
 		?retrieve::block(X,Y);
 		?default::thing(X,Y,block,Type);
 		?gate(Gate);

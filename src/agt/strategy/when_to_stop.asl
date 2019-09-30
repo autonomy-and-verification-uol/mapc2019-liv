@@ -92,7 +92,13 @@
 //		!!retrieve::retrieve_block;
 	}
 	else {
-		-stop;
+		.print("Removing explorer");
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		!common::update_role_to(retriever);
+		!!retrieve::retrieve_block;
 	}
 //	!!retrieve::retrieve_block;
 	.
@@ -146,33 +152,42 @@
 //		-common::escape;
 //		+retrieve::retriever;
 //		!action::forget_old_action;
-	if (Flag == "stocker") {
-		//.print("Removing explorer");
-		//-exploration::explorer;
-		-exploration::special(_);
-		-common::avoid(_);
-		-common::escape;
-		!action::forget_old_action;
-		!common::update_role_to(stocker);
-		//+retrieve::retriever;
-		//+task::stocker;
-		!!retrieve::retrieve_block;
-	}
-	elif (Flag == "helper") {
-		//.print("Removing explorer");
-		//-exploration::explorer;
-		-exploration::special(_);
-		-common::avoid(_);
-		-common::escape;
-		!action::forget_old_action;
-		!common::update_role_to(helper);
-		//+retrieve::retriever;
-		//+task::helper;
-		+retrieve::moving_to_origin;
-		!!retrieve::move_to_goal;
-//		!!retrieve::retrieve_block;
-	}
-//		!!retrieve::retrieve_block;
+		if (Flag == "stocker") {
+			//.print("Removing explorer");
+			//-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(stocker);
+			//+retrieve::retriever;
+			//+task::stocker;
+			!!retrieve::retrieve_block;
+		}
+		elif (Flag == "helper") {
+			//.print("Removing explorer");
+			//-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(helper);
+			//+retrieve::retriever;
+			//+task::helper;
+			+retrieve::moving_to_origin;
+			!!retrieve::move_to_goal;
+	//		!!retrieve::retrieve_block;
+		}
+		else {
+			.print("Removing explorer");
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(retriever);
+			!!retrieve::retrieve_block;
+		}
+	//		!!retrieve::retrieve_block;
 	}
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").

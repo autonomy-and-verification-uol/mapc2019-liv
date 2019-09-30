@@ -51,8 +51,8 @@
 	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
 	not retrieve::block(0, 1) & common::my_role(retriever)
 <-
-	getMyPos(MyX, MyY);
-	addAvailablePos(MyX, MyY);
+//	getMyPos(MyX, MyY);
+//	addAvailablePos(MyX, MyY);
 	!!retrieve::retrieve_block;
 	.
 //+!always_skip :
