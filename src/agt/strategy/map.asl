@@ -407,7 +407,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::check_task_area :
 	map::evaluating_positions(Pos)
 <- 
-	-+map::evaluating_positions([start(0, 5)|Pos]);
+	-+map::evaluating_positions([start(0, 1)|Pos]);
 	!map::move_to_evaluating_pos(start1);
 	!action::clear(0, 5);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
