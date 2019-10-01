@@ -459,10 +459,22 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 		else {
 			getTargetGoal(Ag, GoalX, GoalY, SideStr);
+			.random(NX);
 			.random(RX);
-			RandomX = math.floor(RX * 10);
+			if (NX > 0.5) {
+				RandomX = math.floor(RX * 5)+7;
+			}
+			else {
+				RandomX = math.floor(RX * -5)-7;
+			}
+			.random(NY);
 			.random(RY);
-			RandomY = math.floor(RY * 10);
+			if (NY > 0.5) {
+				RandomY = math.floor(RY * 5)+9;
+			}
+			else {
+				RandomY = math.floor(RX * -5)-5;
+			}
 			MyGoalX = GoalX + RandomX;
 			MyGoalY = GoalY + RandomY;
 		}
@@ -1165,21 +1177,21 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 	}
 	for(.range(I, 1, 3) & not retrieve::res(Res)){
-		if(not default::thing(ClearX, ClearY, block, _) & 
-			not default::thing(ClearX-1, ClearY, block, _) &
-			not default::thing(ClearX+1, ClearY, block, _) &
-			not default::thing(ClearX, ClearY-1, block, _) &
-			not default::thing(ClearX, ClearY+1, block, _) &
-			not default::thing(ClearX, ClearY, entity, Team) & 
-			not default::thing(ClearX-1, ClearY, entity, Team) &
-			not default::thing(ClearX+1, ClearY, entity, Team) &
-			not default::thing(ClearX, ClearY-1, entity, Team) &
-			not default::thing(ClearX, ClearY+1, entity, Team)
-		){
+//		if(not default::thing(ClearX, ClearY, block, _) & 
+//			not default::thing(ClearX-1, ClearY, block, _) &
+//			not default::thing(ClearX+1, ClearY, block, _) &
+//			not default::thing(ClearX, ClearY-1, block, _) &
+//			not default::thing(ClearX, ClearY+1, block, _) &
+//			not default::thing(ClearX, ClearY, entity, Team) & 
+//			not default::thing(ClearX-1, ClearY, entity, Team) &
+//			not default::thing(ClearX+1, ClearY, entity, Team) &
+//			not default::thing(ClearX, ClearY-1, entity, Team) &
+//			not default::thing(ClearX, ClearY+1, entity, Team)
+//		){
 			!action::clear(ClearX, ClearY);
-		} else{
-			+res(0);
-		}
+//		} else{
+//			+res(0);
+//		}
 	}
 	if(not retrieve::res(Res)){
 		if(not default::lastActionResult(success)){
