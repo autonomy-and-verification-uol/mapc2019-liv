@@ -233,7 +233,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	.
 	
 +!no_escape : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
-+!no_escape : escape <- !action::commit_action(move(z)); !no_escape.
++!no_escape : escape <- !action::commit_action(skip); !no_escape.
 	
 +!move_to_escape(MyX,MyY,MyX,MyY).
 +!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).

@@ -16,28 +16,28 @@
 +!move(n)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(n);
 	.
 // Avoid clear markers moving south
 +!move(s)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(s);
 	.
 // Avoid clear markers moving east
 +!move(e)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(e);
 	.
 // Avoid clear markers moving west
 +!move(e)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(w);
 	.	
 //// Go around a friendly agent
@@ -159,3 +159,9 @@
 -!clear(X,Y)[code(.fail(action(Action),result(failed_target)))] <- .print("Target location is not within the agent's vision or outside the grid.").
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] : default::energy(Energy) & Energy < 30 <- .print("Energy is too low.").
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !clear(X,Y).
+
+// ##### SKIP ACTION #####
++!skip
+<-
+	!action::commit_action(skip);
+	.

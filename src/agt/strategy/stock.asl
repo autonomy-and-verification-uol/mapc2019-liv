@@ -677,7 +677,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		if(retrieve::res(0)){
 			if(not map::evaluating_positions(_)){
 				.print("FAILED TO CLEAR: ", Attempts, ", ", Threshold);
-				!action::move(z);
+				!action::skip;
 				!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 			} else {
 				.fail;
@@ -687,7 +687,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		//.fail
 		.print("I WANT TO CLEAR BUT I HAVE NO ENERGY");
 		if(not map::evaluating_positions(_)){
-			!action::move(z);
+			!action::skip;
 			!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count);
 		} else{
 			.fail;
