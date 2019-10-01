@@ -8,6 +8,11 @@ direction_block(s,X,Y) :- X = 0 & Y = 1.
 direction_block(e,X,Y) :- X = 1 & Y = 0.
 direction_block(w,X,Y) :- X = -1 & Y = 0.
 
+check_obstacle_bounds(n) :- default::obstacle(0,-2) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(s) :- default::obstacle(0,2)  | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(e) :- default::obstacle(2,0)  | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(w) :- default::obstacle(-2,0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker).
+
 rotate_direction(cw,NewX,NewY) :- retrieve::block(0,-1) & NewX = 1 & NewY = 0.
 rotate_direction(cw,NewX,NewY) :- retrieve::block(0,1) & NewX = -1 & NewY = 0.
 rotate_direction(cw,NewX,NewY) :- retrieve::block(1,0) & NewX = 0 & NewY = 1.

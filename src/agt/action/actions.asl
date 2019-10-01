@@ -54,6 +54,7 @@
 	.
 -!move(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Direction ",Direction," is not valid, it should be one of {n,s,e,w}.").
 // Improve this failure to drop disjunction into two different plans
+-!move(Direction)[code(.fail(action(Action),result(failed_path)))] : common::direction_block(Direction,X,Y) & retrieve::block(X,Y) & not common::check_obstacle_bounds(Direction) <- .print("Destination is out of bounds for my block."); +action::out_of_bounds(Direction).
 -!move(Direction)[code(.fail(action(Action),result(failed_path)))] <- .print("Destination is blocked, or one of my attached things is blocking.").
 -!move(Direction)[code(.fail(action(Action),result(failed_forbidden)))] <- .print("Destination is out of bounds."); +action::out_of_bounds(Direction).
 -!move(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !move(Direction).	
