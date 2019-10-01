@@ -32,10 +32,8 @@
 	+start;
 	.wait(1000);
 //	!always_skip;
-	//!common::update_role_to(explorer);
 	!!exploration::explore([n,s,e,w]);
 	.
-	
 
 +!always_skip :
 	task::origin & 
@@ -95,4 +93,4 @@
 	!action::move(n);
 	!!always_move_north;
 	.
--!always_move_north <- !!always_move_north.
+//-!always_move_north <- !!always_move_north.

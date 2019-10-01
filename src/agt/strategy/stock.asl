@@ -539,9 +539,9 @@ most_needed_type(Dispensers, AgList, Type) :-
 	} elif(retrieve::block(0, 1)){
 		!retrieve::smart_rotate(s, Direction);
 	}
-	if(common::my_role(Role)){.print("My current role1: ", Role)}	
+//	if(common::my_role(Role)){.print("My current role1: ", Role)}	
 	!action::move(Direction);
-	if(common::my_role(Role1)){.print("My current role2: ", Role1)}
+//	if(common::my_role(Role1)){.print("My current role2: ", Role1)}
 	if(default::lastActionResult(success) & map::evaluating_positions(_)){
 		!map::update_evaluating_positions(Direction);
 	}

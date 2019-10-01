@@ -369,7 +369,19 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	getMyPos(NewStartX, NewStartY);
 	!move_to_pos(Leader2, NewStartX, NewStartY, NewStartX + LocalX, NewStartY + LocalY).*/
 //-!move_to_pos(Leader1, StartX, StartY, X, Y) : true <- .fail.
+
+@removeblockbelief[atomic]
++default::actionID(_)
+	: retrieve::block(X,Y) & default::lastAction(rotate) & default::lastActionResult(success) & default::lastActionParams([Direction|List]) & common::rotate_direction(Direction,NewX,NewY) & not default::thing(NewX,NewY,block,_)
+<-
+	-retrieve::block(X,Y);
+	.
 	
-	
+@removeblockbeliefnorotate[atomic]
++default::actionID(_)
+	: not default::lastAction(rotate) & retrieve::block(X,Y) & not default::thing(X,Y,block,_)
+<-
+	-retrieve::block(X,Y);
+	.
 	
 	
