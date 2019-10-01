@@ -55,13 +55,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 @available_to_evaluate1[atomic]
-+!map::available_to_evaluate(true) :
++!map::available_to_evaluate(true, GoalLocalX, GoalLocalY) :
 	not common::my_role(goal_evaluator)
 <-
 	!common::update_role_to(goal_evaluator);
+	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
 	.
 @available_to_evaluate2[atomic]
-+!map::available_to_evaluate(false).
++!map::available_to_evaluate(false, _, _).
 	
 -!map::evaluate(_, _) : 
 	common::previous_role(retriever) 
@@ -85,9 +86,11 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	//-exploration::explorer;
 	!action::forget_old_action;
-	!common::update_role_to(goal_evaluator);
-	if(common::my_role(Role)){.print("My current role: ", Role)}
-	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	//!common::update_role_to(goal_evaluator);
+	
+	if(not map::evaluating_positions) {
+		+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	}
 
 	!map::find_cluster_origins(GoalLocalX, GoalLocalY);
 	if(not map::evaluating_positions(_)){
@@ -407,21 +410,43 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::check_task_area :
 	map::evaluating_positions(Pos)
 <- 
-	-+map::evaluating_positions([start(0, 1)|Pos]);
+	+map::checking_task_area;
+	-+map::evaluating_positions([start(0, 5)|Pos]);
 	!map::move_to_evaluating_pos(start1);
 	!action::clear(0, 5);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
 		getMyPos(MyX, MyY);
 		evaluateOrigin(Leader, MyX, MyY, bad);
+		-map::checking_task_area;
 		.fail;
 	} else {
 		if(map::evaluating_positions(Pos1)){
 			.delete(start(_, _), Pos1, Pos2);
 			-+map::evaluating_positions([start(0, -5)|Pos2]);
 			!map::move_to_evaluating_pos(start1);
+			-map::checking_task_area;
 		}
 	}
 	.	
+
++!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] :
+	map::myMap(Leader) & common::my_role(goal_evaluator) &
+	map::evaluating_positions(Pos) & .my_name(Me) & .all_names(AllAgents) & .nth(Nth,AllAgents,Me) & .nth(Nth1,AllAgents,Ag)
+<-
+	.print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)], ", Pos: ", Pos, " Goal: ", GoalX, " ", GoalY);
+	getMyPos(MyX, MyY);
+	if((.member(origin(_, MyX+GoalX, MyY+GoalY), Pos) | .member(start(MyX+GoalX, MyY+GoalY), Pos)) & 
+		Nth1 < Nth
+	) {
+		!common::go_back_to_previous_role;
+		if(common::my_role(retriever)){
+			!!retrieve::move_to_goal;
+		} elif(common::my_role(explorer)){
+			!!exploration::explore([n,s,w,e]);
+		}
+	}
+	.
++!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] : true <- .print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)]).
 
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & GX > 0 & not stop::first_to_stop(_)
@@ -509,6 +534,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
 	getMyPos(MyX, MyY);
+	getGoalClusters(Leader, Clusters);
+	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
+		.fail;
+	}
 	evaluateOrigin(Leader, MyX, MyY, boh);
 	.print("OldPos: ", Positions);
 	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
@@ -526,7 +555,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		updateGoalMap(Me, MyX+X, MyY+Y, InsertedInCluster, IsANewCluster);
 		if(IsANewCluster){
 			if(S \== "self"){
-				.send(Ag, askOne, map::available_to_evaluate(Res), map::available_to_evaluate(Res))
+				.send(Ag, askOne, map::available_to_evaluate(Res, X, Y), map::available_to_evaluate(Res, _, _))
 				if(Res == true){
 					.send(Ag, achieve, map::evaluate(X, Y));
 				}
