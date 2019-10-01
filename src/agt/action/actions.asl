@@ -5,11 +5,20 @@
 
 // Get out of a clear marker
 +!move(Direction)
-	: default::thing(0,0,marker,clear) & not common::escape
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
 <-
 	getMyPos(MyX, MyY);
+	if (retrieve::block(X,Y)) {
+		+rotate_block(X,Y);
+	}
 	!common::escape;
-	!common::move_to_pos(MyX, MyY); 
+	!common::move_to_pos(MyX, MyY);
+	if (action::rotate_block(X,Y)) {
+		while (not retrieve::block(X,Y)) {
+			!rotate(cw);
+		}
+		-rotate_block(X,Y);
+	} 
 	!move(Direction);
 	.
 // Avoid clear markers moving north
@@ -87,6 +96,26 @@
 -!detach(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !detach(Direction).
 
 // ##### ROTATE ACTION #####
+// Get out of a clear marker
++!rotate(Direction)
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) & not common::escape & retrieve::block(X,Y)
+<-
+	getMyPos(MyX, MyY);
+	!common::escape;
+	!common::move_to_pos(MyX, MyY); 
+	while (not retrieve::block(X,Y)) {
+		!rotate(Direction);
+	}
+	!rotate(Direction);
+	.
+// Avoid clear markers when rotating
++!rotate(Direction)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & common::rotate_direction(Direction,X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))
+<-
+	!action::commit_action(skip);
+	!rotate(Direction);
+	.
+// Default rotate behaviour
 +!rotate(Direction)
 <-
 	!action::commit_action(rotate(Direction));
@@ -161,6 +190,23 @@
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !clear(X,Y).
 
 // ##### SKIP ACTION #####
++!skip
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
+<-
+	getMyPos(MyX, MyY);
+	if (retrieve::block(X,Y)) {
+		+rotate_block(X,Y);
+	}
+	!common::escape;
+	!common::move_to_pos(MyX, MyY);
+	if (action::rotate_block(X,Y)) {
+		while (not retrieve::block(X,Y)) {
+			!rotate(cw);
+		}
+		-rotate_block(X,Y);
+	} 
+	!skip;
+	.
 +!skip
 <-
 	!action::commit_action(skip);
