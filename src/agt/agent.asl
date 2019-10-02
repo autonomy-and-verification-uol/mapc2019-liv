@@ -40,7 +40,56 @@
 	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30
 <-
 	for(.range(I, 1, 3) & not task::committed(_,_)){
-		!action::clear(X,Y);
+		if (retrieve::block(BX,BY)) {
+			if (BX == X-1) {
+				!action::clear(X+1,Y);
+			}
+			elif (BX == X+1) {
+				!action::clear(X-1,Y);
+			}
+			elif (YX == Y-1) {
+				!action::clear(X,Y+1);
+			}
+			elif (YX == Y+1) {
+				!action::clear(X,Y-1);
+			}
+			else {
+				if(not default::thing(X, Y, block, _) & 
+				not default::thing(X-1, Y, block, _) &
+				not default::thing(X+1, Y, block, _) &
+				not default::thing(X, Y-1, block, _) &
+				not default::thing(X, Y+1, block, _) &
+				not default::thing(X, Y, entity, Team) & 
+				not default::thing(X-1, Y, entity, Team) &
+				not default::thing(X+1, Y, entity, Team) &
+				not default::thing(X, Y-1, entity, Team) &
+				not default::thing(X, Y+1, entity, Team)
+				){
+					!action::clear(X,Y);
+				}
+				else {
+					!action::skip;
+				}
+			}
+		}
+		else {
+			if(not default::thing(X, Y, block, _) & 
+			not default::thing(X-1, Y, block, _) &
+			not default::thing(X+1, Y, block, _) &
+			not default::thing(X, Y-1, block, _) &
+			not default::thing(X, Y+1, block, _) &
+			not default::thing(X, Y, entity, Team) & 
+			not default::thing(X-1, Y, entity, Team) &
+			not default::thing(X+1, Y, entity, Team) &
+			not default::thing(X, Y-1, entity, Team) &
+			not default::thing(X, Y+1, entity, Team)
+			){
+				!action::clear(X,Y);
+			}
+			else {
+				!action::skip;
+			}
+		}
 	}
 	!!always_skip;
 	.

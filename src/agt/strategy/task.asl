@@ -422,12 +422,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(0,-2);
 				!action::clear(0,-2);
 			}
-			!action::move(n);
 			if (default::thing(0,-1,entity,_)) {
 				!common::go_around(n);
 				!rotate_back;
 //				!action::move(s);
 			}
+			!action::move(n);
 		}
 //		else {
 //			.print("@@@@@@@ Obstacle at south");
@@ -442,12 +442,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(0,3);
 				!action::clear(0,3);
 			}
-			!action::move(s);
 			if (default::thing(0,2,entity,_)) {
 				!common::go_around(s);
 				!rotate_back;
 //				!action::move(n);
 			}
+			!action::move(s);
 		}
 //		else {
 //			.print("@@@@@@@ Obstacle at north");
@@ -481,12 +481,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(2,0);
 				!action::clear(2,0);
 			}
-			!action::move(e);
 			if (default::thing(1,0,entity,_)) {
 				!common::go_around(e);
 				!rotate_back;
 //				!action::move(e);
 			}
+			!action::move(e);
 		}
 //		else {
 //			.print("@@@@@@@ Obstacle at east");
@@ -501,12 +501,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 				!action::clear(-2,0);
 				!action::clear(-2,0);
 			}
-			!action::move(w);
 			if (default::thing(-1,0,entity,_)) {
 				!common::go_around(w);
 				!rotate_back;
 //				!action::move(w);
 			}
+			!action::move(w);
 		}
 //		else {
 //			.print("@@@@@@@ Obstacle at west");

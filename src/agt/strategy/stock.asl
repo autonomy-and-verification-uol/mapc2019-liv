@@ -1176,6 +1176,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			not default::thing(ClearX, ClearY-1, entity, Team) &
 			not default::thing(ClearX, ClearY+1, entity, Team)
 		){
+			.print("CLEEEEEEEEEEEEEEEEEEEAR STOCK.ASL");
 			!action::clear(ClearX, ClearY);
 		} else{
 			+res(0);
