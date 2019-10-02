@@ -329,40 +329,71 @@ public class EISArtifact extends Artifact implements AgentListener {
     
     //Planner related methods
     // all coordinates are assumed to be visible to the agent
-    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY) throws NoValueException, IOException {
+    @OPERATION
+    public void getPlanAgentToGoal(String agent, int goalX, int goalY, OpFeedbackParam<Literal[]> plan) throws NoValueException, IOException {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
-    	return getPlan(goalStatement, null, 0);
+    	LinkedList<String> returnedPlan =  getPlan(agent, goalStatement, null, 0);
+    	logger.info(returnedPlan + "");
+    	if(returnedPlan == null) {
+    		plan.set(new Literal[0]);
+    		return ;
+    	}
+    	List<Literal> actions = new ArrayList<Literal>();
+    	for(String action : returnedPlan) {
+    		int par = action.indexOf("(");
+    		String functor = action.substring(0, par);
+    		logger.info(functor + "(");
+    		List<Term> args = new ArrayList<>();
+    		for(String arg : action.substring(par + 1, action.length() - 1).split(",")) {
+    			logger.info(arg);
+    			args.add(ASSyntax.createAtom(arg));
+    		}
+    		logger.info(")");
+    		Term[] terms = new Term[args.size()];
+    		int i = 0;
+    		for(Term t : args) {
+    			terms[i++] = t;
+    		}
+    		
+    		logger.info(terms + "");
+    		actions.add(ASSyntax.createLiteral(functor, terms));
+    	}
+    	
+    	plan.set(actions.toArray(new Literal[actions.size()]));
     }
     
-    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    @OPERATION
+    public LinkedList<String> getPlanAgentToGoal(String agent, int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
-    	return getPlan(goalStatement, attachedBlockCell, 0);
+    	return getPlan(agent, goalStatement, attachedBlockCell, 0);
     }
     
-    // to modify
-    public LinkedList<String> getPlanBlockToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    @OPERATION
+    public LinkedList<String> getPlanBlockToGoal(String agent, int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at b0 " + goalCell + ")");
-    	return getPlan(goalStatement, attachedBlockCell, 1);
+    	return getPlan(agent, goalStatement, attachedBlockCell, 1);
     }
     
     private String createGoalStatement(String actualGoal) {
     	return "\t(:goal " + actualGoal + ")";
     }
     
-    private LinkedList<String> getPlan(String goalStatement, String attachedBlockCoordinates, int blockCounter) throws NoValueException, IOException{
+    private LinkedList<String> getPlan(String agent, String goalStatement, String attachedBlockCoordinates, int blockCounter) throws NoValueException, IOException{
+    	
+    	logger.info("We are in the getPlan method!");
     	
     	Set<String> nonEmptyCells = new HashSet<String>();
     	
     	nonEmptyCells.add("p0p0");
     	
-    	String problemFileName = EISArtifact.class.getName() + "_problem.pddl";
+    	String problemFileName = agent + "_problem.pddl";
     	
-    	File problemFile = new File(problemFileName);
+    	File problemFile = new File("planner/" + problemFileName);
     	
     	FileWriter problemFileWriter = new FileWriter(problemFile);
     	
@@ -417,7 +448,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	for(String b : blocks)
     		blocksDeclaration += b + " ";
     	
-    	if(!blocksDeclaration.equals(""))
+    	if(!blocksDeclaration.equals("\t\t"))
     		objects += blocksDeclaration + "- block\n";
     	
     	String obstaclesDeclaration = "\t\t";
@@ -425,7 +456,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	for(String o : obstacles)
     		obstaclesDeclaration += o + " ";
     	
-    	if(!obstaclesDeclaration.equals(""))
+    	if(!obstaclesDeclaration.equals("\t\t"))
     		objects += "\t\t" + obstaclesDeclaration + "- obstacle\n";
     	
     	objects += "\t)\n";
@@ -487,13 +518,14 @@ public class EISArtifact extends Artifact implements AgentListener {
     	problemFileWriter.close();
     	
     	LinkedList<String> plan = callPlanner(problemFileName, outputFileName);
-    	problemFile.delete();
-    	
+    	//problemFile.delete();
+    	//
     	return plan; 
     }
     
     private LinkedList<String> callPlanner(String problem, String output) throws IOException {
-    	
+    	logger.info("problem file name: " + problem);
+       	logger.info("output file name: " + output);
     	ProcessBuilder pb = new ProcessBuilder("./run.sh", "domain_mapc.pddl", problem, output);
     	pb.directory(new File("./planner"));
 		Process p = pb.start();
@@ -504,12 +536,13 @@ public class EISArtifact extends Artifact implements AgentListener {
 			String line = s.nextLine();
 			if(line.equals("NO PLAN")) {
 				s.close();
+			   	logger.info("NO PLAN returned or problems with the planner invocation");
 				return null;
 			}
 			plan.add(line);
 		}
 		s.close();
-		
+	   	logger.info("We have a plan!");
 		return plan;
     }
     

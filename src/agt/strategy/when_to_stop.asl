@@ -43,7 +43,12 @@
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 			initAvailablePos(Leader);
 			+retrieve::moving_to_origin;
-			!!retrieve::move_to_goal;
+			!generate_goal(GoalX, GoalY, Plan);
+			!!execute_plan(Plan);
+			//+plan(Plan);
+			//?plan([Head|PlanX]);
+			//.print("@@@@@@ Head: ",Head);
+//			!!retrieve::move_to_goal;
 		}
 		else{
 			-stop::stop;
@@ -53,6 +58,66 @@
 		-stop;
 	}
 	.
+	
++!generate_goal(GoalX, GoalY, Plan)
+	: .my_name(Me)
+<-
+	getMyPos(MyX, MyY);
+	//getTargetGoal(_, GoalX, GoalY, _);
+	if(GoalX-MyX <= -5){
+		TargetX = -5;
+	} elif(GoalX-MyX >= 5){
+		TargetX = 5;
+	} else {
+		TargetX = GoalX-MyX;
+	}
+	if(GoalY-MyY <= -5){
+		TargetY = -5;
+	} elif(GoalY-MyY >= 5){
+		TargetY = 5;
+	} else {
+		TargetY = GoalY-MyY;
+	}
+	Sum = math.abs(TargetX) + math.abs(TargetY);
+	if(Sum > 5){
+		DeltaX = math.floor((Sum - 5) / 2);
+		DeltaY = DeltaX + 1;
+		if(TargetX > 0){
+			FinalTargetX = TargetX - DeltaX;
+		} else {
+			FinalTargetX = TargetX + DeltaX;
+		}
+		if(TargetY > 0){
+			FinalTargetY = TargetY - DeltaY;
+		} else {
+			FinalTargetY = TargetY + DeltaY;
+		}
+	} else {
+		FinalTargetX = TargetX;
+		FinalTargetY = TargetY;
+	}
+	.print(FinalTargetX);
+	.print(FinalTargetY);
+	getPlanAgentToGoal(Me, FinalTargetX, FinalTargetY, Plan);
+	.print("@@@@@@ Plan: ",Plan);
+	.
+	
++!execute_plan(Plan)
+<-
+	for (.member(Action, Plan)){
+		if (.substring("clear",Action)) {
+			for(.range(I, 1, 3)){
+				.print("@@@@ Action: ", Action);
+				!action::Action;
+			}
+		}
+		else {
+			.print("@@@@ Action: ", Action);
+			!action::Action;
+		}
+	}
+	.
+	
 @stop2[atomic]
 +stop
 	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
@@ -88,7 +153,10 @@
 		//+retrieve::retriever;
 		//+task::helper;
 		+retrieve::moving_to_origin;
-		!!retrieve::move_to_goal;
+		getTargetGoal(_, GoalX, GoalY, _);
+		!generate_goal(GoalX+1, GoalY, Plan);
+		!!execute_plan(Plan);
+//		!!retrieve::move_to_goal;
 //		!!retrieve::retrieve_block;
 	}
 	else {
