@@ -6,13 +6,17 @@ import jason.asSyntax.*;
 
 
 import java.awt.Point;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -218,6 +222,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 			}
 		}
 		
+
 //		logger.info("@@@@ "+obstacleList);
 //		logger.info("@@@@ "+blockList);
 
@@ -321,5 +326,196 @@ public class EISArtifact extends Artifact implements AgentListener {
 	
     @Override
     public void handlePercept(String agent, Percept percept) {}
-   
+    
+    //Planner related methods
+    // all coordinates are assumed to be visible to the agent
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
+    	return getPlan(goalStatement, null, 0);
+    }
+    
+    public LinkedList<String> getPlanAgentToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
+    	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
+    	return getPlan(goalStatement, attachedBlockCell, 0);
+    }
+    
+    // to modify
+    public LinkedList<String> getPlanBlockToGoal(int goalX, int goalY, int blockX, int blockY) throws NoValueException, IOException {
+    	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
+    	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
+    	String goalStatement = createGoalStatement("(at b0 " + goalCell + ")");
+    	return getPlan(goalStatement, attachedBlockCell, 1);
+    }
+    
+    private String createGoalStatement(String actualGoal) {
+    	return "\t(:goal " + actualGoal + ")";
+    }
+    
+    private LinkedList<String> getPlan(String goalStatement, String attachedBlockCoordinates, int blockCounter) throws NoValueException, IOException{
+    	
+    	Set<String> nonEmptyCells = new HashSet<String>();
+    	
+    	nonEmptyCells.add("p0p0");
+    	
+    	String problemFileName = EISArtifact.class.getName() + "_problem.pddl";
+    	
+    	File problemFile = new File(problemFileName);
+    	
+    	FileWriter problemFileWriter = new FileWriter(problemFile);
+    	
+    	String outputFileName = EISArtifact.class.getName() + "_output";
+    	
+    	String preamble = "(define (problem " + EISArtifact.class.getName() + ")\n"
+    			+ "\t(:domain mapc)\n";
+    	
+    	problemFileWriter.write(preamble);
+    	
+    	List<String> blocks = new LinkedList<String>();
+    	List<String> obstacles = new LinkedList<String>();
+    	
+    	List<String> initBlocksObstacles = new LinkedList<String>();
+    	
+    	int obstacles_number = 0;
+    	
+    	//Analysing blocks list
+    	for(Literal l : this.blockList) {
+    		int x = (int)((NumberTerm) l.getTerm(0)).solve();
+    		int y = (int)((NumberTerm) l.getTerm(1)).solve();
+    		String cell = coordinate2String(x) + coordinate2String(y);
+    		String blockID = null;
+    		if(cell.equals(attachedBlockCoordinates))
+    			blockID = "b0";
+			else {
+				blockID = "b" + blockCounter;
+				blockCounter++;
+			}
+    		nonEmptyCells.add(cell);
+    		blocks.add(blockID);
+    		initBlocksObstacles.add("( at " + blockID + " " + cell + ")");
+    	}
+    	
+    	//Analysing obstacles list
+    	for(Literal l : this.obstacleList) {
+    		int x = (int)((NumberTerm) l.getTerm(0)).solve();
+    		int y = (int)((NumberTerm) l.getTerm(1)).solve();
+    		String cell = coordinate2String(x) + coordinate2String(y);
+    		String obstaclesID = "o" + obstacles_number;
+    		obstacles_number++;
+    		nonEmptyCells.add(cell);
+    		obstacles.add(obstaclesID);
+    		initBlocksObstacles.add("( at " + obstaclesID + " " + cell + ")");
+    	}
+    	
+    	//Creating the :objects field
+    	String objects = "\t(:objects\n";
+    	
+    	String blocksDeclaration = "\t\t";
+    	
+    	for(String b : blocks)
+    		blocksDeclaration += b + " ";
+    	
+    	if(!blocksDeclaration.equals(""))
+    		objects += blocksDeclaration + "- block\n";
+    	
+    	String obstaclesDeclaration = "\t\t";
+    	
+    	for(String o : obstacles)
+    		obstaclesDeclaration += o + " ";
+    	
+    	if(!obstaclesDeclaration.equals(""))
+    		objects += "\t\t" + obstaclesDeclaration + "- obstacle\n";
+    	
+    	objects += "\t)\n";
+    	
+    	// writing objects to file
+    	if(!objects.toString().equals("\t(:objects\n\t\n"))
+    		problemFileWriter.write(objects.toString());
+    	
+    	// writing :init field
+    	problemFileWriter.write("\t(:init\n");
+    	problemFileWriter.write("\t\t(rotation cw n e)\n");
+    	problemFileWriter.write("\t\t(rotation cw e s)\n");
+    	problemFileWriter.write("\t\t(rotation cw s w)\n");
+    	problemFileWriter.write("\t\t(rotation cw w n)\n");
+    	problemFileWriter.write("\t\t(rotation ccw n w)\n");
+    	problemFileWriter.write("\t\t(rotation ccw w s)\n");
+    	problemFileWriter.write("\t\t(rotation ccw s e)\n");
+    	problemFileWriter.write("\t\t(rotation ccw e n)\n");
+    	problemFileWriter.write("\t\t(at a p0p0)\n");
+    	problemFileWriter.write("\t\t(= (total-cost) 0)\n");
+    	
+    	if(attachedBlockCoordinates == null)
+    		problemFileWriter.write("\t\t(alone a)\n");
+    	else
+    		problemFileWriter.write("\t\t(attached a b0)\n");
+    	
+    	for(int i = -5; i < 6; i++) {
+    		int init_j = 5 - Math.abs(i);
+    		for(int j = -init_j; j < init_j + 1; j++) {
+    			String cellName = coordinate2String(j) + coordinate2String(i);
+    			if(!nonEmptyCells.contains(cellName))
+    				problemFileWriter.write("\t\t(empty " + cellName + ")\n");
+    			
+    			if(	Math.abs(j) + Math.abs(i - 1) < 6 )
+    				problemFileWriter.write("\t\t(adjacent n " + cellName + " " + coordinate2String(j) + coordinate2String(i - 1) + ")\n");
+    			
+    			if(	Math.abs(j + 1) + Math.abs(i) < 6 )
+    				problemFileWriter.write("\t\t(adjacent e " + cellName + " " + coordinate2String(j + 1) + coordinate2String(i) + ")\n");
+    			
+    			if(	Math.abs(j) + Math.abs(i + 1) < 6 )
+    				problemFileWriter.write("\t\t(adjacent s " + cellName + " " + coordinate2String(j) + coordinate2String(i + 1) + ")\n");
+    			
+    			if(	Math.abs(j - 1) + Math.abs(i) < 6 )
+    				problemFileWriter.write("\t\t(adjacent w " + cellName + " " + coordinate2String(j - 1) + coordinate2String(i) + ")\n");
+    		}
+    	}
+    	
+    	for(String otherInit : initBlocksObstacles)
+    		problemFileWriter.write("\t\t" + otherInit + "\n");
+    	problemFileWriter.write("\t)\n");
+    	
+    	// writing goal
+    	problemFileWriter.write(goalStatement + "\n");
+    	
+    	//metric + end bracket
+    	problemFileWriter.write("\t(:metric minimize (total-cost))\n)");
+    	
+    	problemFileWriter.flush();
+    	problemFileWriter.close();
+    	
+    	LinkedList<String> plan = callPlanner(problemFileName, outputFileName);
+    	problemFile.delete();
+    	
+    	return plan; 
+    }
+    
+    private LinkedList<String> callPlanner(String problem, String output) throws IOException {
+    	
+    	ProcessBuilder pb = new ProcessBuilder("./run.sh", "domain_mapc.pddl", problem, output);
+    	pb.directory(new File("./planner"));
+		Process p = pb.start();
+		Scanner s = new Scanner(p.getInputStream());
+		LinkedList<String> plan = new LinkedList<String>();
+		
+		while(s.hasNextLine()) {
+			String line = s.nextLine();
+			if(line.equals("NO PLAN")) {
+				s.close();
+				return null;
+			}
+			plan.add(line);
+		}
+		s.close();
+		
+		return plan;
+    }
+    
+    private String coordinate2String(int coordinate) {
+    	if(coordinate < 0)
+    		return "n" + Math.abs(coordinate);
+    	return "p" + coordinate;
+    }
 }

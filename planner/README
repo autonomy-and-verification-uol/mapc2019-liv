@@ -1,0 +1,7 @@
+To use the planner you need
+1) the planner to be compiled somewhere on your computer
+2) change the executable path in the script
+
+NOTE: I've modified the script in such a way that instead of checking the error code of the planner,
+it checks for the existence of the file with the plan. Such file is deleted at the end of the script
+(the problem file is also deleted, but within a Java method).
