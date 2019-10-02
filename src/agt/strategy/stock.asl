@@ -720,16 +720,16 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::move_to_goal_aux(TargetX, TargetY) :	
 	retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
 <-
-	if(retrieve::block(0, -1)){
-		!retrieve::smart_rotate(n, s);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
-	} elif(retrieve::block(-1, 0)){
-		!retrieve::smart_rotate(w, s);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
-	} elif(retrieve::block(1, 0)){
-		!retrieve::smart_rotate(e, s);
-		!retrieve::move_to_goal_aux(TargetX, TargetY);
-	} else{
+//	if(retrieve::block(0, -1)){
+//		!retrieve::smart_rotate(n, s);
+//		!retrieve::move_to_goal_aux(TargetX, TargetY);
+//	} elif(retrieve::block(-1, 0)){
+//		!retrieve::smart_rotate(w, s);
+//		!retrieve::move_to_goal_aux(TargetX, TargetY);
+//	} elif(retrieve::block(1, 0)){
+//		!retrieve::smart_rotate(e, s);
+//		!retrieve::move_to_goal_aux(TargetX, TargetY);
+//	} else{
 	.my_name(Me);
 	if  (stop::first_to_stop(Me)) {
 		-moving_to_origin;
@@ -740,32 +740,20 @@ most_needed_type(Dispensers, AgList, Type) :-
 		.send(Ag, tell, task::helper(Me));
 	}
 	elif (common::my_role(stocker)) {
-		?retrieve::block(X,Y);
-		?default::thing(X,Y,block,Type);
 		?gate(Gate);
 		getMyPos(MyX,MyY);
 		addStocker(Me, MyX, MyY, Gate);
 		+task::stocker_in_position;
-		addStockerBlock(Me, Type);
+		if (retrieve::block(X,Y)) {
+			?default::thing(X,Y,block,Type);
+			addStockerBlock(Me, Type);
+		}
+		
 //			addAvailableAgent(Me,Type);
 		.send(Ag, tell, task::stocker(Me));
 	}
 	!default::always_skip;
-	}
-//	STOCKERS
-//	.my_name(Me);
-//	if  (stop::first_to_stop(Me)) {
-//		+task::origin;
 //	}
-//	else {
-//		if (retrieve::block(X,Y) & default::thing(X,Y,block,Type)) {
-//			addAvailableAgent(Me,Type);
-//		}
-//		else {
-//			!!retrieve::retrieve_block;
-//		}
-//	}
-//	!default::always_skip;
 	.
 	
 //+!retrieve::move_to_goal_aux(MyX, MyY) :
@@ -1177,21 +1165,21 @@ most_needed_type(Dispensers, AgList, Type) :-
 		}
 	}
 	for(.range(I, 1, 3) & not retrieve::res(Res)){
-//		if(not default::thing(ClearX, ClearY, block, _) & 
-//			not default::thing(ClearX-1, ClearY, block, _) &
-//			not default::thing(ClearX+1, ClearY, block, _) &
-//			not default::thing(ClearX, ClearY-1, block, _) &
-//			not default::thing(ClearX, ClearY+1, block, _) &
-//			not default::thing(ClearX, ClearY, entity, Team) & 
-//			not default::thing(ClearX-1, ClearY, entity, Team) &
-//			not default::thing(ClearX+1, ClearY, entity, Team) &
-//			not default::thing(ClearX, ClearY-1, entity, Team) &
-//			not default::thing(ClearX, ClearY+1, entity, Team)
-//		){
+		if(not default::thing(ClearX, ClearY, block, _) & 
+			not default::thing(ClearX-1, ClearY, block, _) &
+			not default::thing(ClearX+1, ClearY, block, _) &
+			not default::thing(ClearX, ClearY-1, block, _) &
+			not default::thing(ClearX, ClearY+1, block, _) &
+			not default::thing(ClearX, ClearY, entity, Team) & 
+			not default::thing(ClearX-1, ClearY, entity, Team) &
+			not default::thing(ClearX+1, ClearY, entity, Team) &
+			not default::thing(ClearX, ClearY-1, entity, Team) &
+			not default::thing(ClearX, ClearY+1, entity, Team)
+		){
 			!action::clear(ClearX, ClearY);
-//		} else{
-//			+res(0);
-//		}
+		} else{
+			+res(0);
+		}
 	}
 	if(not retrieve::res(Res)){
 		if(not default::lastActionResult(success)){

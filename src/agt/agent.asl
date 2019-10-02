@@ -47,7 +47,7 @@
 
 +!always_skip :
 	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
-	not retrieve::block(0, 1) & common::my_role(retriever)
+	not retrieve::block(X, Y) & common::my_role(retriever)
 <-
 	!!retrieve::retrieve_block;
 	.
