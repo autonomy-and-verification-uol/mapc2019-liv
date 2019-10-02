@@ -23,28 +23,28 @@
 	.
 // Avoid clear markers moving north
 +!move(n)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci)) | (retrieve::block(0,-1) & (default::thing(0,-2,marker,clear) | default::thing(0,-2,marker,ci))))
 <-
 	!action::commit_action(skip);
 	!move(n);
 	.
 // Avoid clear markers moving south
 +!move(s)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci)) | (retrieve::block(0,1) & (default::thing(0,2,marker,clear) | default::thing(0,2,marker,ci))))
 <-
 	!action::commit_action(skip);
 	!move(s);
 	.
 // Avoid clear markers moving east
 +!move(e)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci)) | (retrieve::block(1,0) & (default::thing(2,0,marker,clear) | default::thing(2,0,marker,ci))))
 <-
 	!action::commit_action(skip);
 	!move(e);
 	.
 // Avoid clear markers moving west
 +!move(e)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))  | (retrieve::block(-1,0) & (default::thing(-2,0,marker,clear) | default::thing(-2,0,marker,ci))))
 <-
 	!action::commit_action(skip);
 	!move(w);
