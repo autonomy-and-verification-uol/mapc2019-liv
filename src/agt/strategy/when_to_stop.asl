@@ -15,7 +15,7 @@
 
 @stop1[atomic]
 +stop
-	: exploration::explorer & not stop::first_to_stop(_) & .my_name(Me) // first to stop
+	: common::my_role(explorer) & not stop::first_to_stop(_) & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader)
 <-
 	!map::get_clusters(Clusters);
@@ -29,14 +29,15 @@
 		if (Flag) {
 			.broadcast(tell, stop::first_to_stop(Me));
 			+stop::first_to_stop(Me);
-			.print("Removing explorer");
-			-exploration::explorer;
+			//.print("Removing explorer");
+			//-exploration::explorer;
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
 			!action::forget_old_action;
 			.print("Adding retriever");
-			+retrieve::retriever;
+			!common::update_role_to(retriever);
+			//+retrieve::retriever;
 			.print("Call first time setTargetGoal");
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
@@ -54,7 +55,7 @@
 	.
 @stop2[atomic]
 +stop
-	: exploration::explorer & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
+	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
 <-
 	joinRetrievers(Flag);
 //	.print("Removing explorer");
@@ -66,30 +67,38 @@
 //	+retrieve::retriever;
 	if (Flag == "stocker") {
 		.print("Removing explorer");
-		-exploration::explorer;
+		//-exploration::explorer;
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		+retrieve::retriever;
-		+task::stocker;
+		!common::update_role_to(stocker);
+		//+retrieve::retriever;
+		//+task::stocker;
 		!!retrieve::retrieve_block;
 	}
 	elif (Flag == "helper") {
 		.print("Removing explorer");
-		-exploration::explorer;
+		//-exploration::explorer;
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		+retrieve::retriever;
-		+task::helper;
+		!common::update_role_to(helper);
+		//+retrieve::retriever;
+		//+task::helper;
 		+retrieve::moving_to_origin;
 		!!retrieve::move_to_goal;
 //		!!retrieve::retrieve_block;
 	}
 	else {
-		-stop;
+		.print("Removing explorer");
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		!common::update_role_to(retriever);
+		!!retrieve::retrieve_block;
 	}
 //	!!retrieve::retrieve_block;
 	.
@@ -97,17 +106,19 @@
 
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag)[source(_)] :
-	retrieve::retriever & .my_name(Me) & stop::first_to_stop(Me) &
+	common::my_role(retriever) & .my_name(Me) & stop::first_to_stop(Me) &
 	.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Ag) & PosOther < Pos
 <-
 	.print("Removing retriever");
 //	removeRetriever;
-	-retrieve::retriever;
+	//-retrieve::retriever;
 	-stop::stop;
 	-stop::first_to_stop(Me);
 	!action::forget_old_action;
 	.print("Adding explorer");
-	+exploration::explorer;
+	//+exploration::explorer;
+	.print("HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE1");
+	!common::update_role_to(explorer);
 	!!exploration::explore([n,s,e,w]);
 	.
 @first_to_stop2[atomic]
@@ -127,7 +138,7 @@
 	.
 //@check_join_group[atomic]
 +!stop::check_join_group
-	: exploration::explorer & 
+	: common::my_role(explorer) & 
 	stop::first_to_stop(Ag) & // send a message to the one that stopped asking who the leader is, and you check if you have the same
 	map::myMap(Leader)
 <-
@@ -141,31 +152,42 @@
 //		-common::escape;
 //		+retrieve::retriever;
 //		!action::forget_old_action;
-	if (Flag == "stocker") {
-		.print("Removing explorer");
-		-exploration::explorer;
-		-exploration::special(_);
-		-common::avoid(_);
-		-common::escape;
-		!action::forget_old_action;
-		+retrieve::retriever;
-		+task::stocker;
-		!!retrieve::retrieve_block;
-	}
-	elif (Flag == "helper") {
-		.print("Removing explorer");
-		-exploration::explorer;
-		-exploration::special(_);
-		-common::avoid(_);
-		-common::escape;
-		!action::forget_old_action;
-		+retrieve::retriever;
-		+task::helper;
-		+retrieve::moving_to_origin;
-		!!retrieve::move_to_goal;
-//		!!retrieve::retrieve_block;
-	}
-//		!!retrieve::retrieve_block;
+		if (Flag == "stocker") {
+			//.print("Removing explorer");
+			//-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(stocker);
+			//+retrieve::retriever;
+			//+task::stocker;
+			!!retrieve::retrieve_block;
+		}
+		elif (Flag == "helper") {
+			//.print("Removing explorer");
+			//-exploration::explorer;
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(helper);
+			//+retrieve::retriever;
+			//+task::helper;
+			+retrieve::moving_to_origin;
+			!!retrieve::move_to_goal;
+	//		!!retrieve::retrieve_block;
+		}
+		else {
+			.print("Removing explorer");
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(retriever);
+			!!retrieve::retrieve_block;
+		}
+	//		!!retrieve::retrieve_block;
 	}
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").

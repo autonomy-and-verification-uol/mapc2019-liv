@@ -222,8 +222,9 @@ public class EISArtifact extends Artifact implements AgentListener {
 			}
 		}
 		
-		logger.info("@@@@ "+obstacleList);
-		logger.info("@@@@ "+blockList);
+
+//		logger.info("@@@@ "+obstacleList);
+//		logger.info("@@@@ "+blockList);
 
 		if (!start.isEmpty()) {
 			for (Literal lit: start) {

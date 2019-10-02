@@ -8,6 +8,11 @@ direction_block(s,X,Y) :- X = 0 & Y = 1.
 direction_block(e,X,Y) :- X = 1 & Y = 0.
 direction_block(w,X,Y) :- X = -1 & Y = 0.
 
+check_obstacle_bounds(n) :- default::obstacle(0,-2) | (default::thing(0, -2, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(s) :- default::obstacle(0,2)  | (default::thing(0, 2, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(e) :- default::obstacle(2,0)  | (default::thing(2, 0, Type, _) & Type \== dispenser & Type \== marker).
+check_obstacle_bounds(w) :- default::obstacle(-2,0) | (default::thing(-2, 0, Type, _) & Type \== dispenser & Type \== marker).
+
 rotate_direction(cw,NewX,NewY) :- retrieve::block(0,-1) & NewX = 1 & NewY = 0.
 rotate_direction(cw,NewX,NewY) :- retrieve::block(0,1) & NewX = -1 & NewY = 0.
 rotate_direction(cw,NewX,NewY) :- retrieve::block(1,0) & NewX = 0 & NewY = 1.
@@ -228,7 +233,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	.
 	
 +!no_escape : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
-+!no_escape : escape <- !action::commit_action(move(z)); !no_escape.
++!no_escape : escape <- !action::commit_action(skip); !no_escape.
 	
 +!move_to_escape(MyX,MyY,MyX,MyY).
 +!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
@@ -301,6 +306,27 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 -!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
 	
 
++!common::update_role_to(Role) : common::my_role(Role).
++!common::update_role_to(NewRole) :
+	common::my_role(MyRole)
+<-
+	.print("My role is now: ", NewRole);
+	-+common::previous_role(MyRole);
+	-+common::my_role(NewRole)
+	.
++!common::update_role_to(NewRole) :
+	true
+<-
+	.print("My role is now: ", NewRole);
+	-+common::my_role(NewRole)
+	.
++!common::go_back_to_previous_role :
+	common::previous_role(MyRole) & common::my_role(OldRole)
+<-
+	-+common::my_role(MyRole);
+	-+common::previous_role(OldRole);
+	.
+
 /*
 +!move_to_pos_aux(_, X, Y, X, Y).
 +!move_to_pos_aux(Leader, X, Y, MyX, MyY) :	
@@ -348,7 +374,19 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	getMyPos(NewStartX, NewStartY);
 	!move_to_pos(Leader2, NewStartX, NewStartY, NewStartX + LocalX, NewStartY + LocalY).*/
 //-!move_to_pos(Leader1, StartX, StartY, X, Y) : true <- .fail.
+
+@removeblockbelief[atomic]
++default::actionID(_)
+	: retrieve::block(X,Y) & default::lastAction(rotate) & default::lastActionResult(success) & default::lastActionParams([Direction|List]) & common::rotate_direction(Direction,NewX,NewY) & not default::thing(NewX,NewY,block,_)
+<-
+	-retrieve::block(X,Y);
+	.
 	
-	
+@removeblockbeliefnorotate[atomic]
++default::actionID(_)
+	: not default::lastAction(rotate) & retrieve::block(X,Y) & not default::thing(X,Y,block,_)
+<-
+	-retrieve::block(X,Y);
+	.
 	
 	

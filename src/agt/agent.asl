@@ -34,59 +34,78 @@
 //	!always_skip;
 	!!exploration::explore([n,s,e,w]);
 	.
-	
 
 +!always_skip :
-	task::origin & 
+	(task::origin | common::my_role(stocker))  & 
 	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30
 <-
 	for(.range(I, 1, 3) & not task::committed(_,_)){
-		!action::clear(X,Y);
+		if (retrieve::block(BX,BY)) {
+			if (BX == X-1) {
+				!action::clear(X+1,Y);
+			}
+			elif (BX == X+1) {
+				!action::clear(X-1,Y);
+			}
+			elif (YX == Y-1) {
+				!action::clear(X,Y+1);
+			}
+			elif (YX == Y+1) {
+				!action::clear(X,Y-1);
+			}
+			else {
+				if(not default::thing(X, Y, block, _) & 
+				not default::thing(X-1, Y, block, _) &
+				not default::thing(X+1, Y, block, _) &
+				not default::thing(X, Y-1, block, _) &
+				not default::thing(X, Y+1, block, _) &
+				not default::thing(X, Y, entity, Team) & 
+				not default::thing(X-1, Y, entity, Team) &
+				not default::thing(X+1, Y, entity, Team) &
+				not default::thing(X, Y-1, entity, Team) &
+				not default::thing(X, Y+1, entity, Team)
+				){
+					!action::clear(X,Y);
+				}
+				else {
+					!action::skip;
+				}
+			}
+		}
+		else {
+			if(not default::thing(X, Y, block, _) & 
+			not default::thing(X-1, Y, block, _) &
+			not default::thing(X+1, Y, block, _) &
+			not default::thing(X, Y-1, block, _) &
+			not default::thing(X, Y+1, block, _) &
+			not default::thing(X, Y, entity, Team) & 
+			not default::thing(X-1, Y, entity, Team) &
+			not default::thing(X+1, Y, entity, Team) &
+			not default::thing(X, Y-1, entity, Team) &
+			not default::thing(X, Y+1, entity, Team)
+			){
+				!action::clear(X,Y);
+			}
+			else {
+				!action::skip;
+			}
+		}
 	}
 	!!always_skip;
 	.
 
 +!always_skip :
-	not task::origin & not task::helper & not task::stocker &
-	not retrieve::block(0, 1) & retrieve::retriever
+	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
+	not retrieve::block(X, Y) & common::my_role(retriever)
 <-
-	getMyPos(MyX, MyY);
-	addAvailablePos(MyX, MyY);
 	!!retrieve::retrieve_block;
 	.
-//+!always_skip :
-//	not task::origin & retrieve::block(0, 1) & default::team(Team) & (default::thing(1, 1, entity, Team) | default::thing(-1, 1, entity, Team))
-//<-
-//	if(not default::obstacle(-1, 0)){
-//		!action::rotate(cw);
-//		while(not default::lastActionResult(success)){
-//			!action::rotate(cw);
-//		}
-//		!action::move(z);
-//		!action::rotate(ccw);
-//		while(not default::lastActionResult(success)){
-//			!action::rotate(ccw);
-//		}
-//	} elif(not default::obstacle(1, 0)){
-//		!action::rotate(ccw);
-//		while(not default::lastActionResult(success)){
-//			!action::rotate(ccw);
-//		}
-//		!action::move(z);
-//		!action::rotate(cw);
-//		while(not default::lastActionResult(success)){
-//			!action::rotate(cw);
-//		}
-//	}
-//	!!always_skip;
-//	.
 +!always_skip
 	: true
 <-
-	!action::move(z);
+	!action::skip;
 	!!always_skip;
 	.
-//-!always_skip <- !!always_skip.
     
 +!always_move_north
 	: true
@@ -94,4 +113,3 @@
 	!action::move(n);
 	!!always_move_north;
 	.
--!always_move_north <- !!always_move_north.

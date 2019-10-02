@@ -63,7 +63,7 @@ remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
 
 +!explore(DirList) 
-	: explorer & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
+	: common::my_role(explorer) & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
 	.print("There is a friendly agent in all possible directions, trying to move randomly.");
 	!action::move(Dir);
@@ -71,21 +71,21 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore(DirList) 
-	: explorer & prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,Dir)
+	: common::my_role(explorer) & prune_direction(DirList,[],PrunedDirList)  & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,Dir)
 <-
 	 !explore_until_obstacle(Dir);
 	 .
 	
 // special case	
 +!explore(Dirlist)
-	: explorer & prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir) 
+	: common::my_role(explorer) & prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir) 
 <-
 	+special(first);
 	!explore_until_obstacle_special(FirstDir);
 	.
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & exploration::explorer
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer)
 <-
 	.print("@@@@@ No movement options available, sending skip forever");
 	!default::always_skip;
@@ -96,7 +96,7 @@ remove_opposite(w,e) :- true.
 
 
 +!explore_until_obstacle(Dir)
-	: explorer & check_agent(Dir)
+	: common::my_role(explorer) & check_agent(Dir)
 <-
 	.print("I see someone from my team, time to *try* to go around it.");
 	!common::go_around(Dir);
@@ -104,7 +104,7 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle(Dir)
-	: explorer & action::out_of_bounds(Dir)
+	: common::my_role(explorer) & action::out_of_bounds(Dir)
 <-
 	-action::out_of_bounds(Dir);
 	.delete(Dir,[n,s,e,w],DirList);
@@ -112,26 +112,26 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore_until_obstacle(Dir)
-	: explorer & not check_obstacle(Dir) & not action::out_of_bounds(Dir)
+	: common::my_role(explorer) & not check_obstacle(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle(Dir);
 	.
 	
 +!explore_until_obstacle(Dir)
-	: explorer & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
+	: common::my_role(explorer) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	!!explore(DirList);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer & not exploration::special(_) 
+	: common::my_role(explorer) & not exploration::special(_) 
 <-
 	!explore_until_obstacle(Dir);
 	.
 
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(_) & check_agent(Dir)
+	: common::my_role(explorer) & exploration::special(_) & check_agent(Dir)
 <-
 	.print("I see someone from my team, time to *try* to go around it.");
 	!common::go_around(Dir);
@@ -148,14 +148,14 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(_) & not check_obstacle_special(Dir) & not action::out_of_bounds(Dir)
+	: common::my_role(explorer) & exploration::special(_) & not check_obstacle_special(Dir) & not action::out_of_bounds(Dir)
 <-
 	!action::move(Dir);
 	!!explore_until_obstacle_special(Dir);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,SecondDir)
+	: common::my_role(explorer) & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,SecondDir)
 <-
 	!action::move(SecondDir);
 	-special(first);
@@ -164,21 +164,21 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & .empty(PrunedDirList) & not check_obstacle_special(NewDir)
+	: common::my_role(explorer) & exploration::special(first) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) & prune_direction_special(DirList,[],PrunedDirList) & .empty(PrunedDirList) & not check_obstacle_special(NewDir)
 <-
 	!action::move(NewDir);
 	!!explore_until_obstacle_special(NewDir);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(second) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
+	: common::my_role(explorer) & exploration::special(second) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	-special(second);
 	!!explore(DirList);
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & exploration::explorer
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer)
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
 	!default::always_skip;

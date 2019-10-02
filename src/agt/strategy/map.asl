@@ -54,14 +54,43 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.send(Leader, achieve, map::add_map(goal, MyX, MyY, X, Y, UniqueString));
 	.
 
--!map::evaluate(_, _) : retrieve::retriever <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; !!retrieve::move_to_goal.
--!map::evaluate(_, _) : true <- .print("Evaluation failed"); -map::evaluating_positions(_); -map::evaluating_vertexes; +exploration::explorer; !!exploration::explore([n,s,w,e]).
+@available_to_evaluate1[atomic]
++!map::available_to_evaluate(true, GoalLocalX, GoalLocalY) :
+	not common::my_role(goal_evaluator)
+<-
+	!common::update_role_to(goal_evaluator);
+	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	.
+@available_to_evaluate2[atomic]
++!map::available_to_evaluate(false, _, _).
+	
+-!map::evaluate(_, _) : 
+	common::previous_role(retriever) 
+<- 
+	.print("Evaluation failed"); 
+	-map::evaluating_positions(_); 
+	-map::evaluating_vertexes; 
+	!common::go_back_to_previous_role;
+	!!retrieve::move_to_goal.
+-!map::evaluate(_, _) : 
+	common::previous_role(explorer)  
+<- 
+	.print("Evaluation failed"); 
+	-map::evaluating_positions(_); 
+	-map::evaluating_vertexes; 
+	!common::go_back_to_previous_role;
+	//!common::update_role_to(explorer);
+	!!exploration::explore([n,s,w,e]).
 +!map::evaluate(GoalLocalX, GoalLocalY) :
 	true
 <-
-	-exploration::explorer;
+	//-exploration::explorer;
 	!action::forget_old_action;
-	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	//!common::update_role_to(goal_evaluator);
+	
+	if(not map::evaluating_positions) {
+		+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	}
 
 	!map::find_cluster_origins(GoalLocalX, GoalLocalY);
 	if(not map::evaluating_positions(_)){
@@ -114,9 +143,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!action::forget_old_action;
 	!map::get_clusters(Clusters);
 	.print("Clusters: ", Clusters);
-	
-	if (not retrieve::retriever) {
-		+exploration::explorer;
+	!common::go_back_to_previous_role;
+	if (not common::my_role(retriever)) {
+		//+exploration::explorer;
+		//!common::update_role_to(explorer);
 		!!exploration::explore([n,s,w,e]);
 	}
 	.
@@ -245,13 +275,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
-	if(.member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList)) & // .member(origin(_, MyX+X, MyY+Y), GoalList) 
-		not .member(origin(_, _, _), GoalList)
+	if(OriginSide == start1 | (.member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList)) & // .member(origin(_, MyX+X, MyY+Y), GoalList) 
+		not .member(origin(_, _, _), GoalList))
 	){
 		!map::move_to_evaluating_pos_1(OriginSide);
 	} else{
 		-map::evaluating_positions(_);
-		.print("Stop evaluating the cluster1");
+		.print("Stop evaluating the cluster1(", MyX, ", ", MyY, ") ", " (", X, ", ", Y, ") ", Clusters);
 	}
 	.
 +!map::move_to_evaluating_pos(OriginSide) :
@@ -355,7 +385,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			Res = 1;
 		}
 	} else {
+		if(common::my_role(Role)){.print("Before My current role: ", Role)}
 		!retrieve::smart_move(Direction);
+		if(common::my_role(Role)){.print("After My current role: ", Role)}
 		if(default::lastActionResult(failed_forbidden)){
 			Res = 0;
 		} else {
@@ -367,12 +399,55 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origins(GoalLocalX, GoalLocalY) :
 	true
 <-
+	if(common::my_role(Role)){.print("My current role: ", Role)}
 	!map::move_to_evaluating_pos(start);
 	!map::find_cluster_origin(n); 
+	!map::check_task_area;
 	//!map::find_cluster_origin(e); 
 	//!map::find_cluster_origin(s); 
 	//!map::find_cluster_origin(w);
 	.
++!map::check_task_area :
+	map::evaluating_positions(Pos)
+<- 
+	+map::checking_task_area;
+	-+map::evaluating_positions([start(0, 1)|Pos]);
+	!map::move_to_evaluating_pos(start1);
+	!action::clear(0, 5);
+	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
+		getMyPos(MyX, MyY);
+		evaluateOrigin(Leader, MyX, MyY, bad);
+		-map::checking_task_area;
+		.fail;
+	} else {
+		if(map::evaluating_positions(Pos1)){
+			.delete(start(_, _), Pos1, Pos2);
+			-+map::evaluating_positions([start(0, -5)|Pos2]);
+			!map::move_to_evaluating_pos(start1);
+			-map::checking_task_area;
+		}
+	}
+	.	
+
++!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] :
+	map::myMap(Leader) & common::my_role(goal_evaluator) &
+	map::evaluating_positions(Pos) & .my_name(Me) & .all_names(AllAgents) & .nth(Nth,AllAgents,Me) & .nth(Nth1,AllAgents,Ag)
+<-
+	.print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)], ", Pos: ", Pos, " Goal: ", GoalX, " ", GoalY);
+	getMyPos(MyX, MyY);
+	if((.member(origin(_, MyX+GoalX, MyY+GoalY), Pos) | .member(start(MyX+GoalX, MyY+GoalY), Pos)) & 
+		Nth1 < Nth
+	) {
+		!common::go_back_to_previous_role;
+		if(common::my_role(retriever)){
+			!!retrieve::move_to_goal;
+		} elif(common::my_role(explorer)){
+			!!exploration::explore([n,s,w,e]);
+		}
+	}
+	.
++!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] : true <- .print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)]).
+
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & GX > 0 & not stop::first_to_stop(_)
 <-
@@ -459,6 +534,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
 	getMyPos(MyX, MyY);
+	getGoalClusters(Leader, Clusters);
+	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
+		.fail;
+	}
 	evaluateOrigin(Leader, MyX, MyY, boh);
 	.print("OldPos: ", Positions);
 	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
@@ -471,10 +550,19 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
 	: .my_name(Me) & map::myMap(Me)
 <-
+	.term2string(Ag,S);
 	if(Type == goal){
 		updateGoalMap(Me, MyX+X, MyY+Y, InsertedInCluster, IsANewCluster);
 		if(IsANewCluster){
-			.send(Ag, achieve, map::evaluate(X, Y));
+			if(S \== "self"){
+				.send(Ag, askOne, map::available_to_evaluate(Res, X, Y), map::available_to_evaluate(Res, _, _))
+				if(Res == true){
+					.send(Ag, achieve, map::evaluate(X, Y));
+				}
+			} elif(not common::my_role(goal_evaluator)){
+				!common::update_role_to(goal_evaluator);
+				.send(Ag, achieve, map::evaluate(X, Y));
+			}	
 		}
 		//!retrieve::update_target;
 	} else{
@@ -491,7 +579,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			updateMap(Me, Type, MyX+X, MyY+Y);
 		}
 	}
-	.term2string(Ag,S);
 	if (S == "self") {
 		!identification::remove_reasoning(UniqueString);
 	}

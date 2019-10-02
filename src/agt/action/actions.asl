@@ -5,39 +5,48 @@
 
 // Get out of a clear marker
 +!move(Direction)
-	: default::thing(0,0,marker,clear) & not common::escape
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
 <-
 	getMyPos(MyX, MyY);
+	if (retrieve::block(X,Y)) {
+		+rotate_block(X,Y);
+	}
 	!common::escape;
-	!common::move_to_pos(MyX, MyY); 
+	!common::move_to_pos(MyX, MyY);
+	if (action::rotate_block(X,Y)) {
+		while (not retrieve::block(X,Y)) {
+			!rotate(cw);
+		}
+		-rotate_block(X,Y);
+	} 
 	!move(Direction);
 	.
 // Avoid clear markers moving north
 +!move(n)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci)) | (retrieve::block(0,-1) & (default::thing(0,-2,marker,clear) | default::thing(0,-2,marker,ci))))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(n);
 	.
 // Avoid clear markers moving south
 +!move(s)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(0,1,marker,clear) | default::thing(0,1,marker,ci)) | (retrieve::block(0,1) & (default::thing(0,2,marker,clear) | default::thing(0,2,marker,ci))))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(s);
 	.
 // Avoid clear markers moving east
 +!move(e)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(1,0,marker,clear) | default::thing(1,0,marker,ci)) | (retrieve::block(1,0) & (default::thing(2,0,marker,clear) | default::thing(2,0,marker,ci))))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(e);
 	.
 // Avoid clear markers moving west
 +!move(e)
-	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & (default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))  | (retrieve::block(-1,0) & (default::thing(-2,0,marker,clear) | default::thing(-2,0,marker,ci))))
 <-
-	!action::commit_action(move(z));
+	!action::commit_action(skip);
 	!move(w);
 	.	
 //// Go around a friendly agent
@@ -54,6 +63,7 @@
 	.
 -!move(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Direction ",Direction," is not valid, it should be one of {n,s,e,w}.").
 // Improve this failure to drop disjunction into two different plans
+-!move(Direction)[code(.fail(action(Action),result(failed_path)))] : common::direction_block(Direction,X,Y) & retrieve::block(X,Y) & not common::check_obstacle_bounds(Direction) <- .print("Destination is out of bounds for my block."); +action::out_of_bounds(Direction).
 -!move(Direction)[code(.fail(action(Action),result(failed_path)))] <- .print("Destination is blocked, or one of my attached things is blocking.").
 -!move(Direction)[code(.fail(action(Action),result(failed_forbidden)))] <- .print("Destination is out of bounds."); +action::out_of_bounds(Direction).
 -!move(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !move(Direction).	
@@ -86,6 +96,26 @@
 -!detach(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !detach(Direction).
 
 // ##### ROTATE ACTION #####
+// Get out of a clear marker
++!rotate(Direction)
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) & not common::escape & retrieve::block(X,Y)
+<-
+	getMyPos(MyX, MyY);
+	!common::escape;
+	!common::move_to_pos(MyX, MyY); 
+	while (not retrieve::block(X,Y)) {
+		!rotate(Direction);
+	}
+	!rotate(Direction);
+	.
+// Avoid clear markers when rotating
++!rotate(Direction)
+	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & common::rotate_direction(Direction,X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))
+<-
+	!action::commit_action(skip);
+	!rotate(Direction);
+	.
+// Default rotate behaviour
 +!rotate(Direction)
 <-
 	!action::commit_action(rotate(Direction));
@@ -158,3 +188,26 @@
 -!clear(X,Y)[code(.fail(action(Action),result(failed_target)))] <- .print("Target location is not within the agent's vision or outside the grid.").
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] : default::energy(Energy) & Energy < 30 <- .print("Energy is too low.").
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !clear(X,Y).
+
+// ##### SKIP ACTION #####
++!skip
+	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
+<-
+	getMyPos(MyX, MyY);
+	if (retrieve::block(X,Y)) {
+		+rotate_block(X,Y);
+	}
+	!common::escape;
+	!common::move_to_pos(MyX, MyY);
+	if (action::rotate_block(X,Y)) {
+		while (not retrieve::block(X,Y)) {
+			!rotate(cw);
+		}
+		-rotate_block(X,Y);
+	} 
+	!skip;
+	.
++!skip
+<-
+	!action::commit_action(skip);
+	.
