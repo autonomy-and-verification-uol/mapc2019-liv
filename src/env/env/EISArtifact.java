@@ -350,14 +350,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     			args.add(ASSyntax.createAtom(arg));
     		}
     		logger.info(")");
-    		Term[] terms = new Term[args.size()];
-    		int i = 0;
-    		for(Term t : args) {
-    			terms[i++] = t;
-    		}
-    		
-    		logger.info(terms + "");
-    		actions.add(ASSyntax.createLiteral(functor, terms));
+    		actions.add(ASSyntax.createLiteral(functor, args.toArray(new Term[args.size()])));
     	}
     	
     	plan.set(actions.toArray(new Literal[actions.size()]));
