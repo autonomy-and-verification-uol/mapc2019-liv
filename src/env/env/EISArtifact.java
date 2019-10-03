@@ -155,14 +155,27 @@ public class EISArtifact extends Artifact implements AgentListener {
 		}
 	}
 
-	private int getCurrentStep(Collection<Percept> percepts) {
+	private int getCurrentStep(Collection<Percept> percepts) throws JasonException  {
+		obstacleList.clear();
+		blockList.clear();
+		int step = -10;
 		for (Percept percept : percepts) {
 			if (percept.getName().equals("step")) {
 				//logger.info(percept+" "+percept.getParameters().getFirst());
-				return new Integer(percept.getParameters().getFirst().toString());
+				step = new Integer(percept.getParameters().getFirst().toString());
+			}
+			else if (percept.getName().equals("obstacle")) {
+				Literal literal = Translator.perceptToLiteral(percept);
+				obstacleList.add(literal); 
+			}
+			else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("block")) { 
+				Literal literal = Translator.perceptToLiteral(percept);
+				blockList.add(literal); 
 			}
 		}
-		return -10;
+//		logger.info("@@@@ "+obstacleList);
+//		logger.info("@@@@ "+blockList);
+		return step;
 	}
 	
 	private void updatePerception(String agent, Collection<Percept> previousPercepts, Collection<Percept> percepts) throws JasonException {
@@ -189,8 +202,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 		Literal lastActionResult 	= null;
 		Literal lastActionParams	= null;
 		Literal actionID 			= null;
-		obstacleList.clear();
-		blockList.clear();
 		for (Percept percept: percepts) {
 			if ( step_obs_prop.contains(percept.getName()) ) {
 				if (!previousPercepts.contains(percept) || percept.getName().equals("lastAction") || percept.getName().equals("lastActionResult") || percept.getName().equals("lastActionParams") || percept.getName().equals("goal") || percept.getName().equals("thing")) { // really new perception 
@@ -210,8 +221,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 						else if (percept.getName().equals("lastActionParams")) { lastActionParams = literal; }
 						else if (percept.getName().equals("actionID")) { actionID = literal; }
 						else {
-							if (percept.getName().equals("obstacle")) { obstacleList.add(literal); }
-							else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("block")) { blockList.add(literal); }
 							percs.add(literal); 
 						}
 					}
@@ -223,8 +232,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		}
 		
 
-//		logger.info("@@@@ "+obstacleList);
-//		logger.info("@@@@ "+blockList);
+
 
 		if (!start.isEmpty()) {
 			for (Literal lit: start) {

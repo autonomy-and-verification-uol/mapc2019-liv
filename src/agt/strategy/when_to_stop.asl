@@ -43,8 +43,11 @@
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 			initAvailablePos(Leader);
 			+retrieve::moving_to_origin;
-			!planner::generate_goal(GoalX, GoalY, Plan);
-			!!planner::execute_plan(Plan);
+			getMyPos(MyX, MyY);
+			TargetX = GoalX - MyX;
+			TargetY = GoalY - MyY;
+			!!planner::generate_goal(TargetX, TargetY);
+//			!!planner::execute_plan(Plan);
 			//+plan(Plan);
 			//?plan([Head|PlanX]);
 			//.print("@@@@@@ Head: ",Head);
@@ -79,8 +82,7 @@
 		-common::escape;
 		!action::forget_old_action;
 		!common::update_role_to(stocker);
-		//+retrieve::retriever;
-		//+task::stocker;
+//		!!default::always_skip;
 		!!retrieve::retrieve_block;
 	}
 	elif (Flag == "helper") {
@@ -95,8 +97,11 @@
 		//+task::helper;
 		+retrieve::moving_to_origin;
 		getTargetGoal(_, GoalX, GoalY, _);
-		!planner::generate_goal(GoalX+1, GoalY, Plan);
-		!!planner::execute_plan(Plan);
+		getMyPos(MyX, MyY);
+		TargetX = GoalX+1 - MyX;
+		TargetY = GoalY - MyY;
+		!!planner::generate_goal(TargetX, TargetY);
+//		!!planner::execute_plan(Plan);
 //		!!retrieve::move_to_goal;
 //		!!retrieve::retrieve_block;
 	}
@@ -107,6 +112,7 @@
 		-common::escape;
 		!action::forget_old_action;
 		!common::update_role_to(retriever);
+//		!!default::always_skip;
 		!!retrieve::retrieve_block;
 	}
 //	!!retrieve::retrieve_block;
@@ -171,6 +177,7 @@
 			!common::update_role_to(stocker);
 			//+retrieve::retriever;
 			//+task::stocker;
+//			!!default::always_skip;
 			!!retrieve::retrieve_block;
 		}
 		elif (Flag == "helper") {
@@ -184,8 +191,12 @@
 			//+retrieve::retriever;
 			//+task::helper;
 			+retrieve::moving_to_origin;
-			!!retrieve::move_to_goal;
-	//		!!retrieve::retrieve_block;
+			getTargetGoal(_, GoalX, GoalY, _);
+			getMyPos(MyX, MyY);
+			TargetX = GoalX+1 - MyX;
+			TargetY = GoalY - MyY;
+			!!planner::generate_goal(TargetX, TargetY);
+//			!!retrieve::move_to_goal;
 		}
 		else {
 			.print("Removing explorer");
@@ -194,6 +205,7 @@
 			-common::escape;
 			!action::forget_old_action;
 			!common::update_role_to(retriever);
+//			!!default::always_skip;
 			!!retrieve::retrieve_block;
 		}
 	//		!!retrieve::retrieve_block;

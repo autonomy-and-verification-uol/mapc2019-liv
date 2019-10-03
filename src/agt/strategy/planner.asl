@@ -1,23 +1,36 @@
-+!generate_goal(GoalX, GoalY, Plan)
++!generate_goal(0, 0) : common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
+<- 
+	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); 
+	!!default::always_skip;
+	-moving_to_origin;
+	.send(Ag, tell, task::helper(Me));
+	.
++!generate_goal(0, 0) : .my_name(Me) & stop::first_to_stop(Me)
+<- 
+	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); 
+	!!default::always_skip;
+	-moving_to_origin;
+	+task::origin;
+	.
++!generate_goal(0, 0) <- .print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); !!default::always_skip;.
++!generate_goal(TargetX, TargetY)
 	: .my_name(Me)
 <-
-	getMyPos(MyX, MyY);
-	//getTargetGoal(_, GoalX, GoalY, _);
-	if(GoalX-MyX <= -5){
-		TargetX = -5;
-	} elif(GoalX-MyX >= 5){
-		TargetX = 5;
+	if(TargetX <= -5){
+		LocalTargetX = -5;
+	} elif(TargetX >= 5){
+		LocalTargetX = 5;
 	} else {
-		TargetX = GoalX-MyX;
+		LocalTargetX = TargetX;
 	}
-	if(GoalY-MyY <= -5){
-		TargetY = -5;
-	} elif(GoalY-MyY >= 5){
-		TargetY = 5;
+	if(TargetY <= -5){
+		LocalTargetY = -5;
+	} elif(TargetY >= 5){
+		LocalTargetY = 5;
 	} else {
-		TargetY = GoalY-MyY;
+		LocalTargetY = TargetY;
 	}
-	Sum = math.abs(TargetX) + math.abs(TargetY);
+	Sum = math.abs(LocalTargetX) + math.abs(LocalTargetY);
 	if(Sum > 5){
 		DeltaX = math.floor((Sum - 5) / 2);
 		if(((Sum-5) mod 2) == 0) {
@@ -25,33 +38,113 @@
 		} else {
 			DeltaY = DeltaX + 1;	
 		}
-		if(TargetX > 0){
-			FinalTargetX = TargetX - DeltaX;
+		if(LocalTargetX > 0){
+			FinalLocalTargetX = LocalTargetX - DeltaX;
 		} else {
-			FinalTargetX = TargetX + DeltaX;
+			FinalLocalTargetX = LocalTargetX + DeltaX;
 		}
-		if(TargetY > 0){
-			FinalTargetY = TargetY - DeltaY;
+		if(LocalTargetY > 0){
+			FinalLocalTargetY = LocalTargetY - DeltaY;
 		} else {
-			FinalTargetY = TargetY + DeltaY;
+			FinalLocalTargetY = LocalTargetY + DeltaY;
 		}
 	} else {
-		FinalTargetX = TargetX;
-		FinalTargetY = TargetY;
+		FinalLocalTargetX = LocalTargetX;
+		FinalLocalTargetY = LocalTargetY;
 	}
-	.print(FinalTargetX);
-	.print(FinalTargetY);
+	.print(FinalLocalTargetX);
+	.print(FinalLocalTargetY);
+	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 	if (default::energy(Energy) & Energy >= 30) {
-		getPlanAgentToGoal(Me, FinalTargetX, FinalTargetY, Plan, true);
+		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, true);
 	}
 	else {
-		getPlanAgentToGoal(Me, FinalTargetX, FinalTargetY, Plan, false);
+		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, false);
 	}
 	.print("@@@@@@ Plan: ",Plan);
+	
+	!planner::execute_plan(Plan, TargetX, TargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
 	.
 	
-+!execute_plan(Plan)
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: not default::thing(FinalLocalTargetX, FinalLocalTargetY, block, _)
 <-
+	ActualFinalLocalTargetX = FinalLocalTargetX;
+	ActualFinalLocalTargetY = FinalLocalTargetY;
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 
+<-
+	!generate_actual_goal(0,5,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+<-
+	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY > 0 & Counter < 6 & not default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY-Counter, block, _)
+<-
+	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY > 0 & Counter < 6
+<-
+	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY > 0 & Counter == 6
+<- 
+	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY < 0 & Counter < 6 & not default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY+Counter, block, _)
+<-
+	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY < 0 & Counter < 6
+<-
+	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	.
++!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY < 0 & Counter == 6
+<- 
+	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
+	.
++!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY > 0 & Counter < 6 & not default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY-Counter, block, _)
+<-
+	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
+	.
++!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY > 0 & Counter < 6
+<-
+	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	.
++!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY < 0 & Counter < 6 & not default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY+Counter, block, _)
+<-
+	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
+	.
++!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: FinalLocalTargetY < 0 & Counter < 6
+<-
+	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	.
++!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
+	: Counter == 6
+<- 
+	.print("Fabio was wrong!!!!");
+	.
+	
++!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
+<-
+	+localtargetx(LocalTargetX);
+	+localtargety(LocalTargetY);
 	for (.member(Action, Plan)){
 		if (.substring("clear",Action)) {
 			for(.range(I, 1, 3)){
@@ -62,6 +155,23 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
+			if (default::lastAction(move) & not default::lastActionResult(success) & default::lastActionParams([Direction|List])) {
+				if ( Direction == n & planner::localtargety(LocalTargetYAux) ) {
+					-+localtargety(LocalTargetYAux + 1);
+				}
+				elif (Direction == s & planner::localtargety(LocalTargetYAux) ) {
+					-+localtargety(LocalTargetYAux - 1);
+				}
+				elif (Direction == w  & planner::localtargetx(LocalTargetXAux) ) {
+					-+localtargetx(LocalTargetXAux + 1);
+				}
+				elif (Direction == e & planner::localtargetx(LocalTargetXAux) ) {
+					-+localtargetx(LocalTargetXAux - 1);
+				}
+			}
 		}
 	}
+	?localtargetx(FinalLocalTargetX);
+	?localtargety(FinalLocalTargetY);
+	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY);
 	.
