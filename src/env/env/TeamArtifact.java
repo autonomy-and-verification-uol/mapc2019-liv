@@ -190,6 +190,8 @@ public class TeamArtifact extends Artifact {
 			if(key.startsWith("goal_")) {
 				for(Point pp : agentmaps.get(name).get(key)) {
 					if(targetGoalX == pp.x && targetGoalY == pp.y) {
+						logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+						logger.info(((OriginPoint) pp).retrievers+"");
 						for(Point retriever : ((OriginPoint) pp).retrievers) {
 							logger.info("[" + name + "]" + "( " + retriever.x + ", " + retriever.y + " ) added");
 							this.retrieversAvailablePositions.add(retriever);

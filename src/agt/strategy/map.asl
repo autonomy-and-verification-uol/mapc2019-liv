@@ -161,7 +161,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
 			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
 		}
-		for(.member(retriever(RetrieverX, RetrieverY), ScoutsList)){
+		for(.member(retriever(RetrieverX, RetrieverY), RetrieversList)){
 			addRetrieverToOrigin(Leader, MyX + X, MyY + Y, RetrieverX + X + MyX, RetrieverY + Y + MyY);	
 		}
 	}
@@ -397,13 +397,21 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				North = 0;
 			}
 			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
-				-+map::retrievers_found([retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5) | RetrieverPositions]);
+				.concat(RetrieverPositions, [retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5)], RetrieverPositions1);
+				-+map::retrievers_found(RetrieverPositions1);
+				//-+map::retrievers_found([retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5) | RetrieverPositions]);
 			} elif(North==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
-				-+map::retrievers_found([retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5) | RetrieverPositions]);
+				.concat(RetrieverPositions, [retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5)], RetrieverPositions1);
+				-+map::retrievers_found(RetrieverPositions1);
+				//-+map::retrievers_found([retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5) | RetrieverPositions]);
 			} elif(South==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
-				-+map::retrievers_found([retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3) | RetrieverPositions]);
+				.concat(RetrieverPositions, [retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3)], RetrieverPositions1);
+				-+map::retrievers_found(RetrieverPositions1);
+				//-+map::retrievers_found([retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3) | RetrieverPositions]);
 			} elif(South==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
-				-+map::retrievers_found([retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3) | RetrieverPositions]);
+				.concat(RetrieverPositions, [retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3)], RetrieverPositions1);
+				-+map::retrievers_found(RetrieverPositions1);
+				//-+map::retrievers_found([retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3) | RetrieverPositions]);
 			} 
 		}
 	} /*else{
