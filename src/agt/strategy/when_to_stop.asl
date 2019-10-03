@@ -81,7 +81,11 @@
 	Sum = math.abs(TargetX) + math.abs(TargetY);
 	if(Sum > 5){
 		DeltaX = math.floor((Sum - 5) / 2);
-		DeltaY = DeltaX + 1;
+		if(((Sum-5) mod 2) == 0) {
+			DeltaY = DeltaX;
+		} else {
+			DeltaY = DeltaX + 1;	
+		}
 		if(TargetX > 0){
 			FinalTargetX = TargetX - DeltaX;
 		} else {
