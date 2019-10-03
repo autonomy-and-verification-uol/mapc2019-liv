@@ -9,6 +9,7 @@
 { include("strategy/stock.asl", retrieve) }
 { include("strategy/map.asl", map) }
 { include("strategy/common-plans.asl", common) }
+{ include("strategy/planner.asl", planner) }
 { include("strategy/new-round.asl", newround) }
 { include("strategy/end-round.asl", endround) }
 	
