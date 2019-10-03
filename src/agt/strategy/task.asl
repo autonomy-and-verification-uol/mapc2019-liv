@@ -263,7 +263,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		AddPosY = 0; 
 	}
 	getMyPos(MyX,MyY);
-//	addAvailablePos(MyX, MyY);
+	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
 	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
 	.send(Stocker, achieve, task::help_detach(Gate));
@@ -309,7 +309,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		AddPosY = 0; 
 	}
 	getMyPos(MyX,MyY);
-//	addAvailablePos(MyX, MyY);
+	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
 	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
 	.send(Stocker, achieve, task::help_detach(Gate));

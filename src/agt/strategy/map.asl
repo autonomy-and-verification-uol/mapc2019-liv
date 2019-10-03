@@ -153,13 +153,16 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 +!map::update_origin_evaluation(Side, Value) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
-	map::scouts_found(ScoutsList)
+	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
 <-
 	getMyPos(MyX, MyY);
 	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
 	if(.member(Side, [n,s,w,e])){
 		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
 			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
+		}
+		for(.member(retriever(RetrieverX, RetrieverY), ScoutsList)){
+			addRetrieverToOrigin(Leader, MyX + X, MyY + Y, RetrieverX + X + MyX, RetrieverY + Y + MyY);	
 		}
 	}
 	.
@@ -173,11 +176,19 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 //	L2 = [vertex(Side, e, V2X, V2Y)|L1];
 	-map::scouts_found(_);
 	+map::scouts_found([]);
+	-map::retrievers_found(_);
+	+map::retrievers_found([]);
 	.concat(Scouts, Positions, L);
 	-+map::evaluating_positions(L);
 	.print("Positions: ", L);
-	NScouts = 2;
-	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & map::scouts_found(ScoutsList) & .length(ScoutsList, N) & N < NScouts){
+	+map::number_stocker_positions(2);
+	+map::number_retriever_positions(6);
+	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
+		map::scouts_found(ScoutsList) & map::retrievers_found(RetrieverList) & 
+		map::number_stocker_positions(RequiredNumberScouts) & map::number_retriever_positions(RequiredNumberRetrievers) &
+		.length(ScoutsList, NScouts) & .length(RetrieverList, NRetrievers) & 
+		(NScouts < RequiredNumberScouts | NRetrievers < RequiredNumberRetrievers)
+	){
 		.print("Evaluate scout: ", ScoutsList);
 		!map::move_to_evaluating_pos(Side);
 		.print("One scout has been evaluated");
@@ -195,7 +206,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			}
 		}
 	}
-	if(map::scouts_found(ScoutsList) & .length(ScoutsList, NScouts)){
+	if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
+		map::number_stocker_positions(RequiredNumberScouts) & .length(ScoutsList, RequiredNumberScouts) &
+		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, RequiredNumberRetrievers)
+	){
 		Value = Side;
 	} else{
 		Value = bad;
@@ -315,20 +329,82 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)
 		)
 	) {
-		!action::clear(0, -2);
-		if(not default::lastActionResult(failed_target)){
-			!action::clear(0, 2);
+		if(map::number_stocker_positions(NStockers) & map::scouts_found(StockersFound) &
+			.length(StockersFound, NStockersFound) & NStockers > NStockersFound){
+			!action::clear(0, -2);
 			if(not default::lastActionResult(failed_target)){
-				!action::clear(-2, 0);
+				!action::clear(0, 2);
 				if(not default::lastActionResult(failed_target)){
-					!action::clear(2, 0);
+					!action::clear(-2, 0);
 					if(not default::lastActionResult(failed_target)){
-						.print("Scout found");
-						-map::scouts_found(_);
-						+map::scouts_found([scout(OriginSide, -OriginX, -OriginY)|ScoutsList]);
-					} 
+						!action::clear(2, 0);
+						if(not default::lastActionResult(failed_target)){
+							.print("Scout found");
+							-map::scouts_found(_);
+							+map::scouts_found([scout(OriginSide, -OriginX, -OriginY)|ScoutsList]);
+						} 
+					}
 				}
 			}
+		}
+		if(map::number_retriever_positions(NRetriever) & map::retrievers_found(RetrieverPositions) &
+			.length(RetrieverPositions, NRetrieverFound) & NRetriever > NRetrieverFound) {
+			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
+				North = 0;
+			}
+			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+				South = 0;
+			}
+			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+				West = 0;
+			}
+			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+				East = 0;
+			}
+			if(not .ground(West)) {
+				!action::clear(-5, 0);
+				if(default::lastActionResult(failed_target)) {
+					West = 0;	
+				} else {
+					West = 1;
+				}
+			}
+			if(not .ground(East)) {
+				!action::clear(5, 0);
+				if(default::lastActionResult(failed_target)) {
+					East = 0;	
+				} else {
+					East = 1;
+				}
+			}
+			
+			if(not .ground(North)) {
+				!action::clear(0, -5);
+				if(default::lastActionResult(failed_target)) {
+					North = 0;	
+				} else {
+					North = 1;
+				}
+				South = 0;	
+			} 
+			if(not .ground(South)) {
+				!action::clear(0, 5);
+				if(default::lastActionResult(failed_target)) {
+					South = 0;	
+				} else {
+					South = 1;
+				}
+				North = 0;
+			}
+			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
+				-+map::retrievers_found([retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5) | RetrieverPositions]);
+			} elif(North==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
+				-+map::retrievers_found([retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5) | RetrieverPositions]);
+			} elif(South==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
+				-+map::retrievers_found([retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3) | RetrieverPositions]);
+			} elif(South==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
+				-+map::retrievers_found([retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3) | RetrieverPositions]);
+			} 
 		}
 	} /*else{
 		.print("Scout rejected");

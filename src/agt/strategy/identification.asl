@@ -174,7 +174,8 @@ i_met_new_agent(Iknow, IdList) :-
 		.term2string(Me, Me1);
 		if(GoalAgent == Me1){
 			setTargetGoal(Pos, Me, OriginX+GoalX, OriginY+GoalY);
-			updateAvailablePos(OriginX, OriginY);
+			updateStockerAvailablePos(OriginX, OriginY);
+			updateRetrieverAvailablePos(OriginX, OriginY);
 		}
 	}
 	.
@@ -224,7 +225,7 @@ i_met_new_agent(Iknow, IdList) :-
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
 		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
-			for (.member(origin(Evaluated,Scouts, GX,GY),GoalList)) {
+			for (.member(origin(Evaluated,Scouts,Retrievers, GX,GY),GoalList)) {
 				updateGoalMap(Me,NewOriginX+GX,NewOriginY+GY, InsertedInCluster, IsANewCluster);
 				//if(Evaluated \== 'none'){
 				evaluateOrigin(Me, NewOriginX+GX,NewOriginY+GY, Evaluated);

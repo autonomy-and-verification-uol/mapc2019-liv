@@ -41,7 +41,8 @@
 			.print("Call first time setTargetGoal");
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
-			initAvailablePos(Leader);
+			initStockerAvailablePos(Leader);
+			initRetrieverAvailablePos(Leader);
 			+retrieve::moving_to_origin;
 			!planner::generate_goal(GoalX, GoalY, Plan);
 			!!planner::execute_plan(Plan);
@@ -126,7 +127,6 @@
 	!action::forget_old_action;
 	.print("Adding explorer");
 	//+exploration::explorer;
-	.print("HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE1");
 	!common::update_role_to(explorer);
 	!!exploration::explore([n,s,e,w]);
 	.

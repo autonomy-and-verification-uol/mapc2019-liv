@@ -442,7 +442,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		MyGoalX = GoalX; MyGoalY = GoalY;
 	} else{
 		if (not common::my_role(retriever)) {
-			getAvailablePos(MyGoalX, MyGoalY);
+			getStockerAvailablePos(MyGoalX, MyGoalY);
 			if (MyGoalY < GoalY) {
 				StockerBlockPos = s;
 			}
@@ -458,7 +458,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 			+gate(StockerBlockPos);
 		}
 		else {
-			getTargetGoal(Ag, GoalX, GoalY, SideStr);
+			getRetrieverAvailablePos(MyGoalX, MyGoalY);
+			/*getTargetGoal(Ag, GoalX, GoalY, SideStr);
 			.random(NX);
 			.random(RX);
 			if (NX > 0.5) {
@@ -476,7 +477,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 				RandomY = math.floor(RX * -5)-5;
 			}
 			MyGoalX = GoalX + RandomX;
-			MyGoalY = GoalY + RandomY;
+			MyGoalY = GoalY + RandomY;*/
 		}
 //		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
 //		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
