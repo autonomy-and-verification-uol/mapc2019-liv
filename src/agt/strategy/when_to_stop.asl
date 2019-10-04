@@ -1,4 +1,3 @@
-
 +!stop::choose_the_biggest_cluster([], cluster(_, [])).
 +!stop::choose_the_biggest_cluster([cluster(Id1, GoalList1)|Clusters], Cluster) :
 	true
@@ -84,7 +83,7 @@
 		!action::forget_old_action;
 		!common::update_role_to(stocker);
 //		!!default::always_skip;
-		!!retrieve::retrieve_block;
+		!retrieve::retrieve_block;
 	}
 	elif (Flag == "helper") {
 		.print("Removing explorer");
@@ -114,7 +113,7 @@
 		!action::forget_old_action;
 		!common::update_role_to(retriever);
 //		!!default::always_skip;
-		!!retrieve::retrieve_block;
+		!retrieve::retrieve_block;
 	}
 //	!!retrieve::retrieve_block;
 	.

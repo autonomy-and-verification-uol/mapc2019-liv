@@ -1,16 +1,22 @@
++!generate_goal(0, 0) : (common::my_role(stocker) | common::my_role(retriever)) & retrieve::collect_block
+<- 
+	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
+	.print("Insert code to request and attach block here.");
+//	!!default::always_skip;
+	.
 +!generate_goal(0, 0) : common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
-	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); 
-	!!default::always_skip;
+	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
 	-moving_to_origin;
 	.send(Ag, tell, task::helper(Me));
+	!!default::always_skip;
 	.
 +!generate_goal(0, 0) : .my_name(Me) & stop::first_to_stop(Me)
 <- 
-	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); 
-	!!default::always_skip;
+	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
 	-moving_to_origin;
 	+task::origin;
+	!!default::always_skip;
 	.
 +!generate_goal(0, 0) <- .print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); !!default::always_skip;.
 +!generate_goal(TargetX, TargetY)
@@ -55,11 +61,21 @@
 	.print(FinalLocalTargetX);
 	.print(FinalLocalTargetY);
 	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
-	if (default::energy(Energy) & Energy >= 30) {
-		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, true);
+	if (retrieve::block(BlockX,BlockY)) {
+		if (default::energy(Energy) & Energy >= 30) {
+			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
+		}
+		else {
+			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
+		}
 	}
 	else {
-		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, false);
+		if (default::energy(Energy) & Energy >= 30) {
+			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, true);
+		}
+		else {
+			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, false);
+		}
 	}
 	.print("@@@@@@ Plan: ",Plan);
 	

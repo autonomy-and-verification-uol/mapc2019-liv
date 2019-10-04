@@ -267,10 +267,15 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::decide_block_type_flat(Type); .print("I decided to get block type: ", Type);
 	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
-	-retrieve::target(_, _);
-	+retrieve::target(X, Y);
-	.print("Target added: ", X, " ", Y);
-	!retrieve::fetch_block_to_goal.
+//	-retrieve::target(_, _);
+//	+retrieve::target(X, Y);
+//	.print("Target added: ", X, " ", Y);
+	getMyPos(MyX, MyY);
+	TargetX = X - MyX;
+	TargetY = Y - MyY;
+	!!planner::generate_goal(TargetX, TargetY);
+//	!retrieve::fetch_block_to_goal;
+	.
 
 -!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
 //-!retrieve::retrieve_block : true <- true.
