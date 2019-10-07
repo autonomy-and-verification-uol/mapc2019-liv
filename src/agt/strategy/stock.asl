@@ -269,10 +269,17 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
 	.print("Target added: ", X, " ", Y);
 	getMyPos(MyX, MyY);
+	.print("My pos: ", MyX, " ", MyY);
 	TargetX = X - MyX;
 	TargetY = Y - MyY;
 	+collect_block;
-	!!planner::generate_goal(TargetX, TargetY);
+	if(TargetX < 0){
+		.print("Relative target: ", TargetX + 1, " ", TargetY);
+		!!planner::generate_goal(TargetX + 1, TargetY);
+	} else {
+		.print("Relative target: ", TargetX - 1, " ", TargetY);
+		!!planner::generate_goal(TargetX - 1, TargetY);
+	}
 	.
 
 -!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
