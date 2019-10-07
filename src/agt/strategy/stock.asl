@@ -267,14 +267,12 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::decide_block_type_flat(Type); .print("I decided to get block type: ", Type);
 	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
-//	-retrieve::target(_, _);
-//	+retrieve::target(X, Y);
-//	.print("Target added: ", X, " ", Y);
+	.print("Target added: ", X, " ", Y);
 	getMyPos(MyX, MyY);
 	TargetX = X - MyX;
 	TargetY = Y - MyY;
+	+collect_block;
 	!!planner::generate_goal(TargetX, TargetY);
-//	!retrieve::fetch_block_to_goal;
 	.
 
 -!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
@@ -363,19 +361,19 @@ most_needed_type(Dispensers, AgList, Type) :-
 <- 
 	true.
 
-+!create_and_attach_block(n) :
++!create_and_attach_block :
 	default::thing(0, -1, dispenser, _)
 <- 
 	!create_and_attach_block(n, 0, -1).
-+!create_and_attach_block(s) :
++!create_and_attach_block :
 	default::thing(0, 1, dispenser, _)
 <- 
 	!create_and_attach_block(s, 0, 1).
-+!create_and_attach_block(w) :
++!create_and_attach_block :
 	default::thing(-1, 0, dispenser, _)
 <- 
 	!create_and_attach_block(w, -1, 0).
-+!create_and_attach_block(e) :
++!create_and_attach_block :
 	default::thing(1, 0, dispenser, _)
 <- 
 	!create_and_attach_block(e, 1, 0).
@@ -430,6 +428,35 @@ most_needed_type(Dispensers, AgList, Type) :-
 @update_target2[atomic]
 +!retrieve::update_target_aux(_)[source(Ag)].
 */
+
++!get_block
+<-
+	-collect_block;
+	!retrieve::create_and_attach_block;
+	if (common::my_role(stocker)) {
+		getStockerAvailablePos(TargetX, TargetY);
+		getTargetGoal(_, GoalX, GoalY, _);
+		if (TargetY < GoalY) {
+			StockerBlockPos = s;
+		}
+		elif (TargetY > GoalY) {
+			StockerBlockPos = n;
+		}
+		elif (TargetX > GoalX) {
+			StockerBlockPos = w;
+		}
+		else {
+			StockerBlockPos = e;
+		}
+		+gate(StockerBlockPos);
+	}
+	else {
+		getRetrieverAvailablePos(TargetX, TargetY);
+	}
+	.print("Chosen Goal position: ", TargetX, TargetY);
+	!planner::generate_goal(TargetX, TargetY);
+//	!retrieve::move_to_goal;
+	.
 
 +!retrieve::fetch_block_to_goal : 
 	true

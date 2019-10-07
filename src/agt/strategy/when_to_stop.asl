@@ -177,7 +177,7 @@
 			//+retrieve::retriever;
 			//+task::stocker;
 //			!!default::always_skip;
-			!!retrieve::retrieve_block;
+			!retrieve::retrieve_block;
 		}
 		elif (Flag == "helper") {
 			//.print("Removing explorer");
@@ -205,7 +205,7 @@
 			!action::forget_old_action;
 			!common::update_role_to(retriever);
 //			!!default::always_skip;
-			!!retrieve::retrieve_block;
+			!retrieve::retrieve_block;
 		}
 	//		!!retrieve::retrieve_block;
 	}

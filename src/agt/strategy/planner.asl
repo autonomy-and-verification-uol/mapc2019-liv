@@ -1,24 +1,37 @@
-+!generate_goal(0, 0) : (common::my_role(stocker) | common::my_role(retriever)) & retrieve::collect_block
++!generate_goal(0, 0) 
+	: (common::my_role(stocker) | common::my_role(retriever)) & retrieve::collect_block
 <- 
-	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
-	.print("Insert code to request and attach block here.");
-//	!!default::always_skip;
+	!!retrieve::get_block;
 	.
-+!generate_goal(0, 0) : common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
++!generate_goal(0, 0)
+	: common::my_role(stocker) & .my_name(Me)
 <- 
-	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
+	?gate(Gate);
+	getMyPos(MyX,MyY);
+	addStocker(Me, MyX, MyY, Gate);
+	+task::stocker_in_position;
+	if (retrieve::block(X,Y)) {
+		?default::thing(X,Y,block,Type);
+		addStockerBlock(Me, Type);
+	}
+	.send(Ag, tell, task::stocker(Me));
+	!!default::always_skip;
+	.
++!generate_goal(0, 0) 
+	: common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
+<- 
 	-moving_to_origin;
 	.send(Ag, tell, task::helper(Me));
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0) : .my_name(Me) & stop::first_to_stop(Me)
++!generate_goal(0, 0) 
+	: .my_name(Me) & stop::first_to_stop(Me)
 <- 
-	.print("!!!!!!!!!!!!!!!!! Fabio was right, it works!");
 	-moving_to_origin;
 	+task::origin;
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0) <- .print("!!!!!!!!!!!!!!!!! Fabio was right, it works!"); !!default::always_skip;.
++!generate_goal(0, 0) <- !!default::always_skip.
 +!generate_goal(TargetX, TargetY)
 	: .my_name(Me)
 <-
