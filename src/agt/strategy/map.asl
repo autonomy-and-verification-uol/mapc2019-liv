@@ -404,14 +404,17 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(North== 1 & West== 1 & East == 1 & South == 0) { //north side
 				L = [retriever(-OriginX-4, -OriginY-4), retriever(-OriginX, -OriginY-4), retriever(-OriginX+4, -OriginY-4)];
 			}
-			if(North== 1 & West== 1 & South == 1 & East == 0) { //west side
+			elif(North== 1 & West== 1 & South == 1 & East == 0) { //west side
 				L = [retriever(-OriginX-4, -OriginY-4), retriever(-OriginX-4, -OriginY), retriever(-OriginX-4, -OriginY+4)];	
 			}
-			if(South== 1 & West== 1 & East == 1 & North == 0) { //south side
+			elif(South== 1 & West== 1 & East == 1 & North == 0) { //south side
 				L = [retriever(-OriginX-4, -OriginY+4), retriever(-OriginX, -OriginY+4), retriever(-OriginX+4, -OriginY+4)];	
 			}
-			if(South== 1 & East == 1 & North == 1 & West== 0) { //east side
+			elif(South== 1 & East == 1 & North == 1 & West== 0) { //east side
 				L = [retriever(-OriginX+4, -OriginY-4), retriever(-OriginX+4, -OriginY), retriever(-OriginX+4, -OriginY+4)];	
+			}
+			else{
+				L = [];
 			}
 			
 			.concat(RetrieverPositions, L, RetrieverPositions1);
@@ -528,7 +531,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	} else {
 		if(map::evaluating_positions(Pos1)){
 			.delete(start(_, _), Pos1, Pos2);
-			-+map::evaluating_positions([start(0, -5)|Pos2]);
+			-+map::evaluating_positions([start(0, -1)|Pos2]);
 			!map::move_to_evaluating_pos(start1);
 			-map::checking_task_area;
 		}
