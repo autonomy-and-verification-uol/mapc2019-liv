@@ -71,9 +71,9 @@
 		FinalLocalTargetX = LocalTargetX;
 		FinalLocalTargetY = LocalTargetY;
 	}
-	.print(FinalLocalTargetX);
-	.print(FinalLocalTargetY);
+	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
 	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+	.print("Where we are actually going ", ActualFinalLocalTargetX, ", ", ActualFinalLocalTargetY);
 	if (retrieve::block(BlockX,BlockY)) {
 		if (default::energy(Energy) & Energy >= 30) {
 			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
@@ -169,13 +169,13 @@
 <- 
 	.print("Fabio was wrong!!!!");
 	.
-
-+!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	true
+	
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY)
 <-
 	!action::skip;
 	!generate_goal(TargetX, TargetY);
 	.
+	
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
 <-
 	+localtargetx(LocalTargetX);
