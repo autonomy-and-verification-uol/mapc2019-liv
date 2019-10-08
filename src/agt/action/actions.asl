@@ -4,23 +4,23 @@
 // Check if you can get out of a clear immediate (<= 2 steps)
 
 // Get out of a clear marker
-+!move(Direction)
-	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
-<-
-	getMyPos(MyX, MyY);
-	if (retrieve::block(X,Y)) {
-		+rotate_block(X,Y);
-	}
-	!common::escape;
-	!common::move_to_pos(MyX, MyY);
-	if (action::rotate_block(X,Y)) {
-		while (not retrieve::block(X,Y)) {
-			!rotate(cw);
-		}
-		-rotate_block(X,Y);
-	} 
-	!move(Direction);
-	.
+//+!move(Direction)
+//	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
+//<-
+//	getMyPos(MyX, MyY);
+//	if (retrieve::block(X,Y)) {
+//		+rotate_block(X,Y);
+//	}
+//	!common::escape;
+//	!common::move_to_pos(MyX, MyY);
+//	if (action::rotate_block(X,Y)) {
+//		while (not retrieve::block(X,Y)) {
+//			!rotate(cw);
+//		}
+//		-rotate_block(X,Y);
+//	} 
+//	!move(Direction);
+//	.
 // Avoid clear markers moving north
 +!move(n)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(0,-1,marker,clear) | default::thing(0,-1,marker,ci)) | (retrieve::block(0,-1) & (default::thing(0,-2,marker,clear) | default::thing(0,-2,marker,ci))))
@@ -97,17 +97,17 @@
 
 // ##### ROTATE ACTION #####
 // Get out of a clear marker
-+!rotate(Direction)
-	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) & not common::escape & retrieve::block(X,Y)
-<-
-	getMyPos(MyX, MyY);
-	!common::escape;
-	!common::move_to_pos(MyX, MyY); 
-	while (not retrieve::block(X,Y)) {
-		!rotate(Direction);
-	}
-	!rotate(Direction);
-	.
+//+!rotate(Direction)
+//	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) & not common::escape & retrieve::block(X,Y)
+//<-
+//	getMyPos(MyX, MyY);
+//	!common::escape;
+//	!common::move_to_pos(MyX, MyY); 
+//	while (not retrieve::block(X,Y)) {
+//		!rotate(Direction);
+//	}
+//	!rotate(Direction);
+//	.
 // Avoid clear markers when rotating
 +!rotate(Direction)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & common::rotate_direction(Direction,X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))
@@ -190,23 +190,23 @@
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !clear(X,Y).
 
 // ##### SKIP ACTION #####
-+!skip
-	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
-<-
-	getMyPos(MyX, MyY);
-	if (retrieve::block(X,Y)) {
-		+rotate_block(X,Y);
-	}
-	!common::escape;
-	!common::move_to_pos(MyX, MyY);
-	if (action::rotate_block(X,Y)) {
-		while (not retrieve::block(X,Y)) {
-			!rotate(cw);
-		}
-		-rotate_block(X,Y);
-	} 
-	!skip;
-	.
+//+!skip
+//	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
+//<-
+//	getMyPos(MyX, MyY);
+//	if (retrieve::block(X,Y)) {
+//		+rotate_block(X,Y);
+//	}
+//	!common::escape;
+//	!common::move_to_pos(MyX, MyY);
+//	if (action::rotate_block(X,Y)) {
+//		while (not retrieve::block(X,Y)) {
+//			!rotate(cw);
+//		}
+//		-rotate_block(X,Y);
+//	} 
+//	!skip;
+//	.
 +!skip
 <-
 	!action::commit_action(skip);
