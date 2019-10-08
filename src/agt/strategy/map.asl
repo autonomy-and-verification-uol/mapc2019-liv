@@ -361,6 +361,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
+			.print("North:", North);
+			.print("South:", South);
+			.print("West:", West);
+			.print("East:", East);
 			if(not .ground(West)) {
 				!action::clear(-5, 0);
 				if(default::lastActionResult(failed_target)) {
@@ -377,7 +381,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					East = 1;
 				}
 			}
-			
 			if(not .ground(North)) {
 				!action::clear(0, -5);
 				if(default::lastActionResult(failed_target)) {
@@ -385,7 +388,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				} else {
 					North = 1;
 				}
-				South = 0;	
 			} 
 			if(not .ground(South)) {
 				!action::clear(0, 5);
@@ -394,8 +396,24 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				} else {
 					South = 1;
 				}
-				North = 0;
 			}
+			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
+				.concat(RetrieverPositions1, [retriever(-OriginX-4, -OriginY-4)], RetrieverPositions1a);
+				-+map::retrievers_found(RetrieverPositions1a);
+			}
+			if(North==1 & East==1 & map::retrievers_found(RetrieverPositions2)) {
+				.concat(RetrieverPositions2, [retriever(-OriginX+4, -OriginY-4)], RetrieverPositions2a);
+				-+map::retrievers_found(RetrieverPositions2a);
+			}
+			if(South==1 & West==1 & map::retrievers_found(RetrieverPositions3)) {
+				.concat(RetrieverPositions3, [retriever(-OriginX+4, -OriginY+4)], RetrieverPositions3a);
+				-+map::retrievers_found(RetrieverPositions3a);
+			}
+			if(South==1 & East==1 & map::retrievers_found(RetrieverPositions4)) {
+				.concat(RetrieverPositions4, [retriever(-OriginX-4, -OriginY+4)], RetrieverPositions4a);
+				-+map::retrievers_found(RetrieverPositions4a);
+			}
+			/* 
 			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
 				.concat(RetrieverPositions, [retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5)], RetrieverPositions1);
 				-+map::retrievers_found(RetrieverPositions1);
@@ -412,7 +430,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				.concat(RetrieverPositions, [retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3)], RetrieverPositions1);
 				-+map::retrievers_found(RetrieverPositions1);
 				//-+map::retrievers_found([retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3) | RetrieverPositions]);
-			} 
+			} */
 		}
 	} /*else{
 		.print("Scout rejected");

@@ -272,7 +272,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	TargetX = X - MyX;
 	TargetY = Y - MyY;
 	+collect_block;
-	!!planner::generate_goal(TargetX, TargetY);
+	!!planner::generate_goal(TargetX+1, TargetY);
 	.
 
 -!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.

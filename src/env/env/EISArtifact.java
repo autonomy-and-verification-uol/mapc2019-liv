@@ -533,7 +533,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	    	problemFileWriter.close();
 	    	
 	    	plan = callPlanner(problemFileName, outputFileName, clear);
-	    	//problemFile.delete();
+	    	problemFile.delete();
 	    	//
     	} catch (Exception e) {
     		logger.info("Exception while invoking the planner, here is the returned error message:");

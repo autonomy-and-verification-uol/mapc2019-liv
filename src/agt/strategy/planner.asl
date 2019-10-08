@@ -169,7 +169,13 @@
 <- 
 	.print("Fabio was wrong!!!!");
 	.
-	
+
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	true
+<-
+	!action::skip;
+	!generate_goal(TargetX, TargetY);
+	.
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
 <-
 	+localtargetx(LocalTargetX);
