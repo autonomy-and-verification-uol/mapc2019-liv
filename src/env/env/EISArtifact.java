@@ -541,7 +541,6 @@ public class EISArtifact extends Artifact implements AgentListener {
 	    	problemFileWriter.flush();
 	    	problemFileWriter.close();
 	    	
-	    	
 	    	plan = callPlanner(agent, clear);
 
     	} catch (Exception e) {
