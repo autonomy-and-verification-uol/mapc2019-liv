@@ -212,7 +212,6 @@ i_met_new_agent(Iknow, IdList) :-
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
 	getGoalClustersWithScouts(Leader, Clusters);
-	.wait(not action::move_sent);
 	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters,Ag,AgRequesting));
 	.
 
