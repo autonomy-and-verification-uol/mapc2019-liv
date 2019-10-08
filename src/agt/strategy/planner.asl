@@ -6,7 +6,7 @@
 +!generate_goal(0, 0)
 	: common::my_role(stocker) & .my_name(Me)
 <- 
-	?gate(Gate);
+	?retrieve::gate(Gate);
 	getMyPos(MyX,MyY);
 	addStocker(Me, MyX, MyY, Gate);
 	+task::stocker_in_position;
