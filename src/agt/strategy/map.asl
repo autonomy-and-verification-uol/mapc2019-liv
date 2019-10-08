@@ -400,7 +400,26 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					South = 1;
 				}
 			}
-			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
+			
+			if(North== 1 & West== 1 & East == 1 & South == 0) { //north side
+				L = [retriever(-OriginX-4, -OriginY-4), retriever(-OriginX, -OriginY-4), retriever(-OriginX+4, -OriginY-4)];
+			}
+			if(North== 1 & West== 1 & South == 1 & East == 0) { //west side
+				L = [retriever(-OriginX-4, -OriginY-4), retriever(-OriginX-4, -OriginY), retriever(-OriginX-4, -OriginY+4)];	
+			}
+			if(South== 1 & West== 1 & East == 1 & North == 0) { //south side
+				L = [retriever(-OriginX-4, -OriginY+4), retriever(-OriginX, -OriginY+4), retriever(-OriginX+4, -OriginY+4)];	
+			}
+			if(South== 1 & East == 1 & North == 1 & West== 0) { //east side
+				L = [retriever(-OriginX+4, -OriginY-4), retriever(-OriginX+4, -OriginY), retriever(-OriginX+4, -OriginY+4)];	
+			}
+			
+			.concat(RetrieverPositions, L, RetrieverPositions1);
+			.setof(Retriever, .member(Retriever, RetrieverPositions1), RetrieverPositions2);
+			-+map::retrievers_found(RetrieverPositions2);
+		}
+	}
+			/*if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
 				if(not .member(retriever(-OriginX-4, -OriginY-4), RetrieverPositions1)){
 					.concat(RetrieverPositions1, [retriever(-OriginX-4, -OriginY-4)], RetrieverPositions1a);
 					-+map::retrievers_found(RetrieverPositions1a);
@@ -423,35 +442,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					.concat(RetrieverPositions4, [retriever(-OriginX-4, -OriginY+4)], RetrieverPositions4a);
 					-+map::retrievers_found(RetrieverPositions4a);
 				}
-			}
-			/* 
-			if(North==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
-				.concat(RetrieverPositions, [retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5)], RetrieverPositions1);
-				-+map::retrievers_found(RetrieverPositions1);
-				//-+map::retrievers_found([retriever(-OriginX-5, -OriginY-3),retriever(-OriginX-3, -OriginY-3),retriever(-OriginX-3, -OriginY-5) | RetrieverPositions]);
-			} elif(North==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
-				.concat(RetrieverPositions, [retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5)], RetrieverPositions1);
-				-+map::retrievers_found(RetrieverPositions1);
-				//-+map::retrievers_found([retriever(-OriginX+3, -OriginY-5),retriever(-OriginX+3, -OriginY-3),retriever(-OriginX+5, -OriginY-5) | RetrieverPositions]);
-			} elif(South==1 & West==1 & map::retrievers_found(RetrieverPositions)) {
-				.concat(RetrieverPositions, [retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3)], RetrieverPositions1);
-				-+map::retrievers_found(RetrieverPositions1);
-				//-+map::retrievers_found([retriever(-OriginX-3, -OriginY+5),retriever(-OriginX-3, -OriginY+3),retriever(-OriginX-5, -OriginY+3) | RetrieverPositions]);
-			} elif(South==1 & East==1 & map::retrievers_found(RetrieverPositions)) {
-				.concat(RetrieverPositions, [retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3)], RetrieverPositions1);
-				-+map::retrievers_found(RetrieverPositions1);
-				//-+map::retrievers_found([retriever(-OriginX+3, -OriginY+5),retriever(-OriginX+3, -OriginY+3),retriever(-OriginX+5, -OriginY+3) | RetrieverPositions]);
-			} */
-		}
-	} /*else{
-		.print("Scout rejected");
-	}*/
-	/*elif((OriginSide == e) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(2, 0) | default::obstacle(2, 1)) | (default::obstacle(4, 0) | default::obstacle(4, 1))) {
-		.fail;
-	}
-	elif((OriginSide == w) & (default::obstacle(0, -4) | default::obstacle(0, -3)) | (default::obstacle(0, 4) | default::obstacle(0, 5)) | (default::obstacle(-2, 0) | default::obstacle(-2, 1)) | (default::obstacle(-4, 0) | default::obstacle(-4, 1))) {
-		.fail;
-	}*/
+			}*/	
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
