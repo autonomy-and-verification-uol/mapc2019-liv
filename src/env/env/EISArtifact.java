@@ -541,7 +541,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 	    	problemFileWriter.flush();
 	    	problemFileWriter.close();
 	    	
-	    	plan = callPlanner(agent, clear);
+	    	plan = callPlanner2(agent, clear);
 
     	} catch (Exception e) {
     		logger.info("Exception while invoking the planner, here is the returned error message:");
@@ -582,6 +582,43 @@ public class EISArtifact extends Artifact implements AgentListener {
 		
 		while(s.hasNextLine()) {
 			String line = s.nextLine();
+			plan.add(line);
+		}
+		
+		s.close();
+		
+	   	logger.info("We have a plan!");
+	   	
+		return plan;
+    }
+    
+    private LinkedList<String> callPlanner2(String agentName, boolean clear) throws IOException, InterruptedException {
+    	String problem = agentName + "_problem.pddl";
+    	String output = agentName + "_output";
+    	logger.info("problem file name: " + problem);
+       	logger.info("output file name: " + output);
+       	
+       	ProcessBuilder pb = null;
+       	
+       	if(clear)
+       	   	pb = new ProcessBuilder("./run2.sh", "domain_clear.pddl", agentName);
+       	else
+       		pb = new ProcessBuilder("./run2.sh", "domain.pddl", agentName);
+       	
+    	pb.directory(new File("./planner"));
+		Process p = pb.start();
+		p.waitFor();
+		
+		Scanner s = new Scanner(p.getInputStream());
+		
+		LinkedList<String> plan = new LinkedList<String>();
+		
+		while(s.hasNextLine()) {
+			String line = s.nextLine();
+			if(line.equals("NO PLAN")) {
+				s.close();
+				return null;
+			}
 			plan.add(line);
 		}
 		
