@@ -95,12 +95,12 @@
 	!!always_skip;
 	.
 
-+!always_skip :
-	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
-	not retrieve::block(X, Y) & common::my_role(retriever)
-<-
-	!!retrieve::retrieve_block;
-	.
+//+!always_skip :
+//	not task::origin & not common::my_role(helper) & not common::my_role(stocker) &
+//	not retrieve::block(X, Y) & common::my_role(retriever)
+//<-
+//	!!retrieve::retrieve_block;
+//	.
 +!always_skip
 	: true
 <-
