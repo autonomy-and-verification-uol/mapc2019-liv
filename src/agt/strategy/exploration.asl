@@ -139,7 +139,7 @@ remove_opposite(w,e) :- true.
 	.
 	
 +!explore_until_obstacle_special(Dir)
-	: explorer & exploration::special(S) & action::out_of_bounds(Dir)
+	: common::my_role(explorer) & exploration::special(S) & action::out_of_bounds(Dir)
 <-
 	-exploration::special(S);
 	-action::out_of_bounds(Dir);
