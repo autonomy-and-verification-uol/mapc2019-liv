@@ -34,7 +34,10 @@
 	!!wait_request_for_help(Id);
 	chosenAction(Id);
 	
-	.wait({+default::actionID(_)}); 
+	.wait({+default::actionID(_)});
+	if (default::lastAction(move)) {
+		-move_sent;
+	}
 	.wait(not action::reasoning_about_belief(_)); 
 	
 	-::access_token(IntentionId,Token);
@@ -178,6 +181,9 @@
 	: not action::action_sent(ActionId) & action::action(ActionId,Action) & default::step(Step)
 <-
 	.print("Sending ",Step," ",Action);
+	if (.substring("move",Action)) {
+		+move_sent;
+	}
 	action(Action);
 	+action::action_sent(ActionId);
 	.

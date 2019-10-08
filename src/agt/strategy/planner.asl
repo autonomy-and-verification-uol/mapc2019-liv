@@ -6,8 +6,9 @@
 +!generate_goal(0, 0)
 	: common::my_role(stocker) & .my_name(Me)
 <- 
-	?retrieve::gate(Gate);
+	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
+	?retrieve::gate(Gate);
 	addStocker(Me, MyX, MyY, Gate);
 	+task::stocker_in_position;
 	if (retrieve::block(X,Y)) {
@@ -208,5 +209,7 @@
 	}
 	?localtargetx(FinalLocalTargetX);
 	?localtargety(FinalLocalTargetY);
+	-localtargetx(FinalLocalTargetX);
+	-localtargety(FinalLocalTargetY);
 	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY);
 	.
