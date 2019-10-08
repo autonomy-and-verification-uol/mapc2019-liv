@@ -15,7 +15,7 @@
 @stop1[atomic]
 +stop
 	: common::my_role(explorer) & not stop::first_to_stop(_) & .my_name(Me) // first to stop
-	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader)
+	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader) & not action::move_sent
 <-
 	!map::get_clusters(Clusters);
 	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
@@ -43,6 +43,7 @@
 			initStockerAvailablePos(Leader);
 			initRetrieverAvailablePos(Leader);
 			+retrieve::moving_to_origin;
+//			.wait(not action::move_sent);
 			getMyPos(MyX, MyY);
 			TargetX = GoalX - MyX;
 			TargetY = GoalY - MyY;
@@ -64,7 +65,7 @@
 	
 @stop2[atomic]
 +stop
-	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) // someone else stopped already and my map is his map
+	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) & not action::move_sent // someone else stopped already and my map is his map
 <-
 	joinRetrievers(Flag);
 //	.print("Removing explorer");
@@ -117,6 +118,16 @@
 	}
 //	!!retrieve::retrieve_block;
 	.
+	
+@stop12
++stop
+	: action::move_sent
+<-
+	.wait(not action::move_sent);
+	-stop;
+	+stop;
+	.
+	
 +stop : true <- -stop::stop.
 
 @first_to_stop1[atomic]
@@ -186,12 +197,13 @@
 			-common::avoid(_);
 			-common::escape;
 			!action::forget_old_action;
+			.wait(not action::move_sent);
+			getMyPos(MyX, MyY);
 			!common::update_role_to(helper);
 			//+retrieve::retriever;
 			//+task::helper;
 			+retrieve::moving_to_origin;
 			getTargetGoal(_, GoalX, GoalY, _);
-			getMyPos(MyX, MyY);
 			TargetX = GoalX+1 - MyX;
 			TargetY = GoalY - MyY;
 			!!planner::generate_goal(TargetX, TargetY);

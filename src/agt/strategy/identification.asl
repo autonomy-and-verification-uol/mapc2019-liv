@@ -152,7 +152,7 @@ i_met_new_agent(Iknow, IdList) :-
 	
 @updatepos[atomic]
 +!update_pos(MapOther,OriginX,OriginY)
-	: map::myMap(Map) & .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
+	: map::myMap(Map) & .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & not action::move_sent
 <-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
@@ -180,6 +180,9 @@ i_met_new_agent(Iknow, IdList) :-
 	}
 	.
 
+@updatepos2
++!update_pos(MapOther,OriginX,OriginY) <- .wait(not action::move_sent); !update_pos(MapOther,OriginX,OriginY).
+
 @requestmerge[atomic]
 +!request_merge(MergeList,GlobalX,GlobalY)[source(AgRequesting)]
 	: true
@@ -204,10 +207,12 @@ i_met_new_agent(Iknow, IdList) :-
 +!request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY,AgRequesting)[source(Source)]
 	: map::myMap(Leader)
 <-
+	.wait(not action::move_sent);
+	getMyPos(OtherX,OtherY);
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
 	getGoalClustersWithScouts(Leader, Clusters);
-	getMyPos(OtherX,OtherY);
+	.wait(not action::move_sent);
 	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters,Ag,AgRequesting));
 	.
 
@@ -322,6 +327,7 @@ i_met_new_agent(Iknow, IdList) :-
 	-merge(MergeList);
 	?map::myMap(Leader);
 	if (not .empty(MergeList)) {
+		.wait(not action::move_sent);
 		getMyPos(MyX,MyY);
 		if (Me == Leader) {
 			!request_merge(MergeList,MyX,MyY);

@@ -219,8 +219,9 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!escape
 	: default::vision(V) & find_empty_position(X,Y,1,V)
 <-
-	+escape;
+	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
+	+escape;
 	!move_to_escape(MyX,MyY,MyX+X,MyY+Y);
 	-escape;
 	.
@@ -245,35 +246,40 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!move_to_escape(MyX,MyY,X,Y)
 	: escape & X < MyX 
 <-
-	!action::move(w);
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
+	!action::move(w);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
 	: escape & X > MyX 
 <-
-	!action::move(e);
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
+	!action::move(e);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
 	: escape & Y < MyY 
 <-
-	!action::move(n);
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
+	!action::move(n);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 +!move_to_escape(MyX,MyY,X,Y)
 	: escape & Y > MyY 
 <-
-	!action::move(s);
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
+	!action::move(s);
 	!move_to_escape(MyXNew,MyYNew,X,Y);
 	.
 	
 +!move_to_pos(X, Y) : 
 	true
 <- 
+	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	!move_to_pos_aux(X, Y, MyX, MyY).
 +!move_to_pos_aux(X, Y, X, Y).
@@ -283,6 +289,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
 		if(i_can_avoid(Direction, DirectionToGo)){
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
+			.wait(not action::move_sent);
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
@@ -300,6 +307,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	} else {
 		!retrieve::smart_move(Direction);
 	}
+	.wait(not action::move_sent);
 	getMyPos(MyX2,MyY2);
 	!move_to_pos_aux(X, Y, MyX2, MyY2).
 	

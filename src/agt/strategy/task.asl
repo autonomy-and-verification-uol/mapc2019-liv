@@ -109,13 +109,14 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!perform_task_origin_next
 	: committed(Id,CommitListSort) & not .empty(CommitListSort) & helper(HelperAg)
 <-
+	.wait(not action::move_sent);
+	getMyPos(MyX,MyY);
 	.nth(0,CommitListSort,agent(Sum,Ag,TypeAg,X,Y));
 	.delete(0,CommitListSort,CommitListSortNew);
 	!update_commitlist(CommitListSortNew);
-	getMyPos(MyX,MyY);
 	?check_pos(X,Y,NewX,NewY);
 	if (task::no_block) {
-	.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
+		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
 	}
 	else {
 //		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
@@ -211,6 +212,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!help_attach(ConX,ConY)[source(Help)]
 	: no_block
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	!action::forget_old_action(default,always_skip);
 	?get_direction(ConX-MyX, ConY-MyY, Dir)
@@ -223,6 +225,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 +!help_connect(ConX,ConY)[source(Help)]
 //	:  connect(X,Y) & retrieve::block(X,Y) & default::thing(X,Y, block, Type)
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
@@ -243,6 +246,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	removeRetriever;
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
+	.wait(not action::move_sent);
+	getMyPos(MyX,MyY);
 	getStockerPos(Stocker,StockerX,StockerY,GateS);
 	.term2string(Gate,GateS);
 	?get_direction(GateX,GateY,Gate);
@@ -262,7 +267,6 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		AddPosX = 1;
 		AddPosY = 0; 
 	}
-	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
 	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
@@ -273,6 +277,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	-task::detach_complete[source(Stocker)];
 	.print("@@@@@ Detach complete");
 	!rotate_back;
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
@@ -289,6 +294,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.print("@@@@ Received order for new task, origin already has a block.");
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
+	.wait(not action::move_sent);
+	getMyPos(MyX,MyY);
 	getStockerPos(Stocker,StockerX,StockerY,GateS);
 	.term2string(Gate,GateS);
 	?get_direction(GateX,GateY,Gate);
@@ -308,7 +315,6 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		AddPosX = 1;
 		AddPosY = 0; 
 	}
-	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
 	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
@@ -319,8 +325,10 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	-task::detach_complete[source(Stocker)];
 	.print("@@@@@ Detach complete");
 	!rotate_back;
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	.wait(not action::move_sent);
 	getMyPos(MyXNew2,MyYNew2);
 	?retrieve::block(BX,BY);
 	?get_direction(BX,BY,DetachPos);
@@ -455,6 +463,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //			// go around
 //		}
 	}
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_horiz(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.
@@ -514,6 +523,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //			// go around
 //		}
 	}
+	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
 	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.

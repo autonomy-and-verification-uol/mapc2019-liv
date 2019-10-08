@@ -14,15 +14,15 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.print(DList);
 	.print(GList);
 	.print(Size);
-	getMyPos(MyX,MyY);
-	.print("My position ",MyX,", ",MyY);
+//	getMyPos(MyX,MyY);
+//	.print("My position ",MyX,", ",MyY);
 	.
 
 @perceivedispenser[atomic]
 +default::thing(X, Y, dispenser, Type)
-	: true
+	: not action::move_sent
 <-
-	getMyPos(MyX,MyY)
+	getMyPos(MyX,MyY);
 	!map::get_dispensers(Dispensers);
 	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
@@ -38,7 +38,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @perceivegoal[atomic]
 +default::goal(X,Y)
-	: not map::evaluating_vertexes
+	: not map::evaluating_vertexes & not action::move_sent
 <-
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
@@ -155,6 +155,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
 	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
 	if(.member(Side, [n,s,w,e])){
@@ -287,6 +288,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(start(X, Y), Positions)
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(OriginSide == start1 | (.member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList)) & // .member(origin(_, MyX+X, MyY+Y), GoalList) 
@@ -301,6 +303,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(_, X, Y), Positions)
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
@@ -352,13 +355,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
 				North = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
 				South = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
 				West = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
 			.print("North:", North);
@@ -416,6 +419,30 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			-+map::retrievers_found(RetrieverPositions2);
 		}
 	}
+			/*if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
+				if(not .member(retriever(-OriginX-4, -OriginY-4), RetrieverPositions1)){
+					.concat(RetrieverPositions1, [retriever(-OriginX-4, -OriginY-4)], RetrieverPositions1a);
+					-+map::retrievers_found(RetrieverPositions1a);
+				}
+			}
+			if(North==1 & East==1 & map::retrievers_found(RetrieverPositions2)) {
+				if(not .member(retriever(-OriginX+4, -OriginY-4), RetrieverPositions2)){
+					.concat(RetrieverPositions2, [retriever(-OriginX+4, -OriginY-4)], RetrieverPositions2a);
+					-+map::retrievers_found(RetrieverPositions2a);
+				}
+			}
+			if(South==1 & West==1 & map::retrievers_found(RetrieverPositions3)) {
+				if(not .member(retriever(-OriginX+4, -OriginY+4), RetrieverPositions3)){
+					.concat(RetrieverPositions3, [retriever(-OriginX+4, -OriginY+4)], RetrieverPositions3a);
+					-+map::retrievers_found(RetrieverPositions3a);
+				}
+			}
+			if(South==1 & East==1 & map::retrievers_found(RetrieverPositions4)) {
+				if(not .member(retriever(-OriginX-4, -OriginY+4), RetrieverPositions4)){
+					.concat(RetrieverPositions4, [retriever(-OriginX-4, -OriginY+4)], RetrieverPositions4a);
+					-+map::retrievers_found(RetrieverPositions4a);
+				}
+			}*/	
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
@@ -451,14 +478,15 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				Res = 1;
 			}
 		} else {
-			//!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
-			//getMyPos(MyX1,MyY1);
-			//if(MyX == MyX1 & MyY == MyY1){
-			for(.range(_, 1, 3) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-				!retrieve::smart_move(Dir);
+			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1);
+			.wait(not action::move_sent);
+			getMyPos(MyX1,MyY1);
+			if(MyX == MyX1 & MyY == MyY1){
+				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+					!retrieve::smart_move(Dir);
+				}
 			}
-			//}
-			//.print("After go_around_obstacle");
+			.print("After go_around_obstacle");
 			Res = 1;
 		}
 	} else {
@@ -492,6 +520,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::move_to_evaluating_pos(start1);
 	!action::clear(0, 5);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
+		.wait(not action::move_sent);
 		getMyPos(MyX, MyY);
 		evaluateOrigin(Leader, MyX, MyY, bad);
 		-map::checking_task_area;
@@ -510,8 +539,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & common::my_role(goal_evaluator) &
 	map::evaluating_positions(Pos) & .my_name(Me) & .all_names(AllAgents) & .nth(Nth,AllAgents,Me) & .nth(Nth1,AllAgents,Ag)
 <-
-	.print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)], ", Pos: ", Pos, " Goal: ", GoalX, " ", GoalY);
+	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
+	.print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)], ", Pos: ", Pos, " Goal: ", GoalX, " ", GoalY);
 	if((.member(origin(_, MyX+GoalX, MyY+GoalY), Pos) | .member(start(MyX+GoalX, MyY+GoalY), Pos)) & 
 		Nth1 < Nth
 	) {
@@ -610,6 +640,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin(Side) : 
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
+	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
