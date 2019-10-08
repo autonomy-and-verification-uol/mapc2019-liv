@@ -352,13 +352,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
 				North = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
 				South = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
 				West = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
 			.print("North:", North);
@@ -416,30 +416,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			-+map::retrievers_found(RetrieverPositions2);
 		}
 	}
-			/*if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
-				if(not .member(retriever(-OriginX-4, -OriginY-4), RetrieverPositions1)){
-					.concat(RetrieverPositions1, [retriever(-OriginX-4, -OriginY-4)], RetrieverPositions1a);
-					-+map::retrievers_found(RetrieverPositions1a);
-				}
-			}
-			if(North==1 & East==1 & map::retrievers_found(RetrieverPositions2)) {
-				if(not .member(retriever(-OriginX+4, -OriginY-4), RetrieverPositions2)){
-					.concat(RetrieverPositions2, [retriever(-OriginX+4, -OriginY-4)], RetrieverPositions2a);
-					-+map::retrievers_found(RetrieverPositions2a);
-				}
-			}
-			if(South==1 & West==1 & map::retrievers_found(RetrieverPositions3)) {
-				if(not .member(retriever(-OriginX+4, -OriginY+4), RetrieverPositions3)){
-					.concat(RetrieverPositions3, [retriever(-OriginX+4, -OriginY+4)], RetrieverPositions3a);
-					-+map::retrievers_found(RetrieverPositions3a);
-				}
-			}
-			if(South==1 & East==1 & map::retrievers_found(RetrieverPositions4)) {
-				if(not .member(retriever(-OriginX-4, -OriginY+4), RetrieverPositions4)){
-					.concat(RetrieverPositions4, [retriever(-OriginX-4, -OriginY+4)], RetrieverPositions4a);
-					-+map::retrievers_found(RetrieverPositions4a);
-				}
-			}*/	
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
@@ -475,14 +451,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				Res = 1;
 			}
 		} else {
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
+			//!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
+			//getMyPos(MyX1,MyY1);
+			//if(MyX == MyX1 & MyY == MyY1){
+			for(.range(_, 1, 3) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+				!retrieve::smart_move(Dir);
 			}
-			.print("After go_around_obstacle");
+			//}
+			//.print("After go_around_obstacle");
 			Res = 1;
 		}
 	} else {
