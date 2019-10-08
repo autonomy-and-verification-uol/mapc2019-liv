@@ -4,7 +4,7 @@
 	!!retrieve::get_block;
 	.
 +!generate_goal(0, 0)
-	: common::my_role(stocker) & .my_name(Me)
+	: common::my_role(stocker) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
 	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);

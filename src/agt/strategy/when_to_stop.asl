@@ -63,15 +63,6 @@
 	}
 	.
 	
-@stop12
-+stop
-	: action::move_sent
-<-
-	.wait(not action::move_sent);
-	-stop;
-	+stop;
-	.
-	
 @stop2[atomic]
 +stop
 	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) & not action::move_sent // someone else stopped already and my map is his map
@@ -127,6 +118,16 @@
 	}
 //	!!retrieve::retrieve_block;
 	.
+	
+@stop12
++stop
+	: action::move_sent
+<-
+	.wait(not action::move_sent);
+	-stop;
+	+stop;
+	.
+	
 +stop : true <- -stop::stop.
 
 @first_to_stop1[atomic]
