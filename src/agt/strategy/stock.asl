@@ -439,20 +439,20 @@ most_needed_type(Dispensers, AgList, Type) :-
 
 +!get_block
 <-
-	.wait(not action::move_sent);
-	getMyPos(MyX, MyY);
 	-collect_block;
 	!retrieve::create_and_attach_block;
+	.wait(not action::move_sent);
+	getMyPos(MyX, MyY);
 	if (common::my_role(stocker)) {
 		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
 		getTargetGoal(_, GoalX, GoalY, _);
-		if (TargetY < GoalY) {
+		if (TargetYGlobal < GoalY) {
 			StockerBlockPos = s;
 		}
-		elif (TargetY > GoalY) {
+		elif (TargetYGlobal > GoalY) {
 			StockerBlockPos = n;
 		}
-		elif (TargetX > GoalX) {
+		elif (TargetXGlobal > GoalX) {
 			StockerBlockPos = w;
 		}
 		else {
