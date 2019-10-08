@@ -172,7 +172,7 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetX < 0 & not (default::thing(-1, 0, Type, _)) & (Type == block | Type == entity) & not (default::obstacle(-1,0)) 
+	LocalTargetX < 0 & not (default::thing(-1, 0, Type, _) & (Type == block | Type == entity)) & not (default::obstacle(-1,0)) 
 <-
 	!action::move(w);
 	.print("Execute empty plan by moving west");
@@ -184,7 +184,7 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetX > 0 & not (default::thing(1, 0, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(1,0))
+	LocalTargetX > 0 & not (default::thing(1, 0, Type, _)  & (Type == block | Type == entity)) & not (default::obstacle(1,0))
 <-	
 	!action::move(e);
 	.print("Execute empty plan by moving est");
@@ -196,7 +196,7 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetY < 0 & not (default::thing(0, -1, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(0, -1))
+	LocalTargetY < 0 & not (default::thing(0, -1, Type, _)  & (Type == block | Type == entity)) & not (default::obstacle(0, -1))
 <-	
 	!action::move(n);
 	.print("Execute empty plan by moving north");
@@ -208,7 +208,7 @@
 	.
 
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetY > 0 & not (default::thing(0, 1, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(0, 1))
+	LocalTargetY > 0 & not (default::thing(0, 1, Type, _)  & (Type == block | Type == entity)) & not (default::obstacle(0, 1))
 <-		
 	!action::move(s);
 	.print("Execute empty plan by moving south");
@@ -217,6 +217,13 @@
 	} else {
 		!generate_goal(TargetX, TargetY);
 	}
+	.
+	
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) 
+<-
+	.print("No trivial solution to the empty plan, probably stuck in a loop");
+	!action::skip;
+	!generate_goal(TargetX, TargetY);
 	.
 	
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)

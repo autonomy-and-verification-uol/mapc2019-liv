@@ -169,9 +169,10 @@ public class EISArtifact extends Artifact implements AgentListener {
 				Literal literal = Translator.perceptToLiteral(percept);
 				obstacleList.add(literal); 
 			}
-			else if (percept.getName().equals("thing") && percept.getParameters().get(2).toString().equals("block")) { 
+			else if (percept.getName().equals("thing") && (percept.getParameters().get(2).toString().equals("block") || percept.getParameters().get(2).toString().equals("entity"))) { 
 				Literal literal = Translator.perceptToLiteral(percept);
-				blockList.add(literal); 
+				if((int)((NumberTerm) literal.getTerm(0)).solve() != 0 || (int)((NumberTerm) literal.getTerm(1)).solve() != 0)
+					blockList.add(literal); 
 			}
 		}
 //		logger.info("@@@@ "+obstacleList);
