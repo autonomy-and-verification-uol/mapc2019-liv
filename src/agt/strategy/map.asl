@@ -478,15 +478,15 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				Res = 1;
 			}
 		} else {
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1);
-			.wait(not action::move_sent);
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
+			//!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1);
+			//.wait(not action::move_sent);
+			//getMyPos(MyX1,MyY1);
+			//if(MyX == MyX1 & MyY == MyY1){
+			for(.range(_, 1, 3) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+				!retrieve::smart_move(Dir);
 			}
-			.print("After go_around_obstacle");
+			//}
+			//.print("After go_around_obstacle");
 			Res = 1;
 		}
 	} else {
