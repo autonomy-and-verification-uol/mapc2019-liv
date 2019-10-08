@@ -172,9 +172,10 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetX < 0 & not deafult::thing(-1, 0, Type, _) & (Type == block | Type == entity) & not default::obstacle(-1,0) 
+	LocalTargetX < 0 & not (default::thing(-1, 0, Type, _)) & (Type == block | Type == entity) & not (default::obstacle(-1,0)) 
 <-
 	!action::move(w);
+	.print("Execute empty plan by moving west");
 	if (default::lastActionResult(success)) {
 		!generate_goal(TargetX + 1, TargetY);
 	} else {
@@ -183,9 +184,10 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetX > 0 & not deafult::thing(1, 0, Type, _)  & (Type == block | Type == entity) & not default::obstacle(1,0)
+	LocalTargetX > 0 & not (default::thing(1, 0, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(1,0))
 <-	
 	!action::move(e);
+	.print("Execute empty plan by moving est");
 	if (default::lastActionResult(success)) {
 		!generate_goal(TargetX - 1, TargetY);
 	} else {
@@ -194,9 +196,10 @@
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetY < 0 & not deafult::thing(0, -1, Type, _)  & (Type == block | Type == entity) & not default::obstacle(0, -1)
+	LocalTargetY < 0 & not (default::thing(0, -1, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(0, -1))
 <-	
 	!action::move(n);
+	.print("Execute empty plan by moving north");
 	if (default::lastActionResult(success)) {
 		!generate_goal(TargetX, TargetY + 1);
 	} else {
@@ -205,9 +208,10 @@
 	.
 
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
-	LocalTargetY > 0 & not deafult::thing(0, 1, Type, _)  & (Type == block | Type == entity) & not default::obstacle(0, 1)
+	LocalTargetY > 0 & not (default::thing(0, 1, Type, _))  & (Type == block | Type == entity) & not (default::obstacle(0, 1))
 <-		
 	!action::move(s);
+	.print("Execute empty plan by moving south");
 	if (default::lastActionResult(success)) {
 		!generate_goal(TargetX, TargetY - 1);
 	} else {
@@ -229,7 +233,7 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
-			if (default::lastAction(move) & not default::lastActionResult(success) & default::lastActionParams([Direction|List])) {
+			if (default::lastAction(move) & not (default::lastActionResult(success)) & default::lastActionParams([Direction|List])) {
 				if ( Direction == n & planner::localtargety(LocalTargetYAux) ) {
 					-+localtargety(LocalTargetYAux + 1);
 				}
