@@ -171,10 +171,48 @@
 	.print("Fabio was wrong!!!!");
 	.
 	
-+!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY)
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetX < 0 & not deafult::thing(-1, 0, Type, _) & (Type == block | Type == entity) & not default::obstacle(-1,0) 
 <-
-	!action::skip;
-	!generate_goal(TargetX, TargetY);
+	!action::move(w);
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX + 1, TargetY);
+	} else {
+		!generate_goal(TargetX, TargetY);
+	}
+	.
+	
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetX > 0 & not deafult::thing(1, 0, Type, _)  & (Type == block | Type == entity) & not default::obstacle(1,0)
+<-	
+	!action::move(e);
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX - 1, TargetY);
+	} else {
+		!generate_goal(TargetX, TargetY);
+	}
+	.
+	
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetY < 0 & not deafult::thing(0, -1, Type, _)  & (Type == block | Type == entity) & not default::obstacle(0, -1)
+<-	
+	!action::move(n);
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX, TargetY + 1);
+	} else {
+		!generate_goal(TargetX, TargetY);
+	}
+	.
+
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetY > 0 & not deafult::thing(0, 1, Type, _)  & (Type == block | Type == entity) & not default::obstacle(0, 1)
+<-		
+	!action::move(s);
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX, TargetY - 1);
+	} else {
+		!generate_goal(TargetX, TargetY);
+	}
 	.
 	
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
