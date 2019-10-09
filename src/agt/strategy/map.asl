@@ -209,7 +209,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & .length(ScoutsList, RequiredNumberScouts) &
-		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, RequiredNumberRetrievers)
+		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) &
+		NumberRetrieversPositionsFound >= RequiredNumberRetrievers
 	){
 		Value = Side;
 	} else{
@@ -578,6 +579,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	!retrieve::smart_move(e);
 	!retrieve::smart_move(n);
+	!map::move_random(3);
 	!map::find_cluster_origin(n);		
 	.
 +!map::find_cluster_origin(n) :
@@ -585,12 +587,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	!retrieve::smart_move(w);
 	!retrieve::smart_move(n);
+	!map::move_random(3);
 	!map::find_cluster_origin(n);	
 	.
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & not stop::first_to_stop(_)
 <-
 	!retrieve::smart_move(n);
+	!map::move_random(3);
 	!map::find_cluster_origin(n);	
 	.
 /* 
@@ -671,6 +675,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.print("NewPos: ", Pos);
 	}
 	.
++!map::move_random(Steps) :
+	not default::lastActionResult(success)
+<-
+	for(.range(_, 1, Steps) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+		!retrieve::smart_move(Dir);
+	}
+	.
++!map::move_random(_).
 
 @addmap[atomic]
 +!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
