@@ -32,12 +32,12 @@
 	.print("Doing action ",Action, " for ",IntentionId," at step ",Id," . Waiting for step ",Id+1);
 	
 	!!wait_request_for_help(Id);
+//	if (.substring("move",Action)) {
+//		+move_sent;
+//	}
 	chosenAction(Id);
-	
 	.wait({+default::actionID(_)});
-	if (default::lastAction(move)) {
-		-move_sent;
-	}
+
 	.wait(not action::reasoning_about_belief(_)); 
 	
 	-::access_token(IntentionId,Token);
@@ -56,6 +56,9 @@
 		.print("My action failed due to random failure, sending it again.");
 		!commit_action(Action); // repeat the previous action
 	}else{
+//		if (default::lastAction(move)) {
+//			-move_sent;
+//		}
 		if (Result \== success){
 			.print("Failing action ",Action," because ",Result);
 			.fail(action(Action),result(Result));
@@ -181,9 +184,6 @@
 	: not action::action_sent(ActionId) & action::action(ActionId,Action) & default::step(Step)
 <-
 	.print("Sending ",Step," ",Action);
-	if (.substring("move",Action)) {
-		+move_sent;
-	}
 	action(Action);
 	+action::action_sent(ActionId);
 	.

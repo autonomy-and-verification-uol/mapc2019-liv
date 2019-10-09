@@ -6,7 +6,7 @@
 +!generate_goal(0, 0)
 	: common::my_role(stocker) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	?retrieve::gate(Gate);
 	addStocker(Me, MyX, MyY, Gate);
@@ -114,7 +114,7 @@
 	.
 	
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: not default::thing(FinalLocalTargetX, FinalLocalTargetY, block, _)
+	: not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
 <-
 	ActualFinalLocalTargetX = FinalLocalTargetX;
 	ActualFinalLocalTargetY = FinalLocalTargetY;
@@ -129,7 +129,7 @@
 	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
 	.
 +!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6 & not default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY-Counter, block, _)
+	: FinalLocalTargetY > 0 & Counter < 6 & not (default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY-Counter, Type, _) & (Type == block | Type == entity))
 <-
 	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
 	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
@@ -145,7 +145,7 @@
 	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
 	.
 +!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6 & not default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY+Counter, block, _)
+	: FinalLocalTargetY < 0 & Counter < 6 & not (default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY+Counter, Type, _) & (Type == block | Type == entity))
 <-
 	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
 	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
@@ -161,7 +161,7 @@
 	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
 	.
 +!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6 & not default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY-Counter, block, _)
+	: FinalLocalTargetY > 0 & Counter < 6 & not (default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY-Counter, Type, _) & (Type == block | Type == entity))
 <-
 	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
 	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
@@ -172,7 +172,7 @@
 	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
 	.
 +!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6 & not default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY+Counter, block, _)
+	: FinalLocalTargetY < 0 & Counter < 6 & not (default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY+Counter, Type, _) & (Type == block | Type == entity))
 <-
 	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
 	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
@@ -185,7 +185,7 @@
 +!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
 	: Counter == 6
 <- 
-	.print("Fabio was wrong!!!!");
+	.print("Fabio was wrong!!!! -- you wish");
 	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :

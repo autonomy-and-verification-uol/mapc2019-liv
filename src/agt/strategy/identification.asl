@@ -152,7 +152,7 @@ i_met_new_agent(Iknow, IdList) :-
 	
 @updatepos[atomic]
 +!update_pos(MapOther,OriginX,OriginY)
-	: map::myMap(Map) & .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & not action::move_sent
+	: map::myMap(Map) & .my_name(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me)
 <-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
@@ -179,8 +179,8 @@ i_met_new_agent(Iknow, IdList) :-
 	}
 	.
 
-@updatepos2
-+!update_pos(MapOther,OriginX,OriginY) <- .wait(not action::move_sent); !update_pos(MapOther,OriginX,OriginY).
+//@updatepos2
+//+!update_pos(MapOther,OriginX,OriginY) <- .wait(not action::move_sent); !update_pos(MapOther,OriginX,OriginY).
 
 @requestmerge[atomic]
 +!request_merge(MergeList,GlobalX,GlobalY)[source(AgRequesting)]
@@ -206,25 +206,27 @@ i_met_new_agent(Iknow, IdList) :-
 +!request_leader(Ag,LocalX,LocalY,GlobalX,GlobalY,AgRequesting)[source(Source)]
 	: map::myMap(Leader)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(OtherX,OtherY);
 	.print(Source," requested leader to merge with ",Ag);
 	!map::get_dispensers(DispList);
 	getGoalClustersWithScouts(Leader, Clusters);
-	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,Clusters,Ag,AgRequesting));
+	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,Ag,AgRequesting));
 	.
 
 @replyleaderme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList,AgRequested,AgRequesting)[source(Source)]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting)[source(Source)]
 	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
 <-
+	.print(" Starting merge request from  ",AgRequesting," to merge with ",AgRequested," and their leader is ",Leader);
 	.send(Leader, achieve, identification::confirm_merge);
-	.wait(identification::merge_confirmed(IdListOther)[source(Leader)] | identification::merge_canceled[source(Leader)]);
-	if (identification::merge_confirmed(IdListOther)[source(Leader)]) {
-		-identification::merge_confirmed(IdListOther)[source(Leader)];
+	.wait(identification::merge_confirmed(IdListOther, DispList, ClusterGoalList)[source(Leader)] | identification::merge_canceled[source(Leader)]);
+	if (identification::merge_confirmed(IdListOther, DispList, ClusterGoalList)[source(Leader)]) {
+		-identification::merge_confirmed(IdListOther, DispList, ClusterGoalList)[source(Leader)];
 		NewOriginX = (GlobalX + LocalX) - OtherX;
 		NewOriginY = (GlobalY + LocalY) - OtherY;
 		for (.member(dispenser(Type,DX,DY),DispList)) {
+			.print("Adding new dispenser at  X ",NewOriginX+DX," Y ",NewOriginY+DY);
 			updateMap(Me,Type,NewOriginX+DX,NewOriginY+DY);
 		}
 		for(.member(cluster(ClusterId, GoalList),ClusterGoalList)){
@@ -236,6 +238,7 @@ i_met_new_agent(Iknow, IdList) :-
 					addScoutToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+ScoutX, NewOriginY+ScoutY);	
 				}
 				for(.member(retriever(RetrieverX, RetrieverY), Retrievers)){
+					.print("Updating retriever pos X ",RetrieverX," Y ",RetrieverY);
 					addRetrieverToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+RetrieverX, NewOriginY+RetrieverY);	
 				}
 				//initAvailablePos(Me);
@@ -285,7 +288,7 @@ i_met_new_agent(Iknow, IdList) :-
 	}
 	.
 @replyleadernotme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,DispList,ClusterGoalList,AgRequested,AgRequesting)[source(Source)]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting)[source(Source)]
 <-
 	.term2string(AgRequesting,S);
 	if (S == "self") {
@@ -301,7 +304,9 @@ i_met_new_agent(Iknow, IdList) :-
 	: .my_name(Me) & map::myMap(Me)
 <-
 	?identification::identified(IdListOther);
-	.send(Ag, tell, identification::merge_confirmed(IdListOther));
+	!map::get_dispensers(DispList);
+	getGoalClustersWithScouts(Me, Clusters);
+	.send(Ag, tell, identification::merge_confirmed(IdListOther,DispList,Clusters));
 	.wait(identification::merge_completed(NewListAux,NewOriginX,NewOriginY)[source(Ag)]);
 	-identification::merge_completed(NewListAux,NewOriginX,NewOriginY)[source(Ag)];
 	-identification::identified(IdListOther);
@@ -329,7 +334,7 @@ i_met_new_agent(Iknow, IdList) :-
 	-merge(MergeList);
 	?map::myMap(Leader);
 	if (not .empty(MergeList)) {
-		.wait(not action::move_sent);
+//		.wait(not action::move_sent);
 		getMyPos(MyX,MyY);
 		if (Me == Leader) {
 			!request_merge(MergeList,MyX,MyY);

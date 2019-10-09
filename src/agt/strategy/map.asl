@@ -21,25 +21,27 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @perceivedispenser[atomic]
 +default::thing(X, Y, dispenser, Type)
-	: not action::move_sent
+	: true
 <-
 	getMyPos(MyX,MyY);
+	.print("Perceived dispenser of type ",Type," at X ",X," at Y ",Y);
 	!map::get_dispensers(Dispensers);
 	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
 
 +!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers) : .member(dispenser(Type, MyX+X, MyY+Y), Dispensers) <- true.
 +!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers) 
-	: map::myMap(Leader)
+	: map::myMap(Leader) & default::step(S)
 <-
 	.concat(dispenser,Type,MyX+X,MyY+Y,UniqueString);
 	+action::reasoning_about_belief(UniqueString);
+	.print("Sending to ",Leader, " to add a dispenser at X ",MyX+X," Y ",MyY+Y," at step ",S);
 	.send(Leader, achieve, map::add_map(Type, MyX, MyY, X, Y, UniqueString));
 	.
 
 @perceivegoal[atomic]
 +default::goal(X,Y)
-	: not map::evaluating_vertexes & not action::move_sent
+	: not map::evaluating_vertexes
 <-
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
@@ -56,14 +58,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 @available_to_evaluate1[atomic]
-+!map::available_to_evaluate(true, GoalLocalX, GoalLocalY) :
++!map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
 	not common::my_role(goal_evaluator)
 <-
 	!common::update_role_to(goal_evaluator);
 	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
 	.
 @available_to_evaluate2[atomic]
-+!map::available_to_evaluate(false, _, _).
++!map::available_to_evaluate(0, _, _).
 	
 -!map::evaluate(_, _) : 
 	common::previous_role(retriever) 
@@ -156,7 +158,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
 	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
 	if(.member(Side, [n,s,w,e])){
@@ -290,7 +292,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(start(X, Y), Positions)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(OriginSide == start1 | (.member(cluster(_, GoalList), Clusters) & (.member(goal(MyX+X, MyY+Y), GoalList)) & // .member(origin(_, MyX+X, MyY+Y), GoalList) 
@@ -305,7 +307,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos(OriginSide) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(_, X, Y), Positions)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(.member(cluster(_, GoalList), Clusters) & (.member(origin(_, MyX+X, MyY+Y), GoalList) | .member(goal(MyX+X, MyY+Y), GoalList)) &
@@ -540,7 +542,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::move_to_evaluating_pos(start1);
 	!action::clear(0, 5);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
-		.wait(not action::move_sent);
+//		.wait(not action::move_sent);
 		getMyPos(MyX, MyY);
 		evaluateOrigin(Leader, MyX, MyY, bad);
 		-map::checking_task_area;
@@ -559,7 +561,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & common::my_role(goal_evaluator) &
 	map::evaluating_positions(Pos) & .my_name(Me) & .all_names(AllAgents) & .nth(Nth,AllAgents,Me) & .nth(Nth1,AllAgents,Ag)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	.print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)], ", Pos: ", Pos, " Goal: ", GoalX, " ", GoalY);
 	if((.member(origin(_, MyX+GoalX, MyY+GoalY), Pos) | .member(start(MyX+GoalX, MyY+GoalY), Pos)) & 
@@ -663,7 +665,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin(Side) : 
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
@@ -695,7 +697,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		if(IsANewCluster){
 			if(S \== "self"){
 				.send(Ag, askOne, map::available_to_evaluate(Res, X, Y), map::available_to_evaluate(Res, _, _))
-				if(Res == true){
+				if(Res == 1){
 					.send(Ag, achieve, map::evaluate(X, Y));
 				}
 			} elif(not common::my_role(goal_evaluator)){

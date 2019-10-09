@@ -262,10 +262,12 @@ most_needed_type(Dispensers, AgList, Type) :-
 	], pos(X+5, Y)).
 
 +!retrieve::retrieve_block :
-	true
+	default::step(Step1)
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
+	?default::step(Step2);
+	.print(" Step1 ",Step1," Step2 ",Step2);
 	!retrieve::decide_block_type_flat(Type); .print("I decided to get block type: ", Type);
 	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
@@ -441,7 +443,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-collect_block;
 	!retrieve::create_and_attach_block;
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	if (common::my_role(stocker)) {
 		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
@@ -475,7 +477,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::fetch_block_to_goal : 
 	true
 <- 
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	!retrieve::fetch_block_to_goal_aux(MyX, MyY).
 +!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
@@ -544,7 +546,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
-			.wait(not action::move_sent);
+//			.wait(not action::move_sent);
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
@@ -675,7 +677,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::go_around_obstacle(DirectionObstacle, Threshold) :
 	true
 <-
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	if (DirectionObstacle == n | DirectionObstacle == s) {
 		.random(R);
@@ -710,7 +712,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("here2");
 	if(Count > 0){
 		!retrieve::smart_move(DirectionObstacle);
-		.wait(not action::move_sent);
+//		.wait(not action::move_sent);
 		getMyPos(MyX1,MyY1);
 		!retrieve::go_around_obstacle(OppositeDirection, DirectionObstacle, MyX, MyY, 0, Threshold, _, Count-1);
 	}
@@ -720,7 +722,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	.print("here3");
 	!retrieve::smart_move(DirectionToGo);
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX1,MyY1);
 	!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX1, MyY1, Attempts+1, Threshold, ActualDirection, Count).
 +!retrieve::go_around_obstacle(DirectionObstacle, DirectionToGo, MyX, MyY, Attempts, Threshold, ActualDirection, Count) :
@@ -751,7 +753,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::move_to_goal : 
 	.my_name(Me) & common::my_role(helper)
 <- 
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	getTargetGoal(_, GoalX, GoalY, _);
 //	.term2string(Side, SideStr);
@@ -763,7 +765,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 +!retrieve::move_to_goal : 
 	.my_name(Me)
 <- 
-	.wait(not action::move_sent);
+//	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
 	if(stop::first_to_stop(Me)){
 		getTargetGoal(_, GoalX, GoalY, _);
@@ -796,7 +798,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		.send(Ag, tell, task::helper(Me));
 	}
 	elif (common::my_role(stocker)) {
-		.wait(not action::move_sent);
+//		.wait(not action::move_sent);
 		getMyPos(MyX,MyY);
 		?gate(Gate);
 		addStocker(Me, MyX, MyY, Gate);
@@ -842,7 +844,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		if(i_can_avoid(Direction, DirectionToGo)){
 			.print("GO AROUND OBSTACLE");
 			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 10, DirectionObstacle1, 1);
-			.wait(not action::move_sent);
+//			.wait(not action::move_sent);
 			getMyPos(MyX1,MyY1);
 			if(MyX == MyX1 & MyY == MyY1){
 				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){

@@ -247,9 +247,9 @@ public class EISArtifact extends Artifact implements AgentListener {
 				if (lastActionParams.getTerm(0).toString().contains("n")) { mypos.y--; }
 				else if (lastActionParams.getTerm(0).toString().contains("s")) { mypos.y++; }
 				else if (lastActionParams.getTerm(0).toString().contains("e")) { mypos.x++; }
-				else { mypos.x--; }
-//				logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y);
+				else if (lastActionParams.getTerm(0).toString().contains("w")) { mypos.x--; }
 			}
+			logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y+" Step "+step);
 			defineObsProperty(step.getFunctor(), (Object[]) step.getTermsArray());
 			defineObsProperty(lastAction.getFunctor(), (Object[]) lastAction.getTermsArray());
 			defineObsProperty(lastActionResult.getFunctor(), (Object[]) lastActionResult.getTermsArray());
