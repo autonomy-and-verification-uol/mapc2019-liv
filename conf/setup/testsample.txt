@@ -1,5 +1,8 @@
 # simple setup file for testing
 
+
+stop    # stops further setup execution
+
 terrain 17 21 obstacle
 terrain 18 21 obstacle
 terrain 19 21 obstacle
@@ -30,10 +33,6 @@ terrain 20 7 obstacle
 terrain 15 17 obstacle
 terrain 15 12 obstacle
 terrain 15 7 obstacle
-
-stop    # stops further setup execution
-
-
 
 
 
