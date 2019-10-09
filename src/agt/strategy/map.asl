@@ -417,9 +417,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			else{
 				L = [];
 			}
-			.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			.print(L);
-			.print(RetrieverPositions);
+			//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			//.print(L);
+			//.print(RetrieverPositions);
 			.setof(
 				retriever(X, Y),
 				(
@@ -428,12 +428,12 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					math.abs(X - X1) + math.abs(Y - Y1) < 5
 				),
 				BadRetrievers);
-			.print(BadRetrievers);
+			//.print(BadRetrievers);
 			.difference(L, BadRetrievers, L1);
-			.print(L1);
+			//.print(L1);
 			.concat(RetrieverPositions, L1, RetrieverPositions1);
-			.print(RetrieverPositions1);
-			.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			//.print(RetrieverPositions1);
+			//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			//.setof(Retriever, .member(Retriever, RetrieverPositions1), RetrieverPositions2);
 			-+map::retrievers_found(RetrieverPositions1);
 		}
