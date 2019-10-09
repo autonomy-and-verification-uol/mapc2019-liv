@@ -235,6 +235,9 @@ i_met_new_agent(Iknow, IdList) :-
 				for(.member(scout(ScoutX, ScoutY), Scouts)){
 					addScoutToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+ScoutX, NewOriginY+ScoutY);	
 				}
+				for(.member(retriever(RetrieverX, RetrieverY), Retrievers)){
+					addRetrieverToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+RetrieverX, NewOriginY+RetrieverY);	
+				}
 				//initAvailablePos(Me);
 				//evaluateCluster(Me, InsertedInCluster, GX, GY, Evaluated);
 				//}
