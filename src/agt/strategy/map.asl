@@ -416,10 +416,25 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			else{
 				L = [];
 			}
-			
-			.concat(RetrieverPositions, L, RetrieverPositions1);
-			.setof(Retriever, .member(Retriever, RetrieverPositions1), RetrieverPositions2);
-			-+map::retrievers_found(RetrieverPositions2);
+			.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			.print(L);
+			.print(RetrieverPositions);
+			.setof(
+				retriever(X, Y),
+				(
+					.member(retriever(X, Y), L) &
+					.member(retriever(X1, Y1), RetrieverPositions) &
+					math.abs(X - X1) + math.abs(Y - Y1) < 5
+				),
+				BadRetrievers);
+			.print(BadRetrievers);
+			.difference(L, BadRetrievers, L1);
+			.print(L1);
+			.concat(RetrieverPositions, L1, RetrieverPositions1);
+			.print(RetrieverPositions1);
+			.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			//.setof(Retriever, .member(Retriever, RetrieverPositions1), RetrieverPositions2);
+			-+map::retrievers_found(RetrieverPositions1);
 		}
 	}
 			/*if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
