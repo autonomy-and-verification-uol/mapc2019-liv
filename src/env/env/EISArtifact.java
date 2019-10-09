@@ -297,9 +297,9 @@ public class EISArtifact extends Artifact implements AgentListener {
 	}
 	
 	@OPERATION 
-	void updateMyPos(int x, int y){
-		mypos.x = x;
-		mypos.y = y;
+	void updateMyPos(int originx, int originy){
+		mypos.x = mypos.x + originx;
+		mypos.y = mypos.y + originy;
 	}
 
 	@OPERATION 
@@ -366,7 +366,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     
     // NOTE: clear is supposed to be true if the clear action is allowed, false otherwise.
     @OPERATION
-    public void getPlanAgentToGoal(String agent, int goalX, int goalY, OpFeedbackParam<Literal[]> plan, boolean clear) {
+    public void getPlanAgentToGoal(String agent, int goalX, int goalY, OpFeedbackParam<Literal[]> plan, int clear) {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
     	logger.info("Goal statement: " + goalStatement);
@@ -375,7 +375,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     }
     
     @OPERATION
-    public void getPlanAgentToGoal(String agent, int goalX, int goalY, int blockX, int blockY, OpFeedbackParam<Literal[]> plan, boolean clear) {
+    public void getPlanAgentToGoal(String agent, int goalX, int goalY, int blockX, int blockY, OpFeedbackParam<Literal[]> plan, int clear) {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
@@ -385,7 +385,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     }
     
     @OPERATION
-    public void getPlanBlockToGoal(String agent, int goalX, int goalY, int blockX, int blockY, OpFeedbackParam<Literal[]> plan, boolean clear) {
+    public void getPlanBlockToGoal(String agent, int goalX, int goalY, int blockX, int blockY, OpFeedbackParam<Literal[]> plan, int clear) {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at b0 " + goalCell + ")");
@@ -398,7 +398,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	return "\t(:goal " + actualGoal + ")";
     }
     
-    private LinkedList<String> getPlan(String agent, String goalStatement, String attachedBlockCoordinates, int blockCounter, boolean clear) {
+    private LinkedList<String> getPlan(String agent, String goalStatement, String attachedBlockCoordinates, int blockCounter, int clear) {
     	
     	LinkedList<String> plan = null;
     	
@@ -553,7 +553,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	return plan; 
     }
     
-    private LinkedList<String> callPlanner(String agentName, boolean clear) throws IOException, InterruptedException {
+    private LinkedList<String> callPlanner(String agentName, int clear) throws IOException, InterruptedException {
     	String problem = agentName + "_problem.pddl";
     	String output = agentName + "_output";
     	logger.info("problem file name: " + problem);
@@ -561,7 +561,7 @@ public class EISArtifact extends Artifact implements AgentListener {
        	
        	ProcessBuilder pb = null;
        	
-       	if(clear)
+       	if(clear == 1)
        	   	pb = new ProcessBuilder("./run.sh", "domain_clear.pddl", agentName);
        	else
        		pb = new ProcessBuilder("./run.sh", "domain.pddl", agentName);
@@ -593,7 +593,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		return plan;
     }
     
-    private LinkedList<String> callPlanner2(String agentName, boolean clear) throws IOException, InterruptedException {
+    private LinkedList<String> callPlanner2(String agentName, int clear) throws IOException, InterruptedException {
     	String problem = agentName + "_problem.pddl";
     	String output = agentName + "_output";
     	logger.info("problem file name: " + problem);
@@ -601,7 +601,7 @@ public class EISArtifact extends Artifact implements AgentListener {
        	
        	ProcessBuilder pb = null;
        	
-       	if(clear)
+       	if(clear == 1)
        	   	pb = new ProcessBuilder("./run2.sh", "domain_clear.pddl", agentName);
        	else
        		pb = new ProcessBuilder("./run2.sh", "domain.pddl", agentName);

@@ -5,6 +5,7 @@ check_path(XOld,YOld,XFirst,YFirst,XFirst,YFirst) :- true.
 check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== XOld & Y \== YOld & check_path(X,Y,X-1,Y,XFirst,YFirst)) | (default::obstacle(X-1,Y-1) & X-1 \== XOld & Y-1 \== YOld & check_path(X,Y,X-1,Y-1,XFirst,YFirst)) | (default::obstacle(X-1,Y+1)  & X-1 \== XOld & Y+1 \== YOld & check_path(X,Y,X-1,Y+1,XFirst,YFirst)) | (default::obstacle(X,Y-1) & X \== XOld & Y-1 \== YOld & check_path(X,Y,X,Y-1,XFirst,YFirst)) | (default::obstacle(X,Y+1) & X \== XOld & Y+1 \== YOld & check_path(X,Y,X,Y+1,XFirst,YFirst)) | (default::obstacle(X+1,Y) & X+1 \== XOld & Y \== YOld & check_path(X,Y,X+1,Y,XFirst,YFirst)) | (default::obstacle(X+1,Y-1) & X+1 \== XOld & Y-1 \== YOld & check_path(X,Y,X+1,Y-1,XFirst,YFirst)) | (default::obstacle(X+1,Y+1) & X+1 \== XOld & Y+1 \== YOld & check_path(X,Y,X+1,Y+1,XFirst,YFirst)).
 
 // test plan, should be removed later on
+@testplan[atomic]
 +default::step(X)
 	: X \== 0 & X mod 25 = 0
 <-
@@ -684,7 +685,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 +!map::move_random(_).
 
-@addmap[atomic]
+@addmap1[atomic]
 +!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
 	: .my_name(Me) & map::myMap(Me)
 <-
@@ -716,6 +717,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		elif(not .member(dispenser(Type,MyX+X,MyY+Y), Dispensers)){
 			updateMap(Me, Type, MyX+X, MyY+Y);
 		}
+		.print("@@@@@ Adding dispenser type ",Type," Dispenser X ",MyX+X," Dispenser Y ",MyY+Y," Agent that requested ",Ag);
+		.print("@@@@@ Old list of dispensers ",Dispensers);
 	}
 	if (S == "self") {
 		!identification::remove_reasoning(UniqueString);
@@ -724,6 +727,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.send(Ag, achieve, identification::remove_reasoning(UniqueString));
 	}
 	.
+@addmap2[atomic]
 +!add_map(Type, MyX, MyY, X, Y, UniqueString)[source(Ag)]
 <-
 	.term2string(Ag,S);

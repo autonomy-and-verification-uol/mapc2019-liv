@@ -88,39 +88,25 @@
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
 	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 	.print("Where we are actually going ", ActualFinalLocalTargetX, ", ", ActualFinalLocalTargetY);
+	if (default::energy(Energy) & Energy >= 30) {
+		Clear = 1;
+	}
+	else {
+		Clear = 0;
+	}
 	if (planner::back_to_origin & retrieve::block(BlockX,BlockY)) {
 		if (math.abs(TargetX) + math.abs(TargetY) <= 5) {
-			if (default::energy(Energy) & Energy >= 30) {
-				getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
-			}
-			else {
-				getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
-			}
+			getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
 		}
 		else {
-			if (default::energy(Energy) & Energy >= 30) {
-				getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
-			}
-			else {
-				getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
-			}
+			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
 		}
 	}
 	elif (retrieve::block(BlockX,BlockY)) {
-		if (default::energy(Energy) & Energy >= 30) {
-			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
-		}
-		else {
-			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
-		}
+		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
 	}
 	else {
-		if (default::energy(Energy) & Energy >= 30) {
-			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, true);
-		}
-		else {
-			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, false);
-		}
+		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, Clear);
 	}
 	.print("@@@@@@ Plan: ",Plan);
 	

@@ -107,14 +107,13 @@
 //		!!retrieve::retrieve_block;
 	}
 	else {
-//		.print("Removing explorer");
-//		-exploration::special(_);
-//		-common::avoid(_);
-//		-common::escape;
-//		!action::forget_old_action;
-//		!common::update_role_to(retriever);
-//		!!default::always_skip;
-//		!retrieve::retrieve_block;
+		.print("Removing explorer");
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		!common::update_role_to(retriever);
+		!retrieve::retrieve_block;
 	}
 //	!!retrieve::retrieve_block;
 	.
@@ -210,14 +209,13 @@
 //			!!retrieve::move_to_goal;
 		}
 		else {
-//			.print("Removing explorer");
-//			-exploration::special(_);
-//			-common::avoid(_);
-//			-common::escape;
-//			!action::forget_old_action;
-//			!common::update_role_to(retriever);
-//			!!default::always_skip;
-//			!retrieve::retrieve_block;
+			.print("Removing explorer");
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			!action::forget_old_action;
+			!common::update_role_to(retriever);
+			!retrieve::retrieve_block;
 		}
 	//		!!retrieve::retrieve_block;
 	}

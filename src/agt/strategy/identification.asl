@@ -156,8 +156,7 @@ i_met_new_agent(Iknow, IdList) :-
 <-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
-	getMyPos(MyX,MyY);
-	updateMyPos(MyX+OriginX,MyY+OriginY);
+	updateMyPos(OriginX,OriginY);
 	if (common::my_role(stocker) & task::stocker_in_position) {
 		updateStockerPos(Me,OriginX,OriginY);
 	}
@@ -268,6 +267,7 @@ i_met_new_agent(Iknow, IdList) :-
 		if(not common::my_role(retriever)){
 			!stop::check_join_group;
 		}
+		.print("Merge finished.");
 	}
 	else {
 		-identification::merge_canceled[source(Leader)];
