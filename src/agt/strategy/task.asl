@@ -114,9 +114,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	.nth(0,CommitListSort,agent(Sum,Ag,TypeAg,X,Y));
 	.delete(0,CommitListSort,CommitListSortNew);
 	!update_commitlist(CommitListSortNew);
-	?check_pos(X,Y,NewX,NewY);
+//	?check_pos(X,Y,NewX,NewY);
 	if (task::no_block) {
-		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,noblock));
+		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+X,MyY+Y,noblock));
 	}
 	else {
 //		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
@@ -125,7 +125,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //			!action::detach(n);
 //		}
 //		else {
-		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y));
+		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+X,MyY+Y));
 //		}
 	}
 	!!default::always_skip;
@@ -239,7 +239,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!perform_task_origin_next;
 	.
 	
-+!perform_task(Stocker,Type,X,Y,LocalX,LocalY,noblock)[source(Origin)]
++!perform_task(Stocker,Type,X,Y,noblock)[source(Origin)]
 //	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
 	.print("@@@@ Received order for new task, origin does not have a block");
@@ -269,25 +269,39 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	}
 	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
-	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+//	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	TargetX = StockerX + GateX + AddPosX - MyX;
+	TargetY = StockerY + GateY + AddPosY - MyY;
+//	.print("@@@@ TargetX:",TargetX);
+//	.print("@@@@ TargetY:",TargetY);
+	!planner::generate_goal(TargetX, TargetY);
 	.send(Stocker, achieve, task::help_detach(Gate));
 	?exploration::remove_opposite(Gate,OppositeGate);
 	!action::attach(OppositeGate);
 	.wait(task::detach_complete[source(Stocker)]);
 	-task::detach_complete[source(Stocker)];
 	.print("@@@@@ Detach complete");
-	!rotate_back;
+//	!rotate_back;
 	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
-	.send(Origin, achieve, task::help_attach(LocalX,LocalY));
+	.print("MyXNew ",MyXNew);
+	.print("MyYNew ",MyYNew);
+	.print("X ",X);
+	.print("Y ",Y);
+	NewTargetX = X - MyXNew;
+	NewTargetY = Y - MyYNew;
+	.print("NewTargetX ",NewTargetX);
+	.print("NewTargetY ",NewTargetY);
+	!planner::generate_goal(NewTargetX, NewTargetY);
+//	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	.send(Origin, achieve, task::help_attach(X,Y));
 	?retrieve::block(BX,BY);
 	?get_direction(BX,BY,DetachPos);
 	!action::detach(DetachPos);
 //	!default::always_skip;
 	.
 	
-+!perform_task(Stocker,Type,X,Y,LocalX,LocalY)[source(Origin)]
++!perform_task(Stocker,Type,X,Y)[source(Origin)]
 //	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
 //	removeRetriever;
@@ -299,6 +313,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	getStockerPos(Stocker,StockerX,StockerY,GateS);
 	.term2string(Gate,GateS);
 	?get_direction(GateX,GateY,Gate);
+//	.print("@@@@ Gate:",Gate);
 	if (Gate == s) {
 		AddPosX = 0;
 		AddPosY = 1; 
@@ -317,17 +332,31 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	}
 	addRetrieverAvailablePos(MyX, MyY);
 	.send(Stocker, achieve, task::request_block(Type, Gate));
-	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+//	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
+	TargetX = StockerX + GateX + AddPosX - MyX;
+	TargetY = StockerY + GateY + AddPosY - MyY;
+//	.print("@@@@ TargetX:",TargetX);
+//	.print("@@@@ TargetY:",TargetY);
+	!planner::generate_goal(TargetX, TargetY);
 	.send(Stocker, achieve, task::help_detach(Gate));
 	?exploration::remove_opposite(Gate,OppositeGate);
 	!action::attach(OppositeGate);
 	.wait(task::detach_complete[source(Stocker)]);
 	-task::detach_complete[source(Stocker)];
 	.print("@@@@@ Detach complete");
-	!rotate_back;
+//	!rotate_back;
 	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
-	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
+	.print("MyXNew ",MyXNew);
+	.print("MyYNew ",MyYNew);
+	.print("X ",X);
+	.print("Y ",Y);
+	NewTargetX = X - MyXNew;
+	NewTargetY = Y - MyYNew;
+	.print("NewTargetX ",NewTargetX);
+	.print("NewTargetY ",NewTargetY);
+	!planner::generate_goal(NewTargetX, NewTargetY);
+//	!get_to_pos_vert(MyXNew,MyYNew,X,Y,LocalX,LocalY);
 	.wait(not action::move_sent);
 	getMyPos(MyXNew2,MyYNew2);
 	?retrieve::block(BX,BY);

@@ -19,16 +19,29 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
+	: common::my_role(helper) & back_to_origin
+<- 
+	+ready_to_help;
+	-back_to_origin;
+	.
++!generate_goal(0, 0) 
+	: common::my_role(helper) & ready_to_help
+<- 
+	-ready_to_help;
+	+back_to_origin;
+	.
++!generate_goal(0, 0) 
 	: common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
-	-moving_to_origin;
+	-retrieve::moving_to_origin;
+	+ready_to_help;
 	.send(Ag, tell, task::helper(Me));
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
 	: .my_name(Me) & stop::first_to_stop(Me)
 <- 
-	-moving_to_origin;
+	-retrieve::moving_to_origin;
 	+task::origin;
 	!!default::always_skip;
 	.
@@ -75,7 +88,25 @@
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
 	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 	.print("Where we are actually going ", ActualFinalLocalTargetX, ", ", ActualFinalLocalTargetY);
-	if (retrieve::block(BlockX,BlockY)) {
+	if (planner::back_to_origin & retrieve::block(BlockX,BlockY)) {
+		if (math.abs(TargetX) + math.abs(TargetY) <= 5) {
+			if (default::energy(Energy) & Energy >= 30) {
+				getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
+			}
+			else {
+				getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
+			}
+		}
+		else {
+			if (default::energy(Energy) & Energy >= 30) {
+				getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
+			}
+			else {
+				getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, false);
+			}
+		}
+	}
+	elif (retrieve::block(BlockX,BlockY)) {
 		if (default::energy(Energy) & Energy >= 30) {
 			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, true);
 		}

@@ -286,7 +286,7 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void addRetrieveAvailablePos(int x, int y) {
+	void addRetrieverAvailablePos(int x, int y) {
 		this.retrieversAvailablePositions.add(new Point(x, y));
 	}
 	
