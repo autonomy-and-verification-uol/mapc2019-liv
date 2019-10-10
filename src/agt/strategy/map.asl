@@ -600,6 +600,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::move_random(3);
 	!map::find_cluster_origin(n);	
 	.
++!map::find_cluster_origin(n) :
+	default::goal(GX, GY) & GY = 0 & GX > 0 & not stop::first_to_stop(_)
+<-
+	!retrieve::smart_move(e);
+	!map::move_random(3);
+	!map::find_cluster_origin(n);
+	.	
 /* 
 +!map::find_cluster_origin(s) :
 	default::goal(GX, GY) & GY > 0 & GX > 0
@@ -666,6 +673,34 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
 //	.wait(not action::move_sent);
+	/*getMyPos(MyX, MyY);
+	getGoalClusters(Leader, Clusters);
+	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
+		.fail;
+	}
+	evaluateOrigin(Leader, MyX, MyY, boh);
+	.print("OldPos: ", Positions);
+	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
+	if(map::evaluating_positions(Pos)){
+		.print("NewPos: ", Pos);
+	}*/
+	!map::find_other_side(0);
+	.
++!map::find_other_side(Count) :
+	default::goal(GX, GY) & GX == 0 & GY > 0 & not stop::first_to_stop(_)
+<-
+	!retrieve::smart_move(s);
+	if(default::lastActionResult(success)){
+		!map::find_other_side(Count+1);
+	} else {
+		!map::find_other_side(Count);
+	}
+	.
++!map::find_other_side(Count) :
+	map::myMap(Leader) & not stop::first_to_stop(_)
+<-
+	-+map::evaluating_positions([start(0, -Count/2)|Pos]);
+	!map::move_to_evaluating_pos(start1);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
 	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
@@ -677,7 +712,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(map::evaluating_positions(Pos)){
 		.print("NewPos: ", Pos);
 	}
-	.
+	.	
 +!map::move_random(Steps) :
 	not default::lastActionResult(success)
 <-
