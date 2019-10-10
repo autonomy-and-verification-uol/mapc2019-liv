@@ -159,7 +159,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
 <-
 //	.wait(not action::move_sent);
-	getMyPos(MyX, MyY)
+	getMyPos(MyX, MyY);
 	if(.member(Side, [n,s,w,e])){
 		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
 			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
