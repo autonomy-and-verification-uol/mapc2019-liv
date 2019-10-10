@@ -1250,7 +1250,23 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	.
 
-	
-	
-	
-	
++default::step(S)
+	: common::my_role(stocker) & not retrieve::block(0,1) & not retrieve::ghost_block(0,1,_)
+<-
+		+ghost_block(0,1,Ag);
+	.
++default::step(S)
+	: common::my_role(stocker) & not retrieve::block(0,-1) & not retrieve::ghost_block(0,-1,_)
+<-
+		+ghost_block(0,-1,Ag);
+	.
++default::step(S)
+	: common::my_role(stocker) & not retrieve::block(1,0) & not retrieve::ghost_block(1,0,_)
+<-
+		+ghost_block(1,0,Ag);
+	.
++default::step(S)
+	: common::my_role(stocker) & not retrieve::block(-1,0) & not retrieve::ghost_block(-1,0,_)
+<-
+		+ghost_block(-1,0,Ag);
+	.

@@ -119,9 +119,15 @@
 +!rotate(Direction)
 <-
 	!action::commit_action(rotate(Direction));
-	if (default::lastAction(rotate) & default::lastActionResult(success) & retrieve::block(X,Y) & common::rotate_direction(Direction,NewX,NewY)) {
-		-retrieve::block(X,Y);
-		+retrieve::block(NewX,NewY);
+	if (default::lastAction(rotate) & default::lastActionResult(success) & common::rotate_direction(Direction,NewX,NewY)) { 
+		if (retrieve::block(X,Y)) {
+			-retrieve::block(X,Y);
+			+retrieve::block(NewX,NewY);
+		}
+		elif (retrieve::ghost_block(X,Y,Ag)) {
+			-retrieve::ghost_block(X,Y,Ag);
+			+retrieve::ghost_block(NewX,NewY,Ag);
+		}
 	}
 	.
 -!rotate(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Rotation ",Direction," is not valid, it should be one of {cw,cww}.").
