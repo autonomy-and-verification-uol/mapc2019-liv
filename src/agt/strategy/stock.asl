@@ -1253,20 +1253,37 @@ most_needed_type(Dispensers, AgList, Type) :-
 +default::step(S)
 	: common::my_role(stocker) & not retrieve::block(0,1) & not retrieve::ghost_block(0,1,_)
 <-
-		+ghost_block(0,1,Ag);
+	getAvailableAgent([agent(Ag,Type)|List]);
+	+ghost_block(0,1,Ag);
+	.send(Ag, achieve, retrieve::bring_block);
 	.
 +default::step(S)
 	: common::my_role(stocker) & not retrieve::block(0,-1) & not retrieve::ghost_block(0,-1,_)
 <-
-		+ghost_block(0,-1,Ag);
+	getAvailableAgent([agent(Ag,Type)|List]);
+	+ghost_block(0,-1,Ag);
+	.send(Ag, achieve, retrieve::bring_block);
 	.
 +default::step(S)
 	: common::my_role(stocker) & not retrieve::block(1,0) & not retrieve::ghost_block(1,0,_)
 <-
-		+ghost_block(1,0,Ag);
+	getAvailableAgent([agent(Ag,Type)|List]);
+	+ghost_block(1,0,Ag);
+	.send(Ag, achieve, retrieve::bring_block);
 	.
 +default::step(S)
 	: common::my_role(stocker) & not retrieve::block(-1,0) & not retrieve::ghost_block(-1,0,_)
 <-
-		+ghost_block(-1,0,Ag);
+	getAvailableAgent([agent(Ag,Type)|List]);
+	+ghost_block(-1,0,Ag);
+	.send(Ag, achieve, retrieve::bring_block);
 	.
+	
++!retrieve::bring_block[source(Stocker)]
+	: .my_name(Me)
+<-
+	removeAvailableAgent(Me);
+	getMyPos(MyX, MyY);
+	addRetrieverAvailablePos(MyX, MyY);
+	.
+	

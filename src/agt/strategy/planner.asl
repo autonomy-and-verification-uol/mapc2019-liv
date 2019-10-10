@@ -39,10 +39,16 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
-	: .my_name(Me) & stop::first_to_stop(Me)
+	: common::my_role(origin)
 <- 
 	-retrieve::moving_to_origin;
 	+task::origin;
+	!!default::always_skip;
+	.
++!generate_goal(0, 0) 
+	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
+<- 
+	addAvailableAgent(Me,Type);
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) <- !!default::always_skip.
