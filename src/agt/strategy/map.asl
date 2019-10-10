@@ -61,8 +61,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
 	not common::my_role(goal_evaluator)
 <-
-	!common::update_role_to(goal_evaluator);
 	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
+	!!common::update_role_to(goal_evaluator);
 	.
 @available_to_evaluate2[atomic]
 +!map::available_to_evaluate(0, _, _).
@@ -89,7 +89,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	//-exploration::explorer;
 	!action::forget_old_action;
-	//!common::update_role_to(goal_evaluator);
+	!common::update_role_to(goal_evaluator);
 	
 	if(not map::evaluating_positions) {
 		+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
@@ -701,8 +701,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 					.send(Ag, achieve, map::evaluate(X, Y));
 				}
 			} elif(not common::my_role(goal_evaluator)){
-				!common::update_role_to(goal_evaluator);
 				.send(Ag, achieve, map::evaluate(X, Y));
+				//!map::evaluate(X, Y);
 			}	
 		}
 		//!retrieve::update_target;

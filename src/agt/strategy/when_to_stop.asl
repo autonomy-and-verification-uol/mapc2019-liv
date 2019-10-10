@@ -26,7 +26,6 @@
 	){
 		firstToStop(Me,Flag);
 		if (Flag) {
-			.broadcast(tell, stop::first_to_stop(Me));
 			+stop::first_to_stop(Me);
 			//.print("Removing explorer");
 			//-exploration::explorer;
@@ -34,25 +33,12 @@
 			-common::avoid(_);
 			-common::escape;
 			!action::forget_old_action;
-			.print("Adding retriever");
-			!common::update_role_to(retriever);
-			//+retrieve::retriever;
-			.print("Call first time setTargetGoal");
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 			initStockerAvailablePos(Leader);
 			initRetrieverAvailablePos(Leader);
-			+retrieve::moving_to_origin;
-//			.wait(not action::move_sent);
-			getMyPos(MyX, MyY);
-			TargetX = GoalX - MyX;
-			TargetY = GoalY - MyY;
-			!!planner::generate_goal(TargetX, TargetY);
-//			!!planner::execute_plan(Plan);
-			//+plan(Plan);
-			//?plan([Head|PlanX]);
-			//.print("@@@@@@ Head: ",Head);
-//			!!retrieve::move_to_goal;
+			.broadcast(tell, stop::first_to_stop(Me));
+			!!stop::stop_aux(GoalX, GoalY);
 		}
 		else{
 			-stop::stop;
@@ -65,16 +51,11 @@
 	
 @stop2[atomic]
 +stop
-	: common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) //& not action::move_sent // someone else stopped already and my map is his map
+	: not stop::really_stop & common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) //& not action::move_sent // someone else stopped already and my map is his map
 <-
+	.print("ADD really stop belief");
+	+stop::really_stop;
 	joinRetrievers(Flag);
-//	.print("Removing explorer");
-//	-exploration::explorer;
-//	-exploration::special(_);
-//	-common::avoid(_);
-//	-common::escape;
-//	!action::forget_old_action;
-//	+retrieve::retriever;
 	if (Flag == "stocker") {
 		.print("Removing explorer");
 		//-exploration::explorer;
@@ -82,9 +63,7 @@
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		!common::update_role_to(stocker);
-//		!!default::always_skip;
-		!retrieve::retrieve_block;
+		!!stop::retrieve_block_as_stocker;
 	}
 	elif (Flag == "helper") {
 		.print("Removing explorer");
@@ -93,18 +72,7 @@
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		!common::update_role_to(helper);
-		//+retrieve::retriever;
-		//+task::helper;
-		+retrieve::moving_to_origin;
-		getTargetGoal(_, GoalX, GoalY, _);
-		getMyPos(MyX, MyY);
-		TargetX = GoalX+1 - MyX;
-		TargetY = GoalY - MyY;
-		!!planner::generate_goal(TargetX, TargetY);
-//		!!planner::execute_plan(Plan);
-//		!!retrieve::move_to_goal;
-//		!!retrieve::retrieve_block;
+		!!stop::retrieve_block_as_helper;
 	}
 	else {
 		.print("Removing explorer");
@@ -112,8 +80,7 @@
 		-common::avoid(_);
 		-common::escape;
 		!action::forget_old_action;
-		!common::update_role_to(retriever);
-		!retrieve::retrieve_block;
+		!!stop::retrieve_block_as_retriever;
 	}
 //	!!retrieve::retrieve_block;
 	.
@@ -129,6 +96,63 @@
 	
 +stop : true <- -stop::stop.
 
++!stop::retrieve_block_as_stocker :
+	true
+<-
+	!common::update_role_to(stocker);
+//		!!default::always_skip;
+	!retrieve::retrieve_block;
+	.
++!stop::retrieve_block_as_helper :
+	true
+<-
+	!common::update_role_to(helper);
+	//+retrieve::retriever;
+	//+task::helper;
+	+retrieve::moving_to_origin;
+	getTargetGoal(_, GoalX, GoalY, _);
+	getMyPos(MyX, MyY);
+	TargetX = GoalX+1 - MyX;
+	TargetY = GoalY - MyY;
+	!!planner::generate_goal(TargetX, TargetY);
+//		!!planner::execute_plan(Plan);
+//		!!retrieve::move_to_goal;
+//		!!retrieve::retrieve_block;
+	.
+	
++!stop::retrieve_block_as_retriever :
+	true
+<-
+	!common::update_role_to(retriever);
+	!retrieve::retrieve_block;
+	.
+	
++!stop::stop_aux(GoalX, GoalY) :
+	true
+<-
+	!common::update_role_to(origin);
+	//+retrieve::retriever;
+	
+	+retrieve::moving_to_origin;
+//			.wait(not action::move_sent);
+	getMyPos(MyX, MyY);
+	TargetX = GoalX - MyX;
+	TargetY = GoalY - MyY;
+	!!planner::generate_goal(TargetX, TargetY);
+//			!!planner::execute_plan(Plan);
+	//+plan(Plan);
+	//?plan([Head|PlanX]);
+	//.print("@@@@@@ Head: ",Head);
+//			!!retrieve::move_to_goal;
+	.
+
++!stop::explore_as_explorer :
+	true
+<-
+	!common::update_role_to(explorer);
+	!!exploration::explore([n,s,e,w]);
+	.
+
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag)[source(_)] :
 	common::my_role(retriever) & .my_name(Me) & stop::first_to_stop(Me) &
@@ -142,8 +166,7 @@
 	!action::forget_old_action;
 	.print("Adding explorer");
 	//+exploration::explorer;
-	!common::update_role_to(explorer);
-	!!exploration::explore([n,s,e,w]);
+	!!stop::explore_as_explorer;
 	.
 @first_to_stop2[atomic]
 +stop::first_to_stop(Ag1)[source(_)] :
@@ -183,11 +206,9 @@
 			-common::avoid(_);
 			-common::escape;
 			!action::forget_old_action;
-			!common::update_role_to(stocker);
-			//+retrieve::retriever;
-			//+task::stocker;
-//			!!default::always_skip;
-			!retrieve::retrieve_block;
+			!!stop::retrieve_block_as_stocker;
+			//!common::update_role_to(stocker);
+			//!retrieve::retrieve_block;
 		}
 		elif (Flag == "helper") {
 			//.print("Removing explorer");
@@ -197,7 +218,8 @@
 			-common::escape;
 			!action::forget_old_action;
 //			.wait(not action::move_sent);
-			getMyPos(MyX, MyY);
+			!!stop::retrieve_block_as_helper;
+			/*getMyPos(MyX, MyY);
 			!common::update_role_to(helper);
 			//+retrieve::retriever;
 			//+task::helper;
@@ -205,7 +227,7 @@
 			getTargetGoal(_, GoalX, GoalY, _);
 			TargetX = GoalX+1 - MyX;
 			TargetY = GoalY - MyY;
-			!!planner::generate_goal(TargetX, TargetY);
+			!!planner::generate_goal(TargetX, TargetY);*/
 //			!!retrieve::move_to_goal;
 		}
 		else {
@@ -214,8 +236,9 @@
 			-common::avoid(_);
 			-common::escape;
 			!action::forget_old_action;
-			!common::update_role_to(retriever);
-			!retrieve::retrieve_block;
+			!!stop::retrieve_block_as_retriever;
+			//!common::update_role_to(retriever);
+			//!retrieve::retrieve_block;
 		}
 	//		!!retrieve::retrieve_block;
 	}
@@ -254,7 +277,7 @@
 	.member(cluster(_, GoalList), Clusters) &
 	.member(origin(Side, GoalX, GoalY), GoalList) & .member(Side, [n,s,w,e]) &
 	.length(Blocks, NBlocks) & 
-	identification::identified(KnownAgs) & .length(KnownAgs, NKnownAgs) & (NKnownAgs + 1) >= NBlocks & // enough agents to build the structure
+	identification::identified(KnownAgs) & .length(KnownAgs, NKnownAgs) & (NKnownAgs + 1) >= 5 &//NBlocks & // enough agents to build the structure
 	.findall(Type, (.member(req(_, _, Type), Blocks) & not(.member(dispenser(Type, _, _), Dispensers))), []) // all the necessary types are known
 <- 
 	.print("I can stop exploring now..");
