@@ -699,7 +699,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_other_side(Count) :
 	map::myMap(Leader) & not stop::first_to_stop(_)
 <-
-	-+map::evaluating_positions([start(0, -Count/2)|Pos]);
+	DiffY = math.floor(-Count/2);
+	-+map::evaluating_positions([start(0, DiffY)|Pos]);
 	!map::move_to_evaluating_pos(start1);
 	getMyPos(MyX, MyY);
 	getGoalClusters(Leader, Clusters);
