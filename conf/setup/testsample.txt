@@ -1,9 +1,11 @@
 # simple setup file for testing
 
-terrain 20 20 goal
-move 18 18 A1
+
 
 stop    # stops further setup execution
+
+terrain 20 20 goal
+move 18 18 A1
 
 terrain 17 21 obstacle
 terrain 18 21 obstacle
