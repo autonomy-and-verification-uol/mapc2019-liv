@@ -237,6 +237,7 @@ i_met_new_agent(Iknow, IdList) :-
 				for(.member(scout(ScoutX, ScoutY), Scouts)){
 					addScoutToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+ScoutX, NewOriginY+ScoutY);	
 				}
+				.print("Retrievers: ", Retrievers);
 				for(.member(retriever(RetrieverX, RetrieverY), Retrievers)){
 					.print("Updating retriever pos X ",RetrieverX," Y ",RetrieverY);
 					addRetrieverToOrigin(Me, NewOriginX+GX, NewOriginY+GY, NewOriginX+RetrieverX, NewOriginY+RetrieverY);	

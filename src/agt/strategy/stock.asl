@@ -507,9 +507,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			+gate(StockerBlockPos);
 		}
 		else {
-			.print("Angelo was wrong!");
 			getRetrieverAvailablePos(MyGoalX, MyGoalY);
-			.print("Angelo was right!");
 			/*getTargetGoal(Ag, GoalX, GoalY, SideStr);
 			.random(NX);
 			.random(RX);

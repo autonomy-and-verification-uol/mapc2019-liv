@@ -171,7 +171,7 @@ public class TeamArtifact extends Artifact {
 				for(Point pp : agentmaps.get(name).get(key)) {
 					if(targetGoalX == pp.x && targetGoalY == pp.y) {
 						for(Point scout : ((OriginPoint) pp).scouts) {
-							logger.info("[" + name + "]" + "( " + scout.x + ", " + scout.y + " ) added");
+							logger.info("[" + name + "]" + "( " + scout.x + ", " + scout.y + " ) stocker added");
 							this.stockersAvailablePositions.add(scout);
 						}
 						return;
@@ -183,7 +183,7 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION
 	void initRetrieverAvailablePos(String name) {
-		logger.info("initAvailablePos");
+		logger.info("initRetrieversAvailablePos");
 		if(this.targetGoalX == null | this.targetGoalY == null) return;
 		this.retrieversAvailablePositions.clear();
 		for(String key : agentmaps.get(name).keySet()) {
@@ -193,7 +193,7 @@ public class TeamArtifact extends Artifact {
 						logger.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 						logger.info(((OriginPoint) pp).retrievers+"");
 						for(Point retriever : ((OriginPoint) pp).retrievers) {
-							logger.info("[" + name + "]" + "( " + retriever.x + ", " + retriever.y + " ) added");
+							logger.info("[" + name + "]" + "( " + retriever.x + ", " + retriever.y + " ) retriever added");
 							this.retrieversAvailablePositions.add(retriever);
 						}
 						return;
@@ -256,9 +256,9 @@ public class TeamArtifact extends Artifact {
 		
 	@OPERATION
 	void getStockerAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
-		logger.info("Available positions: ");
+		logger.info("Available stocker positions: ");
 		for(Point p : this.stockersAvailablePositions) {
-			logger.info("( "+ p.x + p.y + " )");
+			logger.info("( "+ p.x + ", " + p.y + " )");
 		}
 		if(!this.stockersAvailablePositions.isEmpty()) {
 			x.set(this.stockersAvailablePositions.get(0).x);
@@ -269,9 +269,9 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION
 	void getRetrieverAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
-		logger.info("Available positions: ");
+		logger.info("Available retriever positions: ");
 		for(Point p : this.retrieversAvailablePositions) {
-			logger.info("( "+ p.x + p.y + " )");
+			logger.info("( "+ p.x + ", " + p.y + " )");
 		}
 		if(!this.retrieversAvailablePositions.isEmpty()) {
 			x.set(this.retrieversAvailablePositions.get(0).x);
@@ -282,11 +282,13 @@ public class TeamArtifact extends Artifact {
 	
 	@OPERATION
 	void addStockerAvailablePos(int x, int y) {
+		logger.info("(" + x + ", " + y + ") is now a stocker available position");
 		this.stockersAvailablePositions.add(new Point(x, y));
 	}
 	
 	@OPERATION
 	void addRetrieverAvailablePos(int x, int y) {
+		logger.info("(" + x + ", " + y + ") is now a retriever available position");
 		this.retrieversAvailablePositions.add(new Point(x, y));
 	}
 	
@@ -355,18 +357,20 @@ public class TeamArtifact extends Artifact {
 			if(key.startsWith("goal_")) {
 				for(Point pp : agentmaps.get(name).get(key)) {
 					if(pp instanceof OriginPoint & originX == pp.x && originY == pp.y) {
+						logger.info("[" + name + "]" + "(" + retrieverX + ", " + retrieverY + ") retriever added to cluster " + key);
 						((OriginPoint) pp).retrievers.add(new Point(retrieverX, retrieverY));
 						return;
 					}
 				}
 			}
 		}
+		logger.info("[" + name + "]" + "addRetrieverToOrigin has not add anything");
 	}
 	
 	@OPERATION
 	void updateGoalMap(String name, int x, int y, OpFeedbackParam<String> clusterInserterIn, OpFeedbackParam<Boolean> isANewCluster) {
 		Point p = new Point(x, y);
-		logger.info("[" + name + "]: Try to add point (" + x + ", " + y + ")");
+		logger.info("[" + name + "]: Try to add goal (" + x + ", " + y + ")");
 		double minDistance = 5;
 		String myCluster = null;
 		int id = 0;
