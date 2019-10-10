@@ -320,7 +320,8 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	.print("My role is now: ", NewRole);
 	-+common::previous_role(MyRole);
-	-+common::my_role(NewRole)
+	-+common::my_role(NewRole);
+	!action::skip;
 	.
 +!common::update_role_to(NewRole) :
 	true
@@ -333,6 +334,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	-+common::my_role(MyRole);
 	-+common::previous_role(OldRole);
+	!action::skip;
 	.
 
 /*
