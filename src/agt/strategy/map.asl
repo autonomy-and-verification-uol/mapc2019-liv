@@ -528,7 +528,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	if(common::my_role(Role)){.print("My current role: ", Role)}
 	!map::move_to_evaluating_pos(start);
-	!map::find_cluster_origin(n); 
+	!map::find_cluster_origin;//(n); 
 	!map::check_task_area;
 	//!map::find_cluster_origin(e); 
 	//!map::find_cluster_origin(s); 
@@ -577,9 +577,35 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 +!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] : true <- .print(conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)]).
 
+
+
++!map::find_cluster_origin :
+	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 < GY1), []) & (GX1 \== 0 | GY1 \== 0)
+<-
+	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
+	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	!map::move_to_evaluating_pos(start1);
+	!map::find_cluster_origin;
+	.
++!map::find_cluster_origin :
+	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 == 0 & GX2 > GX1), []) & GX1 \== 0 & GY1 == 0
+<-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
+	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	!map::move_to_evaluating_pos(start1);
+	!map::find_cluster_origin;
+	.
++!map::find_cluster_origin :
+	true
+<-
+	!map::find_other_side(0);
+	.
+
+/* 
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & GX > 0 & not stop::first_to_stop(_)
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@HERE1");
 	!retrieve::smart_move(e);
 	!retrieve::smart_move(n);
 	!map::move_random(3);
@@ -588,6 +614,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & GX < 0 & not stop::first_to_stop(_)
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@HERE2");
 	!retrieve::smart_move(w);
 	!retrieve::smart_move(n);
 	!map::move_random(3);
@@ -596,6 +623,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY < 0 & not stop::first_to_stop(_)
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@HERE3");
 	!retrieve::smart_move(n);
 	!map::move_random(3);
 	!map::find_cluster_origin(n);	
@@ -603,10 +631,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin(n) :
 	default::goal(GX, GY) & GY = 0 & GX > 0 & not stop::first_to_stop(_)
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@HERE4");
 	!retrieve::smart_move(e);
 	!map::move_random(3);
 	!map::find_cluster_origin(n);
 	.	
+	* 
+	*/
 /* 
 +!map::find_cluster_origin(s) :
 	default::goal(GX, GY) & GY > 0 & GX > 0
@@ -669,23 +700,24 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::find_cluster_origin(e);
 	.
 */
-+!map::find_cluster_origin(Side) : 
+/*+!map::find_cluster_origin(Side) : 
 	map::myMap(Leader) & map::evaluating_positions(Positions)
 <-
 //	.wait(not action::move_sent);
-	/*getMyPos(MyX, MyY);
-	getGoalClusters(Leader, Clusters);
-	if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
-		.fail;
-	}
-	evaluateOrigin(Leader, MyX, MyY, boh);
-	.print("OldPos: ", Positions);
-	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
-	if(map::evaluating_positions(Pos)){
-		.print("NewPos: ", Pos);
-	}*/
+	//getMyPos(MyX, MyY);
+	//getGoalClusters(Leader, Clusters);
+	//if(.member(cluster(_, Goals), Clusters) & .print("GOALSSSSSSS: ", Goals) & .member(origin(_, MyX, MyY), Goals)) {
+	//	.fail;
+	//}
+	//evaluateOrigin(Leader, MyX, MyY, boh);
+	//.print("OldPos: ", Positions);
+	//-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
+	//if(map::evaluating_positions(Pos)){
+	//	.print("NewPos: ", Pos);
+	//}
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@HERE5");
 	!map::find_other_side(0);
-	.
+	.*/
 +!map::find_other_side(Count) :
 	default::goal(GX, GY) & GX == 0 & GY > 0 & not stop::first_to_stop(_)
 <-
