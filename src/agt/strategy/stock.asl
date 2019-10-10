@@ -261,8 +261,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 		pos(X+5, Y+4)
 	], pos(X+5, Y)).
 
-+!retrieve::retrieve_block :
-	default::step(Step1)
++!retrieve::retrieve_block 
+	: default::step(Step1)
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);

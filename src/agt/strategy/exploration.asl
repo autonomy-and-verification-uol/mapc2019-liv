@@ -90,6 +90,8 @@ remove_opposite(w,e) :- true.
 	.print("@@@@@ No movement options available, sending skip forever");
 	!default::always_skip;
 	.
+	
++!explore(Dirlist).
 
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
 // TODO what about a block?
@@ -123,6 +125,8 @@ remove_opposite(w,e) :- true.
 <-
 	!!explore(DirList);
 	.
+
++!explore_until_obstacle(Dir).
 	
 +!explore_until_obstacle_special(Dir)
 	: common::my_role(explorer) & not exploration::special(_) 
@@ -184,4 +188,4 @@ remove_opposite(w,e) :- true.
 	!default::always_skip;
 	.
 
-
++!explore_until_obstacle_special(Dir).

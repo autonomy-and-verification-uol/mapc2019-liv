@@ -185,9 +185,9 @@
 	.
 //@check_join_group[atomic]
 +!stop::check_join_group
-	: common::my_role(explorer) & 
+	: common::my_role(explorer) &
 	stop::first_to_stop(Ag) & // send a message to the one that stopped asking who the leader is, and you check if you have the same
-	map::myMap(Leader)
+	map::myMap(Leader) & not stop::really_stop
 <-
 	.send(Ag, askOne, map::myMap(Leader1), map::myMap(Leader1));
 	.print("Leader: ", Leader, " Leader1: ", Leader1);
