@@ -387,6 +387,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	default::thing(1, 0, dispenser, _)
 <- 
 	!create_and_attach_block(e, 1, 0).
++!create_and_attach_block <- .print("No dispenser close by"); getMyPos(X,Y); .print("My position before dying is (", X, ", ", Y, ")");.
 
 +!create_and_attach_block(Direction, DispX, DispY) :
 	true
