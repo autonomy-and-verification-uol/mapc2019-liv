@@ -160,7 +160,6 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
-	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
 	if(.member(Side, [n,s,w,e])){
 		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
 			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
@@ -169,6 +168,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			addRetrieverToOrigin(Leader, MyX + X, MyY + Y, RetrieverX + X + MyX, RetrieverY + Y + MyY);	
 		}
 	}
+	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
 	.
 
 +!map::evaluate_origin(Side, Value) :
