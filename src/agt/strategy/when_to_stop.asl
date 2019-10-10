@@ -32,7 +32,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-			!action::forget_old_action;
+//			!action::forget_old_action;
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
 			initStockerAvailablePos(Leader);
@@ -62,7 +62,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-		!action::forget_old_action;
+//		!action::forget_old_action;
 		!!stop::retrieve_block_as_stocker;
 	}
 	elif (Flag == "helper") {
@@ -71,7 +71,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-		!action::forget_old_action;
+//		!action::forget_old_action;
 		!!stop::retrieve_block_as_helper;
 	}
 	else {
@@ -79,7 +79,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-		!action::forget_old_action;
+//		!action::forget_old_action;
 		!!stop::retrieve_block_as_retriever;
 	}
 //	!!retrieve::retrieve_block;
@@ -205,7 +205,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-			!action::forget_old_action;
+//			!action::forget_old_action;
 			!!stop::retrieve_block_as_stocker;
 			//!common::update_role_to(stocker);
 			//!retrieve::retrieve_block;
@@ -216,7 +216,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-			!action::forget_old_action;
+//			!action::forget_old_action;
 //			.wait(not action::move_sent);
 			!!stop::retrieve_block_as_helper;
 			/*getMyPos(MyX, MyY);
@@ -235,7 +235,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-			!action::forget_old_action;
+//			!action::forget_old_action;
 			!!stop::retrieve_block_as_retriever;
 			//!common::update_role_to(retriever);
 			//!retrieve::retrieve_block;
@@ -293,8 +293,8 @@
 	.
 +!stop::new_dispenser_or_merge[source(_)].
 
-+!stop::check_active_tasks([], Dispensers) : not(stop::stop) <- .print("I cannot stop exploring yet..").
-+!stop::check_active_tasks([], Dispensers) : stop::stop <- .print("I can stop exploring now..").
++!stop::check_active_tasks([], Dispensers) : not(stop::stop).
++!stop::check_active_tasks([], Dispensers) : stop::stop.
 +!stop::check_active_tasks([task(ID, Deadline, Reward, Blocks)|Tasks], Dispensers) 
 	: not(stop::stop) 
 <-
@@ -304,5 +304,5 @@
 	!stop::update_stop(Stop);
 	!stop::check_active_tasks(Tasks, Dispensers);
 	.
-+!stop::check_active_tasks([task(ID, Deadline, Reward, Blocks)|Tasks], Dispensers) : stop::stop <- .print("I can stop exploring now..").
++!stop::check_active_tasks([task(ID, Deadline, Reward, Blocks)|Tasks], Dispensers) : stop::stop.
 

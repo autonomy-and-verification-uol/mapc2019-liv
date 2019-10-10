@@ -211,3 +211,4 @@
 <-
 	!action::commit_action(skip);
 	.
+-!skip[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled.").

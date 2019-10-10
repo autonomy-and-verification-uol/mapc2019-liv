@@ -130,7 +130,7 @@ i_met_new_agent(Iknow, IdList) :-
 		-action::reasoning_about_belief(AgRequested);
 	}
 	!stop::new_dispenser_or_merge;
-	if(not common::my_role(retriever)){
+	if(common::my_role(explorer)){
 		!stop::check_join_group;
 	}
 	.
