@@ -343,6 +343,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	if(
 		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _)
+			| default::thing(0, -1, dispenser, _) | default::thing(0, 1, dispenser, _) 
+			| default::thing(-1, 0, dispenser, _) | default::thing(1, 0, dispenser, _)
+			| default::thing(-1, -1, dispenser, _) | default::thing(-1, 1, dispenser, _)
+			| default::thing(1, -1, dispenser, _) | default::thing(1, 1, dispenser, _)
 			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)
 		) & map::retrievers_found(RetrieverPositions)
 	) {
