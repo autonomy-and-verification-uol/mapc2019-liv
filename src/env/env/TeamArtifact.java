@@ -51,6 +51,9 @@ public class TeamArtifact extends Artifact {
 //	private int maxHelpers = 1;
 //	private int helpers;
 	
+	private int maxRetrievers = 8;
+	private int retrievers = 0;
+	
 	private String firstToStop;
 	
 	private int pos;
@@ -104,7 +107,15 @@ public class TeamArtifact extends Artifact {
 //			flag.set("helper");
 //		}
 //		else {
+		logger.info("Retrievers: " + this.retrievers);
+		if(this.retrievers < this.maxRetrievers) {
+			logger.info("I have become a retriever");
+			this.retrievers++;
 			flag.set("retriever");
+		} else {
+			logger.info("I have become an arsehole");
+			flag.set("arsehole");
+		}
 //		}
 	}
 	

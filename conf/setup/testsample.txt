@@ -1,6 +1,9 @@
 # simple setup file for testing
 
-
+add 5 9 block b0
+add 7 10 block b0
+add 2 9 block b0
+add 4 11 block b0
 
 stop    # stops further setup execution
 

@@ -74,13 +74,17 @@
 //		!action::forget_old_action;
 		!!stop::retrieve_block_as_helper;
 	}
-	else {
+	elif (Flag == "retriever") {
 		.print("Removing explorer");
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-//		!action::forget_old_action;
 		!!stop::retrieve_block_as_retriever;
+	} else{
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!!arsehole::messing_around;
 	}
 //	!!retrieve::retrieve_block;
 	.
@@ -230,7 +234,7 @@
 			!!planner::generate_goal(TargetX, TargetY);*/
 //			!!retrieve::move_to_goal;
 		}
-		else {
+		elif (Flag == "retriever") {
 			.print("Removing explorer");
 			-exploration::special(_);
 			-common::avoid(_);
@@ -239,6 +243,12 @@
 			!!stop::retrieve_block_as_retriever;
 			//!common::update_role_to(retriever);
 			//!retrieve::retrieve_block;
+		} else{
+			-exploration::special(_);
+			-common::avoid(_);
+			-common::escape;
+			.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			!!arsehole::messing_around;
 		}
 	//		!!retrieve::retrieve_block;
 	}

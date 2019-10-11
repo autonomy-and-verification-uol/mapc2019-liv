@@ -6,6 +6,7 @@
 { include("strategy/exploration.asl", exploration) }
 { include("strategy/task.asl", task) }
 { include("strategy/when_to_stop.asl", stop) }
+{ include("strategy/arsehole.asl", arsehole) }
 { include("strategy/stock.asl", retrieve) }
 { include("strategy/map.asl", map) }
 { include("strategy/common-plans.asl", common) }
