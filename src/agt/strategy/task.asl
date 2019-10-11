@@ -34,13 +34,13 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
-	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) & .count(task::stocker(_)[source(_)],2) & helper(HelperAg)
+	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) //& .count(task::stocker(_)[source(_)],2) & helper(HelperAg)
 <-
 	.print("@@@@@@@@@@@@@@@@@@ ", Id, "  ",Deadline);
 //	?can_contribute(ReqList,CommitListTemp,ReqListNew);
 //	.print("I can commit to ",CommitListTemp);
 //	.print("New req list ",ReqListNew);
-	getAvailableBlocks(AgList);
+	getAvailableAgent(AgList);
 	?evaluate_task(ReqList, AgList, [], CommitList);
 	.print("New task required length ",.length(ReqList));
 	.print("Committed length ",.length(CommitList));
@@ -107,7 +107,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 
 @next_job_task[atomic]
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) & not .empty(CommitListSort) & helper(HelperAg)
+	: committed(Id,CommitListSort) & not .empty(CommitListSort) //& helper(HelperAg)
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
@@ -116,7 +116,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!update_commitlist(CommitListSortNew);
 //	?check_pos(X,Y,NewX,NewY);
 	if (task::no_block) {
-		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+X,MyY+Y,noblock));
+		.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y,noblock));
 	}
 	else {
 //		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
@@ -125,17 +125,18 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //			!action::detach(n);
 //		}
 //		else {
-		.send(HelperAg,achieve,task::perform_task(Ag,TypeAg,MyX+X,MyY+Y));
+		.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y));
 //		}
 	}
 	!!default::always_skip;
 	.
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) & helper(HelperAg)
+	: committed(Id,CommitListSort) //& helper(HelperAg)
 <-
 	!action::submit(Id);
+	+task::no_block;
 	-committed(Id,CommitListSort);
-	.send(HelperAg,achieve,default::always_skip);
+	//.send(HelperAg,achieve,default::always_skip);
 	!default::always_skip;
 	.
 
@@ -217,6 +218,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!action::forget_old_action(default,always_skip);
 	?get_direction(ConX-MyX, ConY-MyY, Dir)
 	!action::attach(Dir);
+	if (default::lastAction(attach) & default::lastActionResult(success)) {
+		.send(Help, tell, task::synch_complete);
+	}
 	-no_block;
 //	+connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
@@ -232,6 +236,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Help,X,Y);
 	}
+	.send(Help, tell, task::synch_complete);
 //	-connect(X,Y);
 //	.print(ConX-MyX);
 //	.print(ConY-MyY);
@@ -239,48 +244,52 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	!perform_task_origin_next;
 	.
 	
-+!perform_task(Stocker,Type,X,Y,noblock)[source(Origin)]
++!perform_task(X,Y,noblock)[source(Origin)]
+	: .my_name(Me)
 //	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
-	.print("@@@@ Received order for new task, origin does not have a block");
 //	removeRetriever;
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
-//	.wait(not action::move_sent);
+	.print("@@@@ Received order for new task, origin does not have a block");
+	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
-	getStockerPos(Stocker,StockerX,StockerY,GateS);
-	.term2string(Gate,GateS);
-	?get_direction(GateX,GateY,Gate);
-	if (Gate == s) {
-		AddPosX = 0;
-		AddPosY = 1; 
-	}
-	elif (Gate == n) {
-		AddPosX = 0;
-		AddPosY = -1; 
-	}
-	elif (Gate == w) {
-		AddPosX = -1;
-		AddPosY = 0; 
-	}
-	else {
-		AddPosX = 1;
-		AddPosY = 0; 
-	}
+	addRetrieverAvailablePos(MyX,MyY);
+//	.wait(not action::move_sent);
+//	getMyPos(MyX,MyY);
+//	getStockerPos(Stocker,StockerX,StockerY,GateS);
+//	.term2string(Gate,GateS);
+//	?get_direction(GateX,GateY,Gate);
+//	if (Gate == s) {
+//		AddPosX = 0;
+//		AddPosY = 1; 
+//	}
+//	elif (Gate == n) {
+//		AddPosX = 0;
+//		AddPosY = -1; 
+//	}
+//	elif (Gate == w) {
+//		AddPosX = -1;
+//		AddPosY = 0; 
+//	}
+//	else {
+//		AddPosX = 1;
+//		AddPosY = 0; 
+//	}
 //	addRetrieverAvailablePos(MyX, MyY);
-	.send(Stocker, achieve, task::request_block(Type, Gate));
+//	.send(Stocker, achieve, task::request_block(Type, Gate));
 //	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
-	TargetX = StockerX + GateX + AddPosX - MyX;
-	TargetY = StockerY + GateY + AddPosY - MyY;
+//	TargetX = StockerX + GateX + AddPosX - MyX;
+//	TargetY = StockerY + GateY + AddPosY - MyY;
 //	.print("@@@@ TargetX:",TargetX);
 //	.print("@@@@ TargetY:",TargetY);
-	!planner::generate_goal(TargetX, TargetY);
-	.send(Stocker, achieve, task::help_detach(Gate));
-	?exploration::remove_opposite(Gate,OppositeGate);
-	!action::attach(OppositeGate);
-	.wait(task::detach_complete[source(Stocker)]);
-	-task::detach_complete[source(Stocker)];
-	.print("@@@@@ Detach complete");
+//	!planner::generate_goal(TargetX, TargetY);
+//	.send(Stocker, achieve, task::help_detach(Gate));
+//	?exploration::remove_opposite(Gate,OppositeGate);
+//	!action::attach(OppositeGate);
+//	.wait(task::detach_complete[source(Stocker)]);
+//	-task::detach_complete[source(Stocker)];
+//	.print("@@@@@ Detach complete");
 //	!rotate_back;
 //	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
@@ -298,52 +307,59 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	?retrieve::block(BX,BY);
 	?get_direction(BX,BY,DetachPos);
 	!action::detach(DetachPos);
+	.wait(task::synch_complete[source(Origin)]);
+	-task::synch_complete[source(Origin)];
+	!!retrieve::retrieve_block;
 //	!default::always_skip;
 	.
 	
-+!perform_task(Stocker,Type,X,Y)[source(Origin)]
++!perform_task(X,Y)[source(Origin)]
+	: .my_name(Me)
 //	: retrieve::block(0,1) & default::thing(0,1, block, Type)
 <-
 //	removeRetriever;
-	.print("@@@@ Received order for new task, origin already has a block.");
 //	removeBlock(Type);
 	!action::forget_old_action(default,always_skip);
-//	.wait(not action::move_sent);
+	.print("@@@@ Received order for new task, origin does not have a block");
+	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
-	getStockerPos(Stocker,StockerX,StockerY,GateS);
-	.term2string(Gate,GateS);
-	?get_direction(GateX,GateY,Gate);
+	addRetrieverAvailablePos(MyX,MyY);
+//	.wait(not action::move_sent);
+//	getMyPos(MyX,MyY);
+//	getStockerPos(Stocker,StockerX,StockerY,GateS);
+//	.term2string(Gate,GateS);
+//	?get_direction(GateX,GateY,Gate);
 //	.print("@@@@ Gate:",Gate);
-	if (Gate == s) {
-		AddPosX = 0;
-		AddPosY = 1; 
-	}
-	elif (Gate == n) {
-		AddPosX = 0;
-		AddPosY = -1; 
-	}
-	elif (Gate == w) {
-		AddPosX = -1;
-		AddPosY = 0; 
-	}
-	else {
-		AddPosX = 1;
-		AddPosY = 0; 
-	}
+//	if (Gate == s) {
+//		AddPosX = 0;
+//		AddPosY = 1; 
+//	}
+//	elif (Gate == n) {
+//		AddPosX = 0;
+//		AddPosY = -1; 
+//	}
+//	elif (Gate == w) {
+//		AddPosX = -1;
+//		AddPosY = 0; 
+//	}
+//	else {
+//		AddPosX = 1;
+//		AddPosY = 0; 
+//	}
 //	addRetrieverAvailablePos(MyX, MyY);
-	.send(Stocker, achieve, task::request_block(Type, Gate));
+//	.send(Stocker, achieve, task::request_block(Type, Gate));
 //	!get_to_pos_vert(MyX,MyY,StockerX+GateX+AddPosX,StockerY+GateY+AddPosY,StockerX+GateX,StockerY+GateY);
-	TargetX = StockerX + GateX + AddPosX - MyX;
-	TargetY = StockerY + GateY + AddPosY - MyY;
+//	TargetX = StockerX + GateX + AddPosX - MyX;
+//	TargetY = StockerY + GateY + AddPosY - MyY;
 //	.print("@@@@ TargetX:",TargetX);
 //	.print("@@@@ TargetY:",TargetY);
-	!planner::generate_goal(TargetX, TargetY);
-	.send(Stocker, achieve, task::help_detach(Gate));
-	?exploration::remove_opposite(Gate,OppositeGate);
-	!action::attach(OppositeGate);
-	.wait(task::detach_complete[source(Stocker)]);
-	-task::detach_complete[source(Stocker)];
-	.print("@@@@@ Detach complete");
+//	!planner::generate_goal(TargetX, TargetY);
+//	.send(Stocker, achieve, task::help_detach(Gate));
+//	?exploration::remove_opposite(Gate,OppositeGate);
+//	!action::attach(OppositeGate);
+//	.wait(task::detach_complete[source(Stocker)]);
+//	-task::detach_complete[source(Stocker)];
+//	.print("@@@@@ Detach complete");
 //	!rotate_back;
 //	.wait(not action::move_sent);
 	getMyPos(MyXNew,MyYNew);
@@ -365,7 +381,10 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Origin,BX,BY);
 	}
+	.wait(task::synch_complete[source(Origin)]);
+	-task::synch_complete[source(Origin)];
 	!action::detach(DetachPos);
+	!!retrieve::retrieve_block;
 //	!default::always_skip;
 	.
 //	

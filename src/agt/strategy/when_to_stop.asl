@@ -277,7 +277,7 @@
 	.member(cluster(_, GoalList), Clusters) &
 	.member(origin(Side, GoalX, GoalY), GoalList) & .member(Side, [n,s,w,e]) &
 	.length(Blocks, NBlocks) & 
-	identification::identified(KnownAgs) & .length(KnownAgs, NKnownAgs) & (NKnownAgs + 1) >= 5 &//NBlocks & // enough agents to build the structure
+	identification::identified(KnownAgs) & .length(KnownAgs, NKnownAgs) & (NKnownAgs + 1) >= 3 &//NBlocks & // enough agents to build the structure
 	.findall(Type, (.member(req(_, _, Type), Blocks) & not(.member(dispenser(Type, _, _), Dispensers))), []) // all the necessary types are known
 <- 
 	.print("I can stop exploring now..");

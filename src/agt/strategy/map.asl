@@ -186,7 +186,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	-+map::evaluating_positions(L);
 	.print("Positions: ", L);
 	+map::number_stocker_positions(2);
-	+map::number_retriever_positions(6);
+	+map::number_retriever_positions(9);
 	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
 		map::scouts_found(ScoutsList) & map::retrievers_found(RetrieverList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & map::number_retriever_positions(RequiredNumberRetrievers) &
@@ -212,7 +212,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & .length(ScoutsList, RequiredNumberScouts) &
-		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) &
+		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) & .print("@@@@@@@@@@@@@ NumberRetrieversPositionsFound ",NumberRetrieversPositionsFound) &
 		NumberRetrieversPositionsFound >= RequiredNumberRetrievers
 	){
 		Value = Side;
@@ -359,15 +359,16 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
 				North = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
 				South = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
 				West = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
+			
 			.print("North:", North);
 			.print("South:", South);
 			.print("West:", West);
