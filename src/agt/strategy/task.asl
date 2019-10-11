@@ -27,10 +27,10 @@ get_direction(0,1,Dir) :- Dir = s.
 get_direction(1,0,Dir) :- Dir = e.
 get_direction(-1,0,Dir) :- Dir = w.
 
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX-1,TargetY,block,_) & retrieve::block(TargetX-1,TargetY) & X = TargetX-1 & Y = TargetY.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX+1,TargetY,block,_) & retrieve::block(TargetX+1,TargetY) & X = TargetX+1 & Y = TargetY.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY-1,block,_) & retrieve::block(TargetX,TargetY-1) & X = TargetX & Y = TargetY-1.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,block,_) & retrieve::block(TargetX,TargetY+1) & X = TargetX & Y = TargetY+1.
+get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX-1,TargetY) & X = TargetX-1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX+1,TargetY) & X = TargetX+1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY-1) & X = TargetX & Y = TargetY-1.
+get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) & X = TargetX & Y = TargetY+1.
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
