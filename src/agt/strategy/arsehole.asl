@@ -33,7 +33,7 @@
 			!action::clear(X, Y);
 		}
 	}
-	!arsehole::inspect_cluster(TimeWindow);
+	!arsehole::inspect_cluster(TimeWindow+5);
 	.
 +!arsehole::inspect_cluster(TimeWindow) :
 	.findall(goal(X, Y), default::goal(X, Y), Goals) & Goals \== [] & .shuffle(Goals, GoalsShuffled) & .nth(0, GoalsShuffled, goal(GX, GY)) &
