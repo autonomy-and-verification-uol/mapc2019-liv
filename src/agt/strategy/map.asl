@@ -186,7 +186,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	-+map::evaluating_positions(L);
 	.print("Positions: ", L);
 	+map::number_stocker_positions(2);
-	+map::number_retriever_positions(6);
+	+map::number_retriever_positions(9);
 	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
 		map::scouts_found(ScoutsList) & map::retrievers_found(RetrieverList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & map::number_retriever_positions(RequiredNumberRetrievers) &
