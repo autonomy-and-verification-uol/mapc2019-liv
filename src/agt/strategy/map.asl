@@ -715,6 +715,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(default::lastActionResult(success)){
 		!map::find_other_side(Count+1);
 	} else {
+		if(map::failed(N)){
+			if(N == 5){
+				.fail;
+			}
+			-+map::failed(N+1);
+		} else{
+			+map::failed(1);
+		}
 		!map::find_other_side(Count);
 	}
 	.

@@ -52,7 +52,7 @@ public class TeamArtifact extends Artifact {
 //	private int helpers;
 	
 	private int maxRetrievers = 8;
-	private int retrievers = 0;
+	private int retrievers;
 	
 	private String firstToStop;
 	
@@ -79,6 +79,7 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
 		stockers = 0;
+		retrievers=0;
 //		helpers = 0;
 		firstToStop = null;
 		pos  = 10;
