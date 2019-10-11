@@ -27,10 +27,10 @@ get_direction(0,1,Dir) :- Dir = s.
 get_direction(1,0,Dir) :- Dir = e.
 get_direction(-1,0,Dir) :- Dir = w.
 
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX-1,TargetY,block,_) & X = TargetX-1 & Y = TargetY.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX+1,TargetY,block,_) & X = TargetX+1 & Y = TargetY.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY-1,block,_) & X = TargetX & Y = TargetY-1.
-get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,block,_) & X = TargetX & Y = TargetY+1.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX-1,TargetY,block,_) & retrieve::block(TargetX-1,TargetY) & X = TargetX-1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX+1,TargetY,block,_) & retrieve::block(TargetX+1,TargetY) & X = TargetX+1 & Y = TargetY.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY-1,block,_) & retrieve::block(TargetX,TargetY-1) & X = TargetX & Y = TargetY-1.
+get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,block,_) & retrieve::block(TargetX,TargetY+1) & X = TargetX & Y = TargetY+1.
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
@@ -138,6 +138,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	if (default::lastAction(submit) & not default::lastActionResult(success)) {
 		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
 	}
+	.abolish(retrieve::block(_,_));
 	+task::no_block;
 	-committed(Id,CommitListSort);
 	//.send(HelperAg,achieve,default::always_skip);
@@ -235,11 +236,14 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
+	.print("My pos X ",MyX," Y ",MyY);
+	.print("Help local block X ",ConX-MyX," Y ",ConY-MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Help,X,Y);
 	}
+	+retrieve::block(ConX-MyX,ConY-MyY);
 	.send(Help, tell, task::synch_complete);
 //	-connect(X,Y);
 //	.print(ConX-MyX);
@@ -380,6 +384,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 //	.wait(not action::move_sent);
 	getMyPos(MyXNew2,MyYNew2);
 	?retrieve::block(BX,BY);
+	.print("My pos X ",MyXNew2," Y ",MyYNew2);
+	.print("My block X ",BX," Y ",BY);
 	?get_direction(BX,BY,DetachPos);
 	.send(Origin, achieve, task::help_connect(MyXNew2+BX,MyYNew2+BY));
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {

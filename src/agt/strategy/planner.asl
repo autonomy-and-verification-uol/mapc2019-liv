@@ -116,15 +116,15 @@
 	else {
 		Clear = 0;
 	}
-	if (planner::back_to_origin & retrieve::block(BlockX,BlockY)) {
-//		if (math.abs(TargetX) + math.abs(TargetY) <= 5 & ActualFinalLocalTargetX == FinalLocalTargetX & ActualFinalLocalTargetY == FinalLocalTargetY & dumb_bugfix) {
-//			getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
-//		}
-//		else {
-		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
-//		}
-	}
-	elif (retrieve::block(BlockX,BlockY)) {
+//	if (planner::back_to_origin & retrieve::block(BlockX,BlockY)) {
+////		if (math.abs(TargetX) + math.abs(TargetY) <= 5 & ActualFinalLocalTargetX == FinalLocalTargetX & ActualFinalLocalTargetY == FinalLocalTargetY & dumb_bugfix) {
+////			getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
+////		}
+////		else {
+//		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
+////		}
+//	}
+	if (retrieve::block(BlockX,BlockY)) {
 		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
 	}
 	else {
@@ -265,7 +265,22 @@
 	!action::skip;
 	!generate_goal(TargetX, TargetY);
 	.
-	
+
++!execute_plan(Plan, 0, 0, 0, 0)
+<-
+	for (.member(Action, Plan)){
+		if (.substring("clear",Action)) {
+			for(.range(I, 1, 3)){
+				.print("@@@@ Action: ", Action);
+				!action::Action;
+			}
+		}
+		else {
+			.print("@@@@ Action: ", Action);
+			!action::Action;
+		}
+	}
+	.
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
 <-
 	+localtargetx(LocalTargetX);
