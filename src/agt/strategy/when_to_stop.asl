@@ -97,13 +97,13 @@
 	
 +stop : true <- -stop::stop.
 
-+!stop::retrieve_block_as_stocker :
-	true
-<-
-	!common::update_role_to(stocker);
-//		!!default::always_skip;
-	!retrieve::retrieve_block;
-	.
+//+!stop::retrieve_block_as_stocker :
+//	true
+//<-
+//	!common::update_role_to(stocker);
+////		!!default::always_skip;
+//	!retrieve::retrieve_block;
+//	.
 +!stop::retrieve_block_as_helper :
 	true
 <-

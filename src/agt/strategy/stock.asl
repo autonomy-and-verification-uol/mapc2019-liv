@@ -285,7 +285,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	}
 	.
 
--!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
+//-!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
 //-!retrieve::retrieve_block : true <- true.
 
 +!retrieve::decide_block_type_flat(Type) : 
@@ -894,11 +894,11 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!action::attach(e);
 	!retrieve::move_to_goal;
 	.
-+!retrieve::move_to_goal_aux(MyX, MyY) :
-	not i_have_attached_block & not moving_to_origin
-<-
-	!retrieve::retrieve_block;
-	.
+//+!retrieve::move_to_goal_aux(MyX, MyY) :
+//	not i_have_attached_block & not moving_to_origin
+//<-
+//	!retrieve::retrieve_block;
+//	.
 
 -!retrieve::move_to_goal : true <- !!retrieve::move_to_goal.
 
