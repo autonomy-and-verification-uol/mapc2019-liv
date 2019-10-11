@@ -161,9 +161,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	if(.member(Side, [n,s,w,e])){
-		for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
+		/*for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
 			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
-		}
+		}*/
 		for(.member(retriever(RetrieverX, RetrieverY), RetrieversList)){
 			addRetrieverToOrigin(Leader, MyX + X, MyY + Y, RetrieverX + X + MyX, RetrieverY + Y + MyY);	
 		}
@@ -185,15 +185,21 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.concat(Scouts, Positions, L);
 	-+map::evaluating_positions(L);
 	.print("Positions: ", L);
-	+map::number_stocker_positions(2);
+	//+map::number_stocker_positions(2);
 	+map::number_retriever_positions(9);
-	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
+	/*while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
 		map::scouts_found(ScoutsList) & map::retrievers_found(RetrieverList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & map::number_retriever_positions(RequiredNumberRetrievers) &
 		.length(ScoutsList, NScouts) & .length(RetrieverList, NRetrievers) & 
 		(NScouts < RequiredNumberScouts | NRetrievers < RequiredNumberRetrievers)
+	){*/
+	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
+		map::retrievers_found(RetrieverList) & 
+		map::number_retriever_positions(RequiredNumberRetrievers) &
+		.length(RetrieverList, NRetrievers) & 
+		NRetrievers < RequiredNumberRetrievers
 	){
-		.print("Evaluate scout: ", ScoutsList);
+		.print("Evaluate scout: ", RetrieverList);
 		!map::move_to_evaluating_pos(Side);
 		.print("One scout has been evaluated");
 		if(map::evaluating_positions(Pos1) & .member(origin(_, OriginX, OriginY), Pos1) & .member(scout(_, XDel, YDel), Pos1)){
@@ -210,9 +216,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			}
 		}
 	}
-	if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
+	/*if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & .length(ScoutsList, RequiredNumberScouts) &
-		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) & .print("@@@@@@@@@@@@@ NumberRetrieversPositionsFound ",NumberRetrieversPositionsFound) &
+		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) &
+		NumberRetrieversPositionsFound >= RequiredNumberRetrievers
+	){*/
+	if(map::retrievers_found(RetrieversList) & 
+	   map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) &
 		NumberRetrieversPositionsFound >= RequiredNumberRetrievers
 	){
 		Value = Side;
@@ -329,14 +339,18 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions) &
-	map::scouts_found(ScoutsList) & .member(origin(OriginSide, OriginX, OriginY), Positions)
+	.member(origin(OriginSide, OriginX, OriginY), Positions) // & map::scouts_found(ScoutsList)
 <-
 	if(
 		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _)
 			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)
-		)
+		) & map::retrievers_found(RetrieverPositions)
 	) {
-		if(map::number_stocker_positions(NStockers) & map::scouts_found(StockersFound) &
+		.print("Retriever found: ", [retriever(-OriginX, -OriginY)|RetrieverPositions]);
+		-+map::retrievers_found([retriever(-OriginX, -OriginY)|RetrieverPositions]);
+	}
+	.
+		/*if(map::number_stocker_positions(NStockers) & map::scouts_found(StockersFound) &
 			.length(StockersFound, NStockersFound) & NStockers > NStockersFound){
 			!action::clear(0, -2);
 			if(not default::lastActionResult(failed_target)){
@@ -359,16 +373,15 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
 				North = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
 				South = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
 				West = 0;
 			}
-			elif(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
-			
 			.print("North:", North);
 			.print("South:", South);
 			.print("West:", West);
@@ -442,31 +455,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			-+map::retrievers_found(RetrieverPositions1);
 		}
 	}
-			/*if(North==1 & West==1 & map::retrievers_found(RetrieverPositions1)) {
-				if(not .member(retriever(-OriginX-4, -OriginY-4), RetrieverPositions1)){
-					.concat(RetrieverPositions1, [retriever(-OriginX-4, -OriginY-4)], RetrieverPositions1a);
-					-+map::retrievers_found(RetrieverPositions1a);
-				}
-			}
-			if(North==1 & East==1 & map::retrievers_found(RetrieverPositions2)) {
-				if(not .member(retriever(-OriginX+4, -OriginY-4), RetrieverPositions2)){
-					.concat(RetrieverPositions2, [retriever(-OriginX+4, -OriginY-4)], RetrieverPositions2a);
-					-+map::retrievers_found(RetrieverPositions2a);
-				}
-			}
-			if(South==1 & West==1 & map::retrievers_found(RetrieverPositions3)) {
-				if(not .member(retriever(-OriginX+4, -OriginY+4), RetrieverPositions3)){
-					.concat(RetrieverPositions3, [retriever(-OriginX+4, -OriginY+4)], RetrieverPositions3a);
-					-+map::retrievers_found(RetrieverPositions3a);
-				}
-			}
-			if(South==1 & East==1 & map::retrievers_found(RetrieverPositions4)) {
-				if(not .member(retriever(-OriginX-4, -OriginY+4), RetrieverPositions4)){
-					.concat(RetrieverPositions4, [retriever(-OriginX-4, -OriginY+4)], RetrieverPositions4a);
-					-+map::retrievers_found(RetrieverPositions4a);
-				}
-			}*/	
-	.
+	.*/
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(X, Y), Positions) &
 	retrieve::pick_direction(0, 0, X, Y, Direction)
@@ -591,7 +580,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin :
 	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 == 0 & GX2 > GX1), []) & GX1 \== 0 & GY1 == 0
 <-
-	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
+	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
 	!map::move_to_evaluating_pos(start1);
 	!map::find_cluster_origin;

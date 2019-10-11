@@ -194,31 +194,31 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-retrieve::scouts_aux(_);
 	+retrieve::scouts_aux([]);
-	for(.range(H, 0, RangeE, 5)){
+	for(.range(H, 0, RangeE, 3)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, -RangeN+5, RangeS, 5)){
+	for(.range(V, -RangeN+3, RangeS, 3)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}		
-	for(.range(H, RangeE-5, -RangeW, -5)){
+	for(.range(H, RangeE-3, -RangeW, -3)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(V, RangeS-5, -RangeN, -5)){
+	for(.range(V, RangeS-3, -RangeN, -3)){
 		if(retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
-	for(.range(H, -RangeW+5, 0, 5)){
+	for(.range(H, -RangeW+3, 0, 3)){
 		if(H<0 & retrieve::scouts_aux(Scouts)){
 			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
