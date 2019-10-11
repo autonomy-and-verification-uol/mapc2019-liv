@@ -212,7 +212,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	if(map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & 
 		map::number_stocker_positions(RequiredNumberScouts) & .length(ScoutsList, RequiredNumberScouts) &
-		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) &
+		map::number_retriever_positions(RequiredNumberRetrievers) & .length(RetrieversList, NumberRetrieversPositionsFound) & .print("@@@@@@@@@@@@@ NumberRetrieversPositionsFound ",NumberRetrieversPositionsFound) &
 		NumberRetrieversPositionsFound >= RequiredNumberRetrievers
 	){
 		Value = Side;

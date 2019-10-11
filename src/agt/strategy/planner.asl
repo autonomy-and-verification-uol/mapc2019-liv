@@ -19,6 +19,19 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
+	: common::my_role(retriever) & back_to_origin
+<- 
+	-back_to_origin;
+	!!retrieve::retrieve_block;
+	.
++!generate_goal(0, 0) 
+	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
+<- 
+	addAvailableAgent(Me,Type);
+	+back_to_origin;
+	!!default::always_skip;
+	.
++!generate_goal(0, 0) 
 	: common::my_role(helper) & back_to_origin
 <- 
 	+ready_to_help;
@@ -39,12 +52,13 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
-	: .my_name(Me) & stop::first_to_stop(Me)
+	: common::my_role(origin)
 <- 
 	-retrieve::moving_to_origin;
 	+task::origin;
 	!!default::always_skip;
 	.
+
 +!generate_goal(0, 0) <- !!default::always_skip.
 +!generate_goal(TargetX, TargetY)
 	: .my_name(Me)
