@@ -126,7 +126,7 @@
 	.
 -!rotate(Direction)[code(.fail(action(Action),result(failed_parameter)))] <- .print("Rotation ",Direction," is not valid, it should be one of {cw,cww}.").
 // Improve this failure to drop disjunction into two different plans
--!rotate(Direction)[code(.fail(action(Action),result(failed)))] : task::origin <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."); !rotate(Direction).
+//-!rotate(Direction)[code(.fail(action(Action),result(failed)))] : task::origin <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."); !rotate(Direction).
 -!rotate(Direction)[code(.fail(action(Action),result(failed)))] <- .print("One of the things attached cannot rotate, or the agent is attached to another agent."). //; !rotate(Direction).
 -!rotate(Direction)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !rotate(Direction).
 

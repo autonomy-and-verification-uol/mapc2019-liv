@@ -19,9 +19,18 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0) 
-	: common::my_role(retriever) & back_to_origin
+	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY)
 <- 
 	-back_to_origin;
+	if (default::energy(Energy) & Energy >= 30) {
+		Clear = 1;
+	}
+	else {
+		Clear = 0;
+	}
+	getPlanBlockToGoal(Me, 0, 0, BlockX, BlockY, Plan, Clear);
+	.print("@@@@@@ Plan: ",Plan);
+	!planner::execute_plan(Plan, 0, 0, 0, 0);
 	.
 +!generate_goal(0, 0) 
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
@@ -57,8 +66,8 @@
 	+task::origin;
 	!!default::always_skip;
 	.
-
-+!generate_goal(0, 0) <- !!default::always_skip.
++!generate_goal(0, 0)  : common::my_role(retriever).
+//+!generate_goal(0, 0) <- !!default::always_skip.
 +!generate_goal(TargetX, TargetY)
 	: .my_name(Me)
 <-
@@ -108,12 +117,12 @@
 		Clear = 0;
 	}
 	if (planner::back_to_origin & retrieve::block(BlockX,BlockY)) {
-		if (math.abs(TargetX) + math.abs(TargetY) <= 5) {
-			getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
-		}
-		else {
-			getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
-		}
+//		if (math.abs(TargetX) + math.abs(TargetY) <= 5 & ActualFinalLocalTargetX == FinalLocalTargetX & ActualFinalLocalTargetY == FinalLocalTargetY & dumb_bugfix) {
+//			getPlanBlockToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
+//		}
+//		else {
+		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
+//		}
 	}
 	elif (retrieve::block(BlockX,BlockY)) {
 		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, BlockX, BlockY, Plan, Clear);
@@ -122,9 +131,10 @@
 		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, Clear);
 	}
 	.print("@@@@@@ Plan: ",Plan);
-	
 	!planner::execute_plan(Plan, TargetX, TargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
 	.
+	
+
 	
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	: not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
@@ -284,6 +294,9 @@
 					-+localtargetx(LocalTargetXAux - 1);
 				}
 			}
+//			elif (not default::lastActionResult(success)) {
+//				
+//			}
 		}
 	}
 	?localtargetx(FinalLocalTargetX);

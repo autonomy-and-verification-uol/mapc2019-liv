@@ -134,6 +134,10 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	: committed(Id,CommitListSort) //& helper(HelperAg)
 <-
 	!action::submit(Id);
+	.print("Submitted task ",Id);
+	if (default::lastAction(submit) & not default::lastActionResult(success)) {
+		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
+	}
 	+task::no_block;
 	-committed(Id,CommitListSort);
 	//.send(HelperAg,achieve,default::always_skip);
