@@ -75,6 +75,8 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
+		stockersAvailablePositions.clear();
+		retrieversAvailablePositions.clear();
 		stockers = 0;
 //		helpers = 0;
 		firstToStop = null;

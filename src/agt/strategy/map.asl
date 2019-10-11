@@ -578,7 +578,12 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	getMyPos(MyX, MyY);
 	!map::move_to_evaluating_pos(start1);
+	getMyPos(MyX1, MyY1);
+	if(MyX == MyX1 & MyY == MyY1){
+		.fail;
+	}
 	!map::find_cluster_origin;
 	.
 +!map::find_cluster_origin :
@@ -586,7 +591,12 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 <-
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	getMyPos(MyX, MyY);
 	!map::move_to_evaluating_pos(start1);
+	getMyPos(MyX1, MyY1);
+	if(MyX == MyX1 & MyY == MyY1){
+		.fail;
+	}
 	!map::find_cluster_origin;
 	.
 +!map::find_cluster_origin :
