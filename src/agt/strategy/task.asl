@@ -308,6 +308,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 	?get_direction(BX,BY,DetachPos);
 	!action::detach(DetachPos);
 	.wait(task::synch_complete[source(Origin)]);
+	-task::synch_complete[source(Origin)];
+	!!retrieve::retrieve_block;
 //	!default::always_skip;
 	.
 	
@@ -380,7 +382,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- default::thing(TargetX,TargetY+1,bl
 		!action::connect(Origin,BX,BY);
 	}
 	.wait(task::synch_complete[source(Origin)]);
+	-task::synch_complete[source(Origin)];
 	!action::detach(DetachPos);
+	!!retrieve::retrieve_block;
 //	!default::always_skip;
 	.
 //	

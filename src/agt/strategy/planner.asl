@@ -22,7 +22,6 @@
 	: common::my_role(retriever) & back_to_origin
 <- 
 	-back_to_origin;
-	!!retrieve::retrieve_block;
 	.
 +!generate_goal(0, 0) 
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
