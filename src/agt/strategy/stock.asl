@@ -450,18 +450,20 @@ most_needed_type(Dispensers, AgList, Type) :-
 		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
 		getTargetGoal(_, GoalX, GoalY, _);
 		if (TargetYGlobal < GoalY) {
-			StockerBlockPos = s;
+			GateHelper = s;
 		}
 		elif (TargetYGlobal > GoalY) {
-			StockerBlockPos = n;
+			GateHelper = n;
 		}
 		elif (TargetXGlobal > GoalX) {
-			StockerBlockPos = w;
+			GateHelper = w;
 		}
 		else {
-			StockerBlockPos = e;
+			GateHelper = e;
 		}
-		+gate(StockerBlockPos);
+		+gate_helper(GateHelper);
+		?exploration::remove_opposite(GateHelper,GateRetriever);
+		+gate_retriever(GateRetriever);
 	}
 	else {
 		getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);

@@ -8,8 +8,9 @@
 <- 
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
-	?retrieve::gate(Gate);
-	addStocker(Me, MyX, MyY, Gate);
+	?retrieve::gate_helper(GateHelper);
+	?retrieve::gate_retriever(GateRetriever);
+	addStocker(Me, MyX, MyY, GateHelper, GateRetriever);
 	+task::stocker_in_position;
 	if (retrieve::block(X,Y)) {
 		?default::thing(X,Y,block,Type);

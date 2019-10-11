@@ -204,8 +204,8 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void addStocker(String agent, int x, int y, String gate) {
-		this.stockerBlocks.put(agent, new Stocker(new Point(x, y), gate));
+	void addStocker(String agent, int x, int y, String gate_helper, String gate_retriever) {
+		this.stockerBlocks.put(agent, new Stocker(new Point(x, y), gate_helper, gate_retriever));
 	}
 	
 	@OPERATION
@@ -451,16 +451,18 @@ public class TeamArtifact extends Artifact {
 	}*/
 	
 	private class Stocker extends Point{
-		private String gate;
+		private String gate_helper;
+		private String gate_retriever;
 		private Point p;
 		private String b1;
 		private String b2;
 		private String b3;
 		private String b4;
-		public Stocker(Point p, String gate) {
+		public Stocker(Point p, String gate_helper, String gate_retriever) {
 			this.p = p;
 //			logger.info("Adding new stocker at "+p);
-			this.gate = gate;
+			this.gate_helper = gate_helper;
+			this.gate_retriever = gate_retriever;
 			this.b1 = "";
 			this.b2 = "";
 			this.b3 = "";
@@ -673,12 +675,13 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION 
-	void getStockerPos(String stocker, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> gate){
+	void getStockerPos(String stocker, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> gate_helper, OpFeedbackParam<String> gate_retriever){
 		x.set(stockerBlocks.get(stocker).p.x);
 		y.set(stockerBlocks.get(stocker).p.y);
 //		logger.info("Got stocker "+stocker+" X = "+stockerBlocks.get(stocker).p.x+" Y = "+stockerBlocks.get(stocker).p.y);
 		
-		gate.set(stockerBlocks.get(stocker).gate);
+		gate_helper.set(stockerBlocks.get(stocker).gate_helper);
+		gate_retriever.set(stockerBlocks.get(stocker).gate_retriever);
 	}
 	
 	@OPERATION 
