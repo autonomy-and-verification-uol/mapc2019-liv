@@ -210,6 +210,22 @@
 <- 
 	.print("Fabio was wrong!!!! -- you wish");
 	.
+
++!execute_plan(Plan, 0, 0, 0, 0)
+<-
+	for (.member(Action, Plan)){
+		if (.substring("clear",Action)) {
+			for(.range(I, 1, 3)){
+				.print("@@@@ Action: ", Action);
+				!action::Action;
+			}
+		}
+		else {
+			.print("@@@@ Action: ", Action);
+			!action::Action;
+		}
+	}
+	.
 	
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
 	LocalTargetX < 0 & not (default::thing(-1, 0, Type, _) & (Type == block | Type == entity)) & not (default::obstacle(-1,0)) 
@@ -266,21 +282,7 @@
 	!generate_goal(TargetX, TargetY);
 	.
 
-+!execute_plan(Plan, 0, 0, 0, 0)
-<-
-	for (.member(Action, Plan)){
-		if (.substring("clear",Action)) {
-			for(.range(I, 1, 3)){
-				.print("@@@@ Action: ", Action);
-				!action::Action;
-			}
-		}
-		else {
-			.print("@@@@ Action: ", Action);
-			!action::Action;
-		}
-	}
-	.
+
 +!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
 <-
 	+localtargetx(LocalTargetX);
@@ -318,5 +320,7 @@
 	?localtargety(FinalLocalTargetY);
 	-localtargetx(FinalLocalTargetX);
 	-localtargety(FinalLocalTargetY);
+	.print("Next relative target X ",TargetX - FinalLocalTargetX," Y ",TargetY - FinalLocalTargetY);
 	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY);
 	.
+	

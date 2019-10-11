@@ -332,6 +332,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!common::go_back_to_previous_role :
 	common::previous_role(MyRole) & common::my_role(OldRole)
 <-
+	.print("Going back to role: ", OldRole);
 	-+common::my_role(MyRole);
 	-+common::previous_role(OldRole);
 	!action::skip;

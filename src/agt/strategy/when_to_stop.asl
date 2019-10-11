@@ -38,6 +38,7 @@
 			initStockerAvailablePos(Leader);
 			initRetrieverAvailablePos(Leader);
 			.broadcast(tell, stop::first_to_stop(Me));
+			!action::forget_old_action;
 			!!stop::stop_aux(GoalX, GoalY);
 		}
 		else{
@@ -62,7 +63,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-//		!action::forget_old_action;
+		!action::forget_old_action;
 		!!stop::retrieve_block_as_stocker;
 	}
 	elif (Flag == "helper") {
@@ -71,7 +72,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-//		!action::forget_old_action;
+		!action::forget_old_action;
 		!!stop::retrieve_block_as_helper;
 	}
 	else {
@@ -79,7 +80,7 @@
 		-exploration::special(_);
 		-common::avoid(_);
 		-common::escape;
-//		!action::forget_old_action;
+		!action::forget_old_action;
 		!!stop::retrieve_block_as_retriever;
 	}
 //	!!retrieve::retrieve_block;
@@ -205,7 +206,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-//			!action::forget_old_action;
+			!action::forget_old_action;
 			!!stop::retrieve_block_as_stocker;
 			//!common::update_role_to(stocker);
 			//!retrieve::retrieve_block;
@@ -216,7 +217,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-//			!action::forget_old_action;
+			!action::forget_old_action;
 //			.wait(not action::move_sent);
 			!!stop::retrieve_block_as_helper;
 			/*getMyPos(MyX, MyY);
@@ -235,7 +236,7 @@
 			-exploration::special(_);
 			-common::avoid(_);
 			-common::escape;
-//			!action::forget_old_action;
+			!action::forget_old_action;
 			!!stop::retrieve_block_as_retriever;
 			//!common::update_role_to(retriever);
 			//!retrieve::retrieve_block;

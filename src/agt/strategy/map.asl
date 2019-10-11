@@ -74,7 +74,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	-map::evaluating_positions(_); 
 	-map::evaluating_vertexes; 
 	!common::go_back_to_previous_role;
-	!!retrieve::move_to_goal.
+	!!retrieve::retrieve_block.
 -!map::evaluate(_, _) : 
 	common::previous_role(explorer)  
 <- 
@@ -147,7 +147,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::get_clusters(Clusters);
 	.print("Clusters: ", Clusters);
 	!common::go_back_to_previous_role;
-	if (not common::my_role(retriever)) {
+	if (common::my_role(explorer)) {
 		//+exploration::explorer;
 		//!common::update_role_to(explorer);
 		!!exploration::explore([n,s,w,e]);
@@ -344,7 +344,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	if(
 		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _)
 			| default::thing(0, -1, dispenser, _) | default::thing(0, 1, dispenser, _) 
-			| default::thing(-1, 0, dispenser, _) | default::thing(1, 0, dispenser, _)
+			| default::thing(-1, 0, dispenser, _) | default::thing(-2, 0, dispenser, _) | default::thing(1, 0, dispenser, _) | default::thing(2, 0, dispenser, _)
 			| default::thing(-1, -1, dispenser, _) | default::thing(-1, 1, dispenser, _)
 			| default::thing(1, -1, dispenser, _) | default::thing(1, 1, dispenser, _)
 			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)
