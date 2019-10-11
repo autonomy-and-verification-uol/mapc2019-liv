@@ -359,15 +359,16 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			if(not (.member(scout(_, SX, SY), Positions) & SY > 0)) {
 				North = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SY < 0)) {
 				South = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX > 0)) {
 				West = 0;
 			}
-			if(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
+			elif(not (.member(scout(_, SX, SY), Positions) & SX < 0)) {
 				East = 0;
 			}
+			
 			.print("North:", North);
 			.print("South:", South);
 			.print("West:", West);
