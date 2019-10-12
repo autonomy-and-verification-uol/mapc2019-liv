@@ -72,6 +72,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //		}
 		+committed(Id,CommitListSort);
 		.print("New commit list sorted ",CommitListSort);
+		.length(CommitListSort,AgentsRequired);
+		+ready_submit(AgentsRequired);
 		.print("Task ",Id," with deadline ",Deadline," , reward ",Reward," and requirements ",ReqList," is eligible to be performed");
 		.print("Agents committed: ",CommitList);
 		.print("Agent list used: ",AgList);
@@ -104,6 +106,21 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	+committed(Id,CommitListSort);
 	.print("New commit list ",CommitListSort);
 	.
+	
++!perform_task_origin_next
+	: committed(Id,CommitListSort) & ready_submit(0)
+<-
+	!action::submit(Id);
+	.print("Submitted task ",Id);
+	-ready_submit(0);
+	if (default::lastAction(submit) & not default::lastActionResult(success)) {
+		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
+	}
+	.abolish(retrieve::block(_,_));
+	+task::no_block;
+	-committed(Id,CommitListSort);
+	!default::always_skip;
+	.
 
 @next_job_task[atomic]
 +!perform_task_origin_next
@@ -111,39 +128,22 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
-	.nth(0,CommitListSort,agent(Sum,Ag,TypeAg,X,Y));
-	.delete(0,CommitListSort,CommitListSortNew);
-	!update_commitlist(CommitListSortNew);
-//	?check_pos(X,Y,NewX,NewY);
-	if (task::no_block) {
-		.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y,noblock));
-	}
-	else {
-//		if (help(HelpX,HelpY) & HelpX == X & HelpY == Y) {
-//			-help(HelpX,HelpY);
-//			.send(Ag,achieve,task::collect_block(TypeAg,MyX+NewX,MyY+NewY,MyX+X,MyY+Y,MyX-1,MyY-1));
-//			!action::detach(n);
-//		}
-//		else {
-		.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y));
-//		}
+	.nth(0,CommitListSort,agent(Sum,_,_,_,_));
+	for (.member(agent(Sum,Ag,TypeAg,X,Y),CommitListSort)) {
+		if (task::no_block) {
+			.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y,noblock));
+		}
+		else {
+			.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y));
+		}
+		?committed(Id,CommitListSortAux);
+		.delete(agent(Sum,Ag,TypeAg,X,Y),CommitListSortAux,CommitListSortNew);
+		!update_commitlist(CommitListSortNew);
 	}
 	!!default::always_skip;
 	.
-+!perform_task_origin_next
-	: committed(Id,CommitListSort) //& helper(HelperAg)
-<-
-	!action::submit(Id);
-	.print("Submitted task ",Id);
-	if (default::lastAction(submit) & not default::lastActionResult(success)) {
-		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
-	}
-	.abolish(retrieve::block(_,_));
-	+task::no_block;
-	-committed(Id,CommitListSort);
-	//.send(HelperAg,achieve,default::always_skip);
-	!default::always_skip;
-	.
+	
++!perform_task_origin_next <- !!default::always_skip.
 
 //// Update this plan after adding the belief for attached blocks
 //+!verify_block
@@ -222,12 +222,13 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	getMyPos(MyX,MyY);
 	!action::forget_old_action(default,always_skip);
 	?get_direction(ConX-MyX, ConY-MyY, Dir)
-	!action::attach(Dir);
-	if (default::lastAction(attach) & default::lastActionResult(success)) {
-		.send(Help, tell, task::synch_complete);
+	while (not (default::lastAction(attach) & default::lastActionResult(success))) {
+		!action::attach(Dir);
 	}
+	.send(Help, tell, task::synch_complete);
+	?ready_submit(AgentsRequired);
+	-+ready_submit(AgentsRequired-1);
 	-no_block;
-//	+connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
 	.
 	
@@ -243,12 +244,10 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Help,X,Y);
 	}
-	+retrieve::block(ConX-MyX,ConY-MyY);
 	.send(Help, tell, task::synch_complete);
-//	-connect(X,Y);
-//	.print(ConX-MyX);
-//	.print(ConY-MyY);
-//	+connect(ConX-MyX,ConY-MyY);
+	?ready_submit(AgentsRequired);
+	-+ready_submit(AgentsRequired-1);
+	+retrieve::block(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
 	.
 	
