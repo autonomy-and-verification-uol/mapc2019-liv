@@ -249,7 +249,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 				else if (lastActionParams.getTerm(0).toString().contains("e")) { mypos.x++; }
 				else if (lastActionParams.getTerm(0).toString().contains("w")) { mypos.x--; }
 			}
-			logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y+" Step "+step);
+//			logger.info("My current position is X = "+mypos.x+" Y = "+mypos.y+" Step "+step);
 			defineObsProperty(step.getFunctor(), (Object[]) step.getTermsArray());
 			defineObsProperty(lastAction.getFunctor(), (Object[]) lastAction.getTermsArray());
 			defineObsProperty(lastActionResult.getFunctor(), (Object[]) lastActionResult.getTermsArray());
@@ -344,20 +344,20 @@ public class EISArtifact extends Artifact implements AgentListener {
     	if(returnedPlan == null) 
     		return new Literal[0];
     	
-    	logger.info(returnedPlan + "");
+//    	logger.info(returnedPlan + "");
     	
     	List<Literal> actions = new ArrayList<Literal>();
     	
     	for(String action : returnedPlan) {
     		int par = action.indexOf("(");
     		String functor = action.substring(0, par);
-    		logger.info(functor + "(");
+//    		logger.info(functor + "(");
     		List<Term> args = new ArrayList<>();
     		for(String arg : action.substring(par + 1, action.length() - 1).split(",")) {
-    			logger.info(arg);
+//    			logger.info(arg);
     			args.add(ASSyntax.createAtom(arg));
     		}
-    		logger.info(")");
+//    		logger.info(")");
     		actions.add(ASSyntax.createLiteral(functor, args.toArray(new Term[args.size()])));
     	}
     	
@@ -369,7 +369,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     public void getPlanAgentToGoal(String agent, int goalX, int goalY, OpFeedbackParam<Literal[]> plan, int clear) {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
-    	logger.info("Goal statement: " + goalStatement);
+//    	logger.info("Goal statement: " + goalStatement);
     	LinkedList<String> returnedPlan = getPlan(agent, goalStatement, null, 0, clear);
     	plan.set(convertToAgentPlan(returnedPlan));
     }
@@ -379,7 +379,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at a " + goalCell + ")");
-    	logger.info("Goal statement: " + goalStatement);
+//    	logger.info("Goal statement: " + goalStatement);
     	LinkedList<String> returnedPlan = getPlan(agent, goalStatement, attachedBlockCell, 1, clear);
     	plan.set(convertToAgentPlan(returnedPlan));
     }
@@ -389,7 +389,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	String goalCell = coordinate2String(goalX) + coordinate2String(goalY);
     	String attachedBlockCell = coordinate2String(blockX) + coordinate2String(blockY);
     	String goalStatement = createGoalStatement("(at b0 " + goalCell + ")");
-    	logger.info("Goal statement: " + goalStatement);
+//    	logger.info("Goal statement: " + goalStatement);
     	LinkedList<String> returnedPlan = getPlan(agent, goalStatement, attachedBlockCell, 1, clear);
     	plan.set(convertToAgentPlan(returnedPlan));
     }
@@ -409,7 +409,7 @@ public class EISArtifact extends Artifact implements AgentListener {
     	
     	try {
     	
-	    	logger.info("We are in the getPlan method!");
+//	    	logger.info("We are in the getPlan method!");
 	    	
 	    	Set<String> nonEmptyCells = new HashSet<String>();
 	    	
@@ -556,8 +556,8 @@ public class EISArtifact extends Artifact implements AgentListener {
     private LinkedList<String> callPlanner(String agentName, int clear) throws IOException, InterruptedException {
     	String problem = agentName + "_problem.pddl";
     	String output = agentName + "_output";
-    	logger.info("problem file name: " + problem);
-       	logger.info("output file name: " + output);
+//    	logger.info("problem file name: " + problem);
+//       	logger.info("output file name: " + output);
        	
        	ProcessBuilder pb = null;
        	
@@ -588,7 +588,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		
 		s.close();
 		
-	   	logger.info("We have a plan!");
+//	   	logger.info("We have a plan!");
 	   	
 		return plan;
     }
@@ -596,8 +596,8 @@ public class EISArtifact extends Artifact implements AgentListener {
     private LinkedList<String> callPlanner2(String agentName, int clear) throws IOException, InterruptedException {
     	String problem = agentName + "_problem.pddl";
     	String output = agentName + "_output";
-    	logger.info("problem file name: " + problem);
-       	logger.info("output file name: " + output);
+//    	logger.info("problem file name: " + problem);
+//       	logger.info("output file name: " + output);
        	
        	ProcessBuilder pb = null;
        	
@@ -625,7 +625,7 @@ public class EISArtifact extends Artifact implements AgentListener {
 		
 		s.close();
 		
-	   	logger.info("We have a plan!");
+//	   	logger.info("We have a plan!");
 	   	
 		return plan;
     }

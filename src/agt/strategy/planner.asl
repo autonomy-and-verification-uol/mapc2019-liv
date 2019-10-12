@@ -243,7 +243,7 @@
 	LocalTargetX > 0 & not (default::thing(1, 0, Type, _)  & (Type == block | Type == entity)) & not (default::obstacle(1,0))
 <-	
 	!action::move(e);
-	.print("Execute empty plan by moving est");
+	.print("Execute empty plan by moving east");
 	if (default::lastActionResult(success)) {
 		!generate_goal(TargetX - 1, TargetY);
 	} else {

@@ -24,7 +24,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	: true
 <-
 	getMyPos(MyX,MyY);
-	.print("Perceived dispenser of type ",Type," at X ",X," at Y ",Y);
+//	.print("Perceived dispenser of type ",Type," at X ",X," at Y ",Y);
 	!map::get_dispensers(Dispensers);
 	!map::update_dispenser_in_map(Type, MyX, MyY, X, Y, Dispensers);
 	.
