@@ -58,14 +58,15 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 @available_to_evaluate1[atomic]
-+!map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
++?map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
 	not common::my_role(goal_evaluator)
 <-
+	.print("@@@@@@@@@@@@@@@@@ I AM AVAILABLE TO EVALUATE A CLUSTER @@@@@@@@@@@@@@@@@@@");
 	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
 	!!common::update_role_to(goal_evaluator);
 	.
 @available_to_evaluate2[atomic]
-+!map::available_to_evaluate(0, _, _).
++?map::available_to_evaluate(0, _, _) : true <- .print("@@@@@@@@@@@@@@@@@ I AM NOT AVAILABLE TO EVALUATE A CLUSTER @@@@@@@@@@@@@@@@@@@").
 	
 -!map::evaluate(_, _) : 
 	common::previous_role(retriever) 
@@ -574,13 +575,16 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 
 +!map::find_cluster_origin :
-	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 < GY1), []) & (GX1 \== 0 | GY1 \== 0)
+	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 < GY1), []) & GY1 \== 0
 <-
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
 	getMyPos(MyX, MyY);
 	!map::move_to_evaluating_pos(start1);
 	getMyPos(MyX1, MyY1);
+	?map::evaluating_positions(Pos1);
+	.delete(start(_, _), Pos1, Pos2);
+	-+map::evaluating_positions(Pos2);
 	if(MyX == MyX1 & MyY == MyY1){
 		.fail;
 	}
@@ -594,6 +598,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	getMyPos(MyX, MyY);
 	!map::move_to_evaluating_pos(start1);
 	getMyPos(MyX1, MyY1);
+	?map::evaluating_positions(Pos1);
+	.delete(start(_, _), Pos1, Pos2);
+	-+map::evaluating_positions(Pos2);
 	if(MyX == MyX1 & MyY == MyY1){
 		.fail;
 	}
@@ -768,7 +775,8 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		updateGoalMap(Me, MyX+X, MyY+Y, InsertedInCluster, IsANewCluster);
 		if(IsANewCluster){
 			if(S \== "self"){
-				.send(Ag, askOne, map::available_to_evaluate(Res, X, Y), map::available_to_evaluate(Res, _, _))
+				.send(Ag, askOne, map::available_to_evaluate(Res, X, Y), map::available_to_evaluate(Res, _, _));
+				.print("@@@@@@@@@@@@@@@@@@@ RES: ", Res);
 				if(Res == 1){
 					.send(Ag, achieve, map::evaluate(X, Y));
 				}
