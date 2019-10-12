@@ -223,6 +223,9 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
+			while (default::lastAction(rotate) & not default::lastActionResult(success)) {
+				!action::Action;
+			}
 		}
 	}
 	.
