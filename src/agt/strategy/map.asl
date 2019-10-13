@@ -107,7 +107,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.print("Failing because of evaluation of north origin");
 		.fail;
 	}
-	!map::update_origin_evaluation(n, Value1);
+	!map::request_to_update_origin_evaluation(n, Value1);
 	.print("OriginN evaluated as:", Value1);
 	
 	/* +map::scouts_found([]);
@@ -139,13 +139,51 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::update_origin_evaluation(w, Value4);
 	.print("OriginW evaluated as:", Value4);
 	*/
-	
+	.
+
+@update_origin_evaluation1[atomic]
++!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value)[source(Ag)] :
+	.my_name(Me) & map::myMap(Me)
+<-
+	.print("@@@@@@@@@@@@@@@@: ", update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value));
+	if(not .member(Value, [n,s,w,e])){
+		evaluateOrigin(Me, OriginX, OriginY, Value);
+	} else{
+		for(.member(retriever(RetrieverX, RetrieverY), RetrieversList)){
+			addRetrieverToOrigin(Me, OriginX, OriginY, RetrieverX + OriginX, RetrieverY + OriginY);	
+		}
+		evaluateOrigin(Me, OriginX, OriginY, Value);
+	}
+	.send(Ag, tell, map::update_origin_res(Side, Value, 1));
+	.
+@update_origin_evaluation2[atomic]
++!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value)[source(Ag)] :
+	map::myMap(Leader)
+<-
+	.send(Ag, tell, map::update_origin_res(Side, Value, 0));
+	.
+
+@request_to_update_origin_evaluation[atomic]
++!map::request_to_update_origin_evaluation(Side, Value) :
+	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
+	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
+<-
+	getMyPos(MyX, MyY);
+	if(not action::reasoning_about_belief(update_origin)){
+		+action::reasoning_about_belief(update_origin);
+	}
+	.send(Leader, achieve, map::update_origin_evaluation(Side, MyX+X, MyY+Y, RetrieversList, Value));
+	.
+
+//@update_origin_res1[atomic]
++map::update_origin_res(_, _, 1) :
+	true
+<-
+	-action::reasoning_about_belief(update_origin);
 	-map::evaluating_positions(_);
 	-map::evaluating_vertexes;
 	
 	!action::forget_old_action;
-	!map::get_clusters(Clusters);
-	.print("Clusters: ", Clusters);
 	!common::go_back_to_previous_role;
 	if (common::my_role(explorer)) {
 		//+exploration::explorer;
@@ -153,23 +191,27 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		!!exploration::explore([n,s,w,e]);
 	}
 	.
-
-+!map::update_origin_evaluation(Side, Value) :
+//@update_origin_res2[atomic]
++map::update_origin_res(Side, Value, 0) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
+	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
+<-
+	!!map::request_to_update_origin_evaluation(Side, Value);
+	.
+	
+/*+!map::update_origin_evaluation(Side, Value) :
+	map::myMap(Me) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
 	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
 	if(.member(Side, [n,s,w,e])){
-		/*for(.member(scout(_, ScoutX, ScoutY), ScoutsList)){
-			addScoutToOrigin(Leader, MyX + X, MyY + Y, ScoutX + X + MyX, ScoutY + Y + MyY);	
-		}*/
 		for(.member(retriever(RetrieverX, RetrieverY), RetrieversList)){
 			addRetrieverToOrigin(Leader, MyX + X, MyY + Y, RetrieverX + X + MyX, RetrieverY + Y + MyY);	
 		}
 	}
 	evaluateOrigin(Leader, MyX + X, MyY + Y, Value);
-	.
+	. */
 
 +!map::evaluate_origin(Side, Value) :
 	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
@@ -596,38 +638,40 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 
 +!map::find_cluster_origin :
-	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 < GY1), []) & GY1 \== 0
+	default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 < GY1), []) & GY1 \== 0
 <-
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
-	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	-+map::evaluating_positions([start(GX1, GY1)]);
 	getMyPos(MyX, MyY);
 	-map::find_origin;
 	+map::find_origin;
 	!map::move_to_evaluating_pos(start1);
 	-map::find_origin;
 	getMyPos(MyX1, MyY1);
-	?map::evaluating_positions(Pos1);
-	.delete(start(_, _), Pos1, Pos2);
-	-+map::evaluating_positions(Pos2);
+	//?map::evaluating_positions(Pos1);
+	-+map::evaluating_positions([]);
+	//.delete(start(_, _), Pos1, Pos2);
+	//-+map::evaluating_positions(Pos2);
 	if(MyX == MyX1 & MyY == MyY1){
 		.fail;
 	}
 	!map::find_cluster_origin;
 	.
 +!map::find_cluster_origin :
-	map::evaluating_positions(Pos) & default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 == 0 & GX2 > GX1), []) & GX1 \== 0 & GY1 == 0
+	default::goal(GX1, GY1) & .findall(goal(GX2, GY2), (default::goal(GX2, GY2) & GY2 == 0 & GX2 > GX1), []) & GX1 \== 0 & GY1 == 0
 <-
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
-	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
+	-+map::evaluating_positions([start(GX1, GY1)]);
 	getMyPos(MyX, MyY);
 	-map::find_origin;
 	+map::find_origin;
 	!map::move_to_evaluating_pos(start1);
 	-map::find_origin;
 	getMyPos(MyX1, MyY1);
-	?map::evaluating_positions(Pos1);
-	.delete(start(_, _), Pos1, Pos2);
-	-+map::evaluating_positions(Pos2);
+	//?map::evaluating_positions(Pos1);
+	//.delete(start(_, _), Pos1, Pos2);
+	//-+map::evaluating_positions(Pos2);
+	-+map::evaluating_positions([]);
 	if(MyX == MyX1 & MyY == MyY1){
 		.fail;
 	}
@@ -636,7 +680,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::find_cluster_origin :
 	true
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@ FIND OTHER SIDE1!");
 	!map::find_other_side(0);
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@ FIND OTHER SIDE2!");
 	.
 
 /* 
@@ -767,7 +813,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	}
 	.
 +!map::find_other_side(Count) :
-	map::myMap(Leader) & not stop::first_to_stop(_)
+	map::myMap(Leader) & not stop::first_to_stop(_) & map::evaluating_positions(Pos)
 <-
 	DiffY = math.floor(-Count/2);
 	-+map::evaluating_positions([start(0, DiffY)|Pos]);
@@ -778,10 +824,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.fail;
 	}
 	evaluateOrigin(Leader, MyX, MyY, boh);
-	.print("OldPos: ", Positions);
-	-+map::evaluating_positions([origin(Side, 0, 0)|Positions]);
-	if(map::evaluating_positions(Pos)){
-		.print("NewPos: ", Pos);
+	.print("OldPos: ", Pos);
+	-+map::evaluating_positions([origin(n, 0, 0)|Pos]);
+	if(map::evaluating_positions(Pos1)){
+		.print("NewPos: ", Pos1);
 	}
 	.	
 +!map::move_random(Steps) :
