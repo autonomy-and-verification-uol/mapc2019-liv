@@ -85,10 +85,13 @@ remove_opposite(w,e) :- true.
 	.
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer)
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & default::vision(V) & common::find_empty_position(X,Y,1,V)
 <-
-	.print("@@@@@ No movement options available, sending skip forever");
-	!default::always_skip;
+	.print("@@@@@ No movement options available");
+	!action::skip;
+	!planner::generate_goal(X, Y, notblock);
+	!!explore(Dirlist);
+//	!default::always_skip;
 	.
 	
 +!explore(Dirlist).

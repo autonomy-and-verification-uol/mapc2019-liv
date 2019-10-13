@@ -1,22 +1,7 @@
 +!generate_goal(0, 0, Aux) 
-	: (common::my_role(stocker) | common::my_role(retriever)) & retrieve::collect_block
+	: common::my_role(retriever) & retrieve::collect_block
 <- 
 	!!retrieve::get_block;
-	.
-+!generate_goal(0, 0, Aux)
-	: common::my_role(stocker) & .my_name(Me) & stop::first_to_stop(Ag)
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	?retrieve::gate(Gate);
-	addStocker(Me, MyX, MyY, Gate);
-	+task::stocker_in_position;
-	if (retrieve::block(X,Y)) {
-		?default::thing(X,Y,block,Type);
-		addStockerBlock(Me, Type);
-	}
-	.send(Ag, tell, task::stocker(Me));
-	!!default::always_skip;
 	.
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY)
@@ -45,26 +30,6 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0, Aux) 
-	: common::my_role(helper) & back_to_origin
-<- 
-	+ready_to_help;
-	-back_to_origin;
-	.
-+!generate_goal(0, 0, Aux) 
-	: common::my_role(helper) & ready_to_help
-<- 
-	-ready_to_help;
-	+back_to_origin;
-	.
-+!generate_goal(0, 0, Aux) 
-	: common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
-<- 
-	-retrieve::moving_to_origin;
-	+ready_to_help;
-	.send(Ag, tell, task::helper(Me));
-	!!default::always_skip;
-	.
-+!generate_goal(0, 0, Aux) 
 	: common::my_role(origin)
 <- 
 	-retrieve::moving_to_origin;
@@ -72,6 +37,7 @@
 	!!default::always_skip;
 	.
 +!generate_goal(0, 0, Aux)  : common::my_role(retriever).
++!generate_goal(0, 0, Aux)  : common::my_role(explorer).
 //+!generate_goal(0, 0) <- !!default::always_skip.
 +!generate_goal(TargetX, TargetY, Aux)
 	: .my_name(Me)
