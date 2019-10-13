@@ -537,17 +537,32 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!map::move_to_evaluating_pos(start1);
 	!action::clear(0, 5);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
-//		.wait(not action::move_sent);
 		getMyPos(MyX, MyY);
 		evaluateOrigin(Leader, MyX, MyY, bad);
 		-map::checking_task_area;
 		.fail;
 	} else {
-		if(map::evaluating_positions(Pos1)){
-			.delete(start(_, _), Pos1, Pos2);
-			-+map::evaluating_positions([start(0, -1)|Pos2]);
-			!map::move_to_evaluating_pos(start1);
+		!action::clear(5, 0);
+		if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
+			getMyPos(MyX, MyY);
+			evaluateOrigin(Leader, MyX, MyY, bad);
 			-map::checking_task_area;
+			.fail;
+		} else {
+			!action::clear(-5, 0);
+				if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
+					getMyPos(MyX, MyY);
+					evaluateOrigin(Leader, MyX, MyY, bad);
+					-map::checking_task_area;
+					.fail;
+				} else {
+					if(map::evaluating_positions(Pos1)){
+						.delete(start(_, _), Pos1, Pos2);
+						-+map::evaluating_positions([start(0, -1)|Pos2]);
+						!map::move_to_evaluating_pos(start1);
+						-map::checking_task_area;
+					}
+				}
 		}
 	}
 	.	
