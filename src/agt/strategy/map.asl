@@ -61,12 +61,11 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +?map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
 	not common::my_role(goal_evaluator)
 <-
-	.print("@@@@@@@@@@@@@@@@@ I AM AVAILABLE TO EVALUATE A CLUSTER @@@@@@@@@@@@@@@@@@@");
 	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
 	!!common::update_role_to(goal_evaluator);
 	.
 @available_to_evaluate2[atomic]
-+?map::available_to_evaluate(0, _, _) : true <- .print("@@@@@@@@@@@@@@@@@ I AM NOT AVAILABLE TO EVALUATE A CLUSTER @@@@@@@@@@@@@@@@@@@").
++?map::available_to_evaluate(0, _, _) .
 	
 -!map::evaluate(_, _) : 
 	common::previous_role(retriever) 
@@ -490,7 +489,14 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		if(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
 			!retrieve::smart_clear(Direction);
 			if(retrieve::res(0)){
-				Res = 0;
+				if(map::find_origin){
+					for(.range(_, 1, 3) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
+						!retrieve::smart_move(Dir);
+					}
+					Res = 1;
+				} else{
+					Res = 0;
+				}
 			} else {
 				Res = 1;
 			}
@@ -595,7 +601,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
 	getMyPos(MyX, MyY);
+	-map::find_origin;
+	+map::find_origin;
 	!map::move_to_evaluating_pos(start1);
+	-map::find_origin;
 	getMyPos(MyX1, MyY1);
 	?map::evaluating_positions(Pos1);
 	.delete(start(_, _), Pos1, Pos2);
@@ -611,7 +620,10 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	//.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@GOAL: ", default::goal(GX1, GY1));
 	-+map::evaluating_positions([start(GX1, GY1)|Pos]);
 	getMyPos(MyX, MyY);
+	-map::find_origin;
+	+map::find_origin;
 	!map::move_to_evaluating_pos(start1);
+	-map::find_origin;
 	getMyPos(MyX1, MyY1);
 	?map::evaluating_positions(Pos1);
 	.delete(start(_, _), Pos1, Pos2);
