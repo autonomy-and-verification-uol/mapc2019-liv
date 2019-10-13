@@ -44,6 +44,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 		.print("New commit list sorted ",CommitListSort);
 		.length(CommitListSort,AgentsRequired);
 		+ready_submit(AgentsRequired);
+		+batch(0);
 		.print("Task ",Id," with deadline ",Deadline," , reward ",Reward," and requirements ",ReqList," is eligible to be performed");
 		.print("Agents committed: ",CommitList);
 		.print("Agent list used: ",AgList);
@@ -59,25 +60,33 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	+committed(Id,CommitListSort);
 	.print("New commit list ",CommitListSort);
 	.
-	
-+!perform_task_origin_next
-	: committed(Id,CommitListSort) & ready_submit(0)
+
+@update_beliefs_submit[atomic]
++!update_beliefs_submit
+	: committed(Id,CommitListSort)
 <-
-	!action::submit(Id);
 	.print("Submitted task ",Id);
 	-ready_submit(0);
+	-batch(_);
 	if (default::lastAction(submit) & not default::lastActionResult(success)) {
 		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
 	}
 	.abolish(retrieve::block(_,_));
 	+task::no_block;
 	-committed(Id,CommitListSort);
+	.
+
++!perform_task_origin_next
+	: committed(Id,CommitListSort) & ready_submit(0)
+<-
+	!action::submit(Id);
+	!update_beliefs_submit;
 	!default::always_skip;
 	.
 
 @next_job_task[atomic]
 +!perform_task_origin_next
-	: committed(Id,CommitListSort) & not .empty(CommitListSort) //& helper(HelperAg)
+	: committed(Id,CommitListSort) & not .empty(CommitListSort) & batch(0) //& helper(HelperAg)
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
@@ -89,6 +98,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 		else {
 			.send(Ag,achieve,task::perform_task(MyX+X,MyY+Y));
 		}
+		?batch(Batch);
+		-+batch(Batch+1);
 		?committed(Id,CommitListSortAux);
 		.delete(agent(Sum,Ag,TypeAg,X,Y),CommitListSortAux,CommitListSortNew);
 		!update_commitlist(CommitListSortNew);
@@ -101,9 +112,28 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!perform_task_origin
 	: true
 <-
-	!action::forget_old_action;
+	!action::forget_old_action(default,always_skip);
 	+no_block;
 	!perform_task_origin_next;
+	.
+	
+@updatetaskbeliefsattach[atomic]
++!update_task_beliefs_attach
+	: batch(Batch) & ready_submit(AgentsRequired)
+<-
+	-+ready_submit(AgentsRequired-1);
+	-+batch(Batch-1);
+	-no_block;
+	.
+	
+@updatetaskbeliefsconnect[atomic]
++!update_task_beliefs_connect(X,Y)
+	: batch(Batch) & ready_submit(AgentsRequired)
+<-
+	-+ready_submit(AgentsRequired-1);
+	-+batch(Batch-1);
+	-helping_connect;
+	+retrieve::block(X,Y);
 	.
 
 +!help_attach(ConX,ConY)[source(Help)]
@@ -111,15 +141,13 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 <-
 //	.wait(not action::move_sent);
 	getMyPos(MyX,MyY);
-	!action::forget_old_action;
+	!action::forget_old_action(default,always_skip);
 	?get_direction(ConX-MyX, ConY-MyY, Dir)
 	while (not (default::lastAction(attach) & default::lastActionResult(success))) {
 		!action::attach(Dir);
 	}
 	.send(Help, tell, task::synch_complete);
-	?ready_submit(AgentsRequired);
-	-+ready_submit(AgentsRequired-1);
-	-no_block;
+	!update_task_beliefs_attach;
 	!perform_task_origin_next;
 	.
 	
@@ -132,15 +160,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.print("My pos X ",MyX," Y ",MyY);
 	.print("Help local block X ",ConX-MyX," Y ",ConY-MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
-	!action::forget_old_action;
+	!action::forget_old_action(default,always_skip);
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Help,X,Y);
 	}
 	.send(Help, tell, task::synch_complete);
-	?ready_submit(AgentsRequired);
-	-+ready_submit(AgentsRequired-1);
-	+retrieve::block(ConX-MyX,ConY-MyY);
-	-helping_connect;
+	!update_task_beliefs_connect(ConX-MyX,ConY-MyY);
 	!perform_task_origin_next;
 	.
 	
@@ -149,7 +174,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!perform_task(X,Y,noblock)[source(Origin)]
 	: .my_name(Me)
 <-
-	!action::forget_old_action;
+	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
@@ -176,7 +201,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!perform_task(X,Y)[source(Origin)]
 	: .my_name(Me)
 <-
-	!action::forget_old_action;
+	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
