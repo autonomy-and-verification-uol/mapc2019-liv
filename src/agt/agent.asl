@@ -28,7 +28,7 @@
 	.
 
 +default::actionID(_)
-	: not start
+	: not start & .my_name(Me)
 <- 
 	+start;
 	.wait(1000);
@@ -37,7 +37,7 @@
 	.
 
 +!always_skip :
-	(task::origin | common::my_role(stocker))  & 
+	task::origin  & 
 	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30
 <-
 	for(.range(I, 1, 3) & not task::committed(_,_)){

@@ -1,7 +1,6 @@
 # simple setup file for testing
 
 
-
 stop    # stops further setup execution
 
 terrain 20 20 goal
