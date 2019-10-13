@@ -45,8 +45,14 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
-	private int maxStockers = 2;
-	private int stockers;
+//	private int maxStockers = 2;
+//	private int stockers;
+	
+	private int maxPlanners = 6;
+	private int planners;
+	
+//	private int maxStop = 1;
+//	private int stop;
 	
 //	private int maxHelpers = 1;
 //	private int helpers;
@@ -77,8 +83,10 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent10",map10);
 		stockersAvailablePositions.clear();
 		retrieversAvailablePositions.clear();
-		stockers = 0;
+//		stockers = 0;
 //		helpers = 0;
+		planners = 0;
+//		stop = 0;
 		firstToStop = null;
 		pos  = 10;
 	}
@@ -94,6 +102,38 @@ public class TeamArtifact extends Artifact {
 		}
 		logger.info("!!!! First to stop "+firstToStop);
 	}
+	
+	@OPERATION
+	void callPlanner(OpFeedbackParam<Boolean> flag){
+		if(this.planners+1 <= this.maxPlanners) {
+			this.planners++;
+			flag.set(true);
+		}
+		else {
+			flag.set(false);
+		}
+	}
+	
+	@OPERATION
+	void plannerDone(){
+		this.planners--;
+	}
+	
+//	@OPERATION
+//	void callStop(OpFeedbackParam<Boolean> flag){
+//		if(this.stop+1 <= this.maxStop) {
+//			this.stop++;
+//			flag.set(true);
+//		}
+//		else {
+//			flag.set(false);
+//		}
+//	}
+//	
+//	@OPERATION
+//	void stopDone(){
+//		this.stop--;
+//	}
 	
 	@OPERATION
 	void joinRetrievers(OpFeedbackParam<String> flag){

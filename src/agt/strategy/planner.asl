@@ -1,9 +1,9 @@
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: (common::my_role(stocker) | common::my_role(retriever)) & retrieve::collect_block
 <- 
 	!!retrieve::get_block;
 	.
-+!generate_goal(0, 0)
++!generate_goal(0, 0, Aux)
 	: common::my_role(stocker) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
 //	.wait(not action::move_sent);
@@ -18,7 +18,7 @@
 	.send(Ag, tell, task::stocker(Me));
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY)
 <- 
 	-back_to_origin;
@@ -28,30 +28,35 @@
 	else {
 		Clear = 0;
 	}
+	if (Aux == notblock) {
+		callPlanner(Flag);
+		!try_call_planner(Flag);
+	}
 	getPlanBlockToGoal(Me, 0, 0, BlockX, BlockY, Plan, Clear);
+	plannerDone;
 	.print("@@@@@@ Plan: ",Plan);
 	!planner::execute_plan(Plan, 0, 0, 0, 0);
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
 <- 
 	addAvailableAgent(Me,Type);
 	+back_to_origin;
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(helper) & back_to_origin
 <- 
 	+ready_to_help;
 	-back_to_origin;
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(helper) & ready_to_help
 <- 
 	-ready_to_help;
 	+back_to_origin;
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(helper) & .my_name(Me) & stop::first_to_stop(Ag)
 <- 
 	-retrieve::moving_to_origin;
@@ -59,18 +64,23 @@
 	.send(Ag, tell, task::helper(Me));
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0) 
++!generate_goal(0, 0, Aux) 
 	: common::my_role(origin)
 <- 
 	-retrieve::moving_to_origin;
 	+task::origin;
 	!!default::always_skip;
 	.
-+!generate_goal(0, 0)  : common::my_role(retriever).
++!generate_goal(0, 0, Aux)  : common::my_role(retriever).
 //+!generate_goal(0, 0) <- !!default::always_skip.
-+!generate_goal(TargetX, TargetY)
++!generate_goal(TargetX, TargetY, Aux)
 	: .my_name(Me)
 <-
+	if (Aux == notblock) {
+		callPlanner(Flag);
+		!try_call_planner(Flag);
+	}
+
 	if(TargetX <= -5){
 		LocalTargetX = -5;
 	} elif(TargetX >= 5){
@@ -130,11 +140,18 @@
 	else {
 		getPlanAgentToGoal(Me, ActualFinalLocalTargetX, ActualFinalLocalTargetY, Plan, Clear);
 	}
+	plannerDone;
 	.print("@@@@@@ Plan: ",Plan);
 	!planner::execute_plan(Plan, TargetX, TargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
 	.
 	
-
++!try_call_planner(true).
++!try_call_planner(false)
+<-
+	!action::skip;
+	callPlanner(Flag);
+	!try_call_planner(Flag);
+	.
 	
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	: not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
@@ -236,9 +253,9 @@
 	!action::move(w);
 	.print("Execute empty plan by moving west");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX + 1, TargetY);
+		!generate_goal(TargetX + 1, TargetY, notblock);
 	} else {
-		!generate_goal(TargetX, TargetY);
+		!generate_goal(TargetX, TargetY, notblock);
 	}
 	.
 	
@@ -248,9 +265,9 @@
 	!action::move(e);
 	.print("Execute empty plan by moving east");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX - 1, TargetY);
+		!generate_goal(TargetX - 1, TargetY, notblock);
 	} else {
-		!generate_goal(TargetX, TargetY);
+		!generate_goal(TargetX, TargetY, notblock);
 	}
 	.
 	
@@ -260,9 +277,9 @@
 	!action::move(n);
 	.print("Execute empty plan by moving north");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX, TargetY + 1);
+		!generate_goal(TargetX, TargetY + 1, notblock);
 	} else {
-		!generate_goal(TargetX, TargetY);
+		!generate_goal(TargetX, TargetY, notblock);
 	}
 	.
 
@@ -272,9 +289,9 @@
 	!action::move(s);
 	.print("Execute empty plan by moving south");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX, TargetY - 1);
+		!generate_goal(TargetX, TargetY - 1, notblock);
 	} else {
-		!generate_goal(TargetX, TargetY);
+		!generate_goal(TargetX, TargetY, notblock);
 	}
 	.
 	
@@ -282,7 +299,7 @@
 <-
 	.print("No trivial solution to the empty plan, probably stuck in a loop");
 	!action::skip;
-	!generate_goal(TargetX, TargetY);
+	!generate_goal(TargetX, TargetY, notblock);
 	.
 
 
@@ -324,6 +341,6 @@
 	-localtargetx(FinalLocalTargetX);
 	-localtargety(FinalLocalTargetY);
 	.print("Next relative target X ",TargetX - FinalLocalTargetX," Y ",TargetY - FinalLocalTargetY);
-	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY);
+	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY, notblock);
 	.
 	

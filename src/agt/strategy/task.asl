@@ -161,6 +161,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.print("Help local block X ",ConX-MyX," Y ",ConY-MyY);
 	?get_block_connect(ConX-MyX, ConY-MyY, X, Y);
 	!action::forget_old_action(default,always_skip);
+	!action::connect(Help,X,Y);
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Help,X,Y);
 	}
@@ -188,7 +189,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	NewTargetY = Y - MyYNew;
 //	.print("NewTargetX ",NewTargetX);
 //	.print("NewTargetY ",NewTargetY);
-	!planner::generate_goal(NewTargetX, NewTargetY);
+	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	.send(Origin, achieve, task::help_attach(X,Y));
 	?retrieve::block(BX,BY);
 	?get_direction(BX,BY,DetachPos);
@@ -215,7 +216,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	NewTargetY = Y - MyYNew;
 //	.print("NewTargetX ",NewTargetX);
 //	.print("NewTargetY ",NewTargetY);
-	!planner::generate_goal(NewTargetX, NewTargetY);
+	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew2,MyYNew2);
 	?retrieve::block(BX,BY);
 	.send(Origin, achieve, task::help_connect(MyXNew2+BX,MyYNew2+BY));

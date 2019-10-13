@@ -115,7 +115,7 @@
 	getMyPos(MyX, MyY);
 	TargetX = GoalX+1 - MyX;
 	TargetY = GoalY - MyY;
-	!!planner::generate_goal(TargetX, TargetY);
+	!!planner::generate_goal(TargetX, TargetY, notblock);
 //		!!planner::execute_plan(Plan);
 //		!!retrieve::move_to_goal;
 //		!!retrieve::retrieve_block;
@@ -139,7 +139,7 @@
 	getMyPos(MyX, MyY);
 	TargetX = GoalX - MyX;
 	TargetY = GoalY - MyY;
-	!!planner::generate_goal(TargetX, TargetY);
+	!!planner::generate_goal(TargetX, TargetY, notblock);
 //			!!planner::execute_plan(Plan);
 	//+plan(Plan);
 	//?plan([Head|PlanX]);
@@ -246,17 +246,28 @@
 	.
 +!stop::check_join_group : true <- .print("I cannot join the stop group yet").
 
+//+!try_call_stop(true).
+//+!try_call_stop(false)
+//<-
+//	!action::skip;
+//	callStop(Flag);
+//	!try_call_stop(Flag);
+//	.
+
 // trigger for new task addition 
 @trigger1[atomic]
 +default::task(ID, Deadline, Reward, Blocks) 
 	: not(stop::stop)
  <- 
+// 	callStop(Flag);
+// 	!try_call_stop(Flag);
  	!map::get_dispensers(Dispensers);
 	!stop::update_blocks_count(Blocks);
 	!map::get_clusters(Clusters);
 	//.length(Clusters, NClusters);
 	!stop::conditional_stop(Blocks, Clusters, Dispensers, Stop);
 	!stop::update_stop(Stop);
+//	stopDone;
 	.
 	
 +!stop::update_stop(true) : true <- +stop::stop.
@@ -289,9 +300,12 @@
 +!stop::new_dispenser_or_merge[source(_)] 
 	: not(stop::stop) & .findall(task(ID, Deadline, Reward, Blocks), default::task(ID, Deadline, Reward, Blocks), PreShuffleTasks) & not .empty(PreShuffleTasks)
 <-
+//	callStop(Flag);
+// 	!try_call_stop(Flag);
 	.shuffle(PreShuffleTasks,Tasks);
 	!map::get_dispensers(Dispensers);
 	!stop::check_active_tasks(Tasks, Dispensers, 5);
+//	stopDone;
 	.
 +!stop::new_dispenser_or_merge[source(_)].
 
@@ -305,7 +319,9 @@
 	!map::get_clusters(Clusters);
 	!stop::conditional_stop(Blocks, Clusters, Dispensers, Stop);
 	!stop::update_stop(Stop);
-	!stop::check_active_tasks(Tasks, Dispensers, Counter-1);
+	if (not Stop) {
+		!stop::check_active_tasks(Tasks, Dispensers, Counter-1);
+	}
 	.
 +!stop::check_active_tasks([task(ID, Deadline, Reward, Blocks)|Tasks], Dispensers, Counter) : stop::stop.
 

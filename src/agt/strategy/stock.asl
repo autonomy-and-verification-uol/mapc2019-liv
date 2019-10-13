@@ -265,6 +265,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 	: default::step(Step1)
 <-
 //	.wait(not action::move_sent);
+	callPlanner(Flag);
+	!planner::try_call_planner(Flag);
 	getMyPos(MyX, MyY);
 	?default::step(Step2);
 	.print(" Step1 ",Step1," Step2 ",Step2);
@@ -278,10 +280,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 	+collect_block;
 	if(TargetX < 0){
 		.print("Relative target: ", TargetX + 1, " ", TargetY);
-		!!planner::generate_goal(TargetX + 1, TargetY);
+		!!planner::generate_goal(TargetX + 1, TargetY, block);
 	} else {
 		.print("Relative target: ", TargetX - 1, " ", TargetY);
-		!!planner::generate_goal(TargetX - 1, TargetY);
+		!!planner::generate_goal(TargetX - 1, TargetY, block);
 	}
 	.
 
@@ -446,32 +448,32 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!retrieve::create_and_attach_block;
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
-	if (common::my_role(stocker)) {
-		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
-		getTargetGoal(_, GoalX, GoalY, _);
-		if (TargetYGlobal < GoalY) {
-			StockerBlockPos = s;
-		}
-		elif (TargetYGlobal > GoalY) {
-			StockerBlockPos = n;
-		}
-		elif (TargetXGlobal > GoalX) {
-			StockerBlockPos = w;
-		}
-		else {
-			StockerBlockPos = e;
-		}
-		+gate(StockerBlockPos);
-	}
-	else {
+//	if (common::my_role(stocker)) {
+//		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
+//		getTargetGoal(_, GoalX, GoalY, _);
+//		if (TargetYGlobal < GoalY) {
+//			StockerBlockPos = s;
+//		}
+//		elif (TargetYGlobal > GoalY) {
+//			StockerBlockPos = n;
+//		}
+//		elif (TargetXGlobal > GoalX) {
+//			StockerBlockPos = w;
+//		}
+//		else {
+//			StockerBlockPos = e;
+//		}
+//		+gate(StockerBlockPos);
+//	}
+//	else {
 		getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
-	}
+//	}
 	TargetX = TargetXGlobal - MyX;
 	TargetY = TargetYGlobal - MyY;
 	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
 	.print("Agent position: ", MyX, MyY);
 	.print("Chosen Relative Goal position: ", TargetX, TargetY);
-	!planner::generate_goal(TargetX, TargetY);
+	!planner::generate_goal(TargetX, TargetY, notblock);
 //	!retrieve::move_to_goal;
 	.
 
