@@ -62,6 +62,11 @@ remove_opposite(s,n) :- true.
 remove_opposite(e,w) :- true.
 remove_opposite(w,e) :- true.
 
+get_clear_direction(n,X,Y) :- X = 0 & Y = -2.
+get_clear_direction(s,X,Y) :- X = 0 & Y = 2.
+get_clear_direction(w,X,Y) :- X = -2 & Y = 0.
+get_clear_direction(e,X,Y) :- X = 2 & Y = 0.
+
 +!explore(DirList) 
 	: common::my_role(explorer) & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
@@ -119,6 +124,47 @@ remove_opposite(w,e) :- true.
 +!explore_until_obstacle(Dir)
 	: common::my_role(explorer) & not check_obstacle(Dir) & not action::out_of_bounds(Dir)
 <-
+	!action::move(Dir);
+	!!explore_until_obstacle(Dir);
+	.
+	
++!explore_until_obstacle(Dir)
+	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & first_clear
+<-
+	-first_clear;
+	?get_clear_direction(Dir,X,Y);
+	!action::move(Dir);
+	for(.range(I, 1, 3)){
+		!action::clear(X,Y);
+	}
+	if (Dir == n) {
+		if (default::obstacle(X,Y-1) | default::obstacle(X,Y-2)) {
+			for(.range(I, 1, 3)){
+				!action::clear(X,Y-2);
+			}
+		}
+	}
+	elif (Dir == s) {
+		if (default::obstacle(X,Y+1) | default::obstacle(X,Y+2)) {
+			for(.range(I, 1, 3)){
+				!action::clear(X,Y+2);
+			}
+		}
+	}
+	elif (Dir == w) {
+		if (default::obstacle(X-1,Y) | default::obstacle(X-2,Y)) {
+			for(.range(I, 1, 3)){
+				!action::clear(X-2,Y);
+			}
+		}
+	}
+	else {
+		if (default::obstacle(X+1,Y) | default::obstacle(X+2,Y)) {
+			for(.range(I, 1, 3)){
+				!action::clear(X+2,Y);
+			}
+		}
+	}
 	!action::move(Dir);
 	!!explore_until_obstacle(Dir);
 	.
