@@ -26,6 +26,7 @@
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
 <- 
 	addAvailableAgent(Me,Type);
+	-retrieve::getting_to_position;
 	+back_to_origin;
 	!!default::always_skip;
 	.
@@ -283,6 +284,9 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
+			if (common::my_role(retriever) & retrieve::getting_to_position & not retrieve::block(X,Y)) {
+				.fail;
+			}
 			if (default::lastAction(move) & not (default::lastActionResult(success)) & default::lastActionParams([Direction|List])) {
 				if ( Direction == n & planner::localtargety(LocalTargetYAux) ) {
 					-+localtargety(LocalTargetYAux + 1);
@@ -297,9 +301,6 @@
 					-+localtargetx(LocalTargetXAux - 1);
 				}
 			}
-//			elif (not default::lastActionResult(success)) {
-//				
-//			}
 		}
 	}
 	?localtargetx(FinalLocalTargetX);
@@ -308,5 +309,12 @@
 	-localtargety(FinalLocalTargetY);
 	.print("Next relative target X ",TargetX - FinalLocalTargetX," Y ",TargetY - FinalLocalTargetY);
 	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY, notblock);
+	.
+
+-!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
+	: common::my_role(retriever) & retrieve::getting_to_position
+<-
+	-retrieve::getting_to_position;
+	!!retrieve::retrieve_block;
 	.
 	

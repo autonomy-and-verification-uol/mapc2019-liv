@@ -473,6 +473,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
 	.print("Agent position: ", MyX, MyY);
 	.print("Chosen Relative Goal position: ", TargetX, TargetY);
+	+getting_to_position;
 	!planner::generate_goal(TargetX, TargetY, notblock);
 //	!retrieve::move_to_goal;
 	.
