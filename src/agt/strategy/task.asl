@@ -30,7 +30,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 
 @task[atomic]
 +default::task(Id, Deadline, Reward, ReqList)
-	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) & .length(ReqList) <= 6 //& .count(task::stocker(_)[source(_)],2) & helper(HelperAg)
+	: task::origin & not task::committed(Id2,_) & .my_name(Me) & ((default::energy(Energy) & Energy < 30) | not default::obstacle(_,_)) & .length(ReqList) <= 6 & task::max_pos_s(MaxPosS) & task::max_pos_w(MaxPosW) & task::max_pos_e(MaxPosE)
+	   & 	.findall(X, .member(req(X,Y,Type),ReqList), ListX) &
+	.findall(Y, .member(req(X,Y,Type),ReqList), ListY) &
+	.max(ListY,MaxY) & MaxY <= MaxPosS &
+	.max(ListX,MaxX) & MaxX <= MaxPosE &
+	.min(ListX,MinX) & math.abs(MinX) <= MaxPosW
 <-
 	.print("@@@@@@@@@@@@@@@@@@ ", Id, "  ",Deadline);
 	getAvailableAgent(AgList);

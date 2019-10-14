@@ -27,6 +27,9 @@
 		firstToStop(Me,Flag);
 		if (Flag) {
 			.print("@@@@@@@@@@@@@@@@@@@ MaxPos: ", MaxPosS, ", ", MaxPosW, ", ", MaxPosE);
+			+task::max_pos_s(MaxPosS);
+			+task::max_pos_w(MaxPosW);
+			+task::max_pos_e(MaxPosE);
 			+stop::first_to_stop(Me);
 			//.print("Removing explorer");
 			//-exploration::explorer;

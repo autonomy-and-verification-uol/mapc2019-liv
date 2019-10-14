@@ -73,7 +73,7 @@ get_other_side(w,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 
 +!explore(DirList) 
-	: common::my_role(explorer) & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
+	: common::my_role(explorer) & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w)  & .random(Number) & random_dir([n,s,e,w],4,Number,Dir)
 <-
 	.print("There is a friendly agent in all possible directions, trying to move randomly.");
 	!action::move(Dir);
@@ -87,13 +87,15 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	 .
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & default::vision(V) & common::find_empty_position(X,Y,1,V)
+	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & .random(Number) & random_dir([n,s,e,w],4,Number,Dir) & default::energy(Energy) & Energy >= 270 // & default::vision(V) & common::find_empty_position(X,Y,1,V)
 <-
 	.print("@@@@@ No movement options available");
 	!action::skip;
-	!planner::generate_goal(X, Y, notblock);
-	!!explore(Dirlist);
-//	!default::always_skip;
+	!try_to_clear(Dir);
+//	!action::skip;
+//	!planner::generate_goal(X, Y, notblock);
+//	!!explore(Dirlist);
+////	!default::always_skip;
 	.
 
 // special case	
@@ -126,6 +128,62 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
 // TODO what about a block?
 
++!try_to_clear(Dir)
+<-
+	?get_clear_direction(Dir,X,Y);
+	if (not check_obstacle(Dir)) {
+		!action::move(Dir);
+	}
+	for(.range(I, 1, 3)){
+		if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+			!action::clear(X,Y);
+		}
+	}
+	if (Dir == n) {
+		if (default::obstacle(X,Y-1) | default::obstacle(X,Y-2)) {
+			for(.range(I, 1, 3)){
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+					!action::clear(X,Y-2);
+				}
+			}
+		}
+	}
+	elif (Dir == s) {
+		if (default::obstacle(X,Y+1) | default::obstacle(X,Y+2)) {
+			for(.range(I, 1, 3)){
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+					!action::clear(X,Y+2);
+				}
+			}
+		}
+	}
+	elif (Dir == w) {
+		if (default::obstacle(X-1,Y) | default::obstacle(X-2,Y)) {
+			for(.range(I, 1, 3)){
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+					!action::clear(X-2,Y);
+				}
+			}
+		}
+	}
+	else {
+		if (default::obstacle(X+1,Y) | default::obstacle(X+2,Y)) {
+			for(.range(I, 1, 3)){
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+					!action::clear(X+2,Y);
+				}
+			}
+		}
+	}
+	if (not check_obstacle(Dir)) {
+		!action::move(Dir);
+		!!explore_until_obstacle(Dir);
+	}
+	else {
+		.delete(Dir,[n,s,e,w],DirList);
+		!!explore(DirList);
+	}
+	.
 
 +!explore_until_obstacle(Dir)
 	: common::my_role(explorer) & check_agent(Dir)
@@ -153,57 +211,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 +!explore_until_obstacle(Dir)
 	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & default::energy(Energy) & Energy >= 270
 <-
-	?get_clear_direction(Dir,X,Y);
-	!action::move(Dir);
-	for(.range(I, 1, 3)){
-		if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
-			!action::clear(X,Y);
-		}
-	}
-	if (Dir == n) {
-		if (default::obstacle(X,Y-1) | default::obstacle(X,Y-2)) {
-			for(.range(I, 1, 3)){
-				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
-					!action::clear(X,Y-2);
-				}
-			}
-		}
-	}
-	elif (Dir == s) {
-		if (default::obstacle(X,Y+1) | default::obstacle(X,Y+2)) {
-			for(.range(I, 1, 3)){
-				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
-					!action::clear(X,Y+2);
-				}
-			}
-		}
-	}
-	elif (Dir == w) {
-		if (default::obstacle(X-1,Y) | default::obstacle(X-2,Y)) {
-			for(.range(I, 1, 3)){
-				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
-					!action::clear(X-2,Y);
-				}
-			}
-		}
-	}
-	else {
-		if (default::obstacle(X+1,Y) | default::obstacle(X+2,Y)) {
-			for(.range(I, 1, 3)){
-				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
-					!action::clear(X+2,Y);
-				}
-			}
-		}
-	}
-	if (not check_obstacle(Dir)) {
-		!action::move(Dir);
-		!!explore_until_obstacle(Dir);
-	}
-	else {
-		.delete(Dir,[n,s,e,w],DirList);
-		!!explore(DirList);
-	}
+	!try_to_clear(Dir);
 	.
 	
 +!explore_until_obstacle(Dir)

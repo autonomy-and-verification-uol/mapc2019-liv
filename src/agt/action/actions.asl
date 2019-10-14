@@ -212,3 +212,5 @@
 	!action::commit_action(skip);
 	.
 -!skip[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled.").
+-!skip[code(.fail(action(Action),result(failed_random)))] <- .print("Skip failed random, but we don't care.").
+
