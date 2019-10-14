@@ -178,7 +178,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
-	removeBlock(Type);
+	removeBlock(Me);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 //	.print("MyXNew ",MyXNew);
@@ -206,7 +206,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
-	removeBlock(Type);
+	removeBlock(Me);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 //	.print("MyXNew ",MyXNew);

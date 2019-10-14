@@ -102,7 +102,7 @@
 <-
 	getAvailableMeType(Me, Type);
 	removeAvailableAgent(Me);
-	removeBlock(Type);
+	removeBlock(Me);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 	!!retrieve::retrieve_block;

@@ -196,41 +196,25 @@ most_needed_type(Dispensers, AgList, Type) :-
 	+retrieve::scouts_aux([]);
 	for(.range(H, 0, RangeE, 3)){
 		if(retrieve::scouts_aux(Scouts)){
-			if(H == RangeE){
-				.concat(Scouts, [scout(Side, X+H-1, Y-RangeN+1)], Scouts1);
-			} else{
-				.concat(Scouts, [scout(Side, X+H, Y-RangeN+1)], Scouts1);
-			}
+			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
 	for(.range(V, -RangeN+3, RangeS, 3)){
 		if(retrieve::scouts_aux(Scouts)){
-			if(V == RangeS){
-				.concat(Scouts, [scout(Side, X+RangeE-1, Y+V-1)], Scouts1);
-			} else{
-				.concat(Scouts, [scout(Side, X+RangeE-1, Y+V)], Scouts1);
-			}
+			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}		
 	for(.range(H, RangeE-3, -RangeW, -3)){
 		if(retrieve::scouts_aux(Scouts)){
-			if(H == -RangeW){
-				.concat(Scouts, [scout(Side, X+H+1, Y+RangeS-1)], Scouts1);
-			} else{
-				.concat(Scouts, [scout(Side, X+H, Y+RangeS-1)], Scouts1);
-			}
+			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
 	for(.range(V, RangeS-3, -RangeN, -3)){
 		if(retrieve::scouts_aux(Scouts)){
-			if(V == -RangeN){
-				.concat(Scouts, [scout(Side, X-RangeW+1, Y+V+1)], Scouts1);
-			} else{
-				.concat(Scouts, [scout(Side, X-RangeW+1, Y+V)], Scouts1);
-			}
+			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
@@ -308,16 +292,16 @@ most_needed_type(Dispensers, AgList, Type) :-
 //-!retrieve::retrieve_block : true <- true.
 	
 +!retrieve::decide_block_type_flat(Type) : 
-	true
+	.my_name(Me)
 <-
 	//getAvailableAgent(AgList);
 	getBlocks(Blocks);
 	!map::get_dispensers(Dispensers);
-	.setof(B, (.member(dispenser(B, _, _), Dispensers) & not .member(B, Blocks)), MostNeededTypes);
+	.setof(B, (.member(dispenser(B, _, _), Dispensers) & not .member(block(_, B), Blocks)), MostNeededTypes);
 	if(MostNeededTypes == []){
-		.setof(T, .member(T, Blocks), Ts);
+		.setof(T, .member(block(_, T), Blocks), Ts);
 		for(.member(T1, Ts)){
-			.findall(TT1, .member(TT1, Blocks) & TT1 = T1, TTs);
+			.findall(TT1, .member(block(_, TT1), Blocks) & TT1 = T1, TTs);
 			.length(TTs, N);
 			if(retrieve::current_min(_, Min)){
 				if(N < Min){
@@ -335,7 +319,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 		.shuffle(MostNeededTypes, Types);
 		.nth(0, Types, Type);
 	}
-	addBlock(Type);
+	addBlock(Me, Type);
 	.
 
 +!retrieve::decide_block_type(Type) : 
@@ -1257,7 +1241,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			ClearX = 2 ClearY = 0
 		}
 	}
-	for(.range(I, 1, 3) & not retrieve::res(Res)){
+	for(.range(I, 1, 3)){
 		if(not default::thing(ClearX, ClearY, block, _) & 
 			not default::thing(ClearX-1, ClearY, block, _) &
 			not default::thing(ClearX+1, ClearY, block, _) &
@@ -1267,12 +1251,15 @@ most_needed_type(Dispensers, AgList, Type) :-
 			not default::thing(ClearX-1, ClearY, entity, Team) &
 			not default::thing(ClearX+1, ClearY, entity, Team) &
 			not default::thing(ClearX, ClearY-1, entity, Team) &
-			not default::thing(ClearX, ClearY+1, entity, Team)
+			not default::thing(ClearX, ClearY+1, entity, Team) &
+			not retrieve::res(_)
 		){
-			.print("CLEEEEEEEEEEEEEEEEEEEAR STOCK.ASL");
 			!action::clear(ClearX, ClearY);
+			if(not default::lastActionResult(success)){
+				+retrieve::res(0);
+			}
 		} else{
-			+res(0);
+			+retrieve::res(0);
 		}
 	}
 	if(not retrieve::res(Res)){

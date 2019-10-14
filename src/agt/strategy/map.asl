@@ -216,7 +216,11 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::evaluate_origin(Side, Value) :
 	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
 <-
-	!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, 5, 9, 9, 9, Scouts);
+	!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, 4, 8, 8, 8, Scouts);
+	-map::rectangle_size(_);
+	+map::rectangle_size(4, 8, 8, 8);
+	-map::check_sides(_, _, _, _);
+	+map::check_sides(_, _, _, _);
 	.print("SCOUTSSSSS:", Scouts);
 //	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
 //	L2 = [vertex(Side, e, V2X, V2Y)|L1];
@@ -235,6 +239,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.length(ScoutsList, NScouts) & .length(RetrieverList, NRetrievers) & 
 		(NScouts < RequiredNumberScouts | NRetrievers < RequiredNumberRetrievers)
 	){*/
+	-map::fail_eval_retriever;
 	while(map::evaluating_positions(PosAux) & .member(scout(_, _, _), PosAux) & 
 		map::retrievers_found(RetrieverList) & 
 		map::number_retriever_positions(RequiredNumberRetrievers) &
@@ -250,9 +255,18 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 			.length(Pos2, N2);
 			if(N1 == N2){
 				.delete(scout(_, XDel, YDel), Pos1, Pos3);
+				if(not map::fail_eval_retriever){
+					+map::fail_eval_retriever;
+					?map::retrievers_found(RetrieverList1);
+					if(RetrieverList1 = [H|RetrieverList2]){
+						-map::retrievers_found(_);
+						+map::retrievers_found(RetrieverList2);
+					} 
+				}
 				-map::evaluating_positions(_);
 				+map::evaluating_positions(Pos3);
 			} else{
+				-map::fail_eval_retriever;
 				-map::evaluating_positions(_);
 				+map::evaluating_positions(Pos2);
 			}
@@ -373,6 +387,44 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		.print("Stop evaluating the cluster2: (", MyX, ", ", MyY, ") ", " (", X, ", ", Y, ") ", Clusters);
 	}
 	.
+	
++!map::get_rectangle_side(Sides, DiffX, DiffY) :
+	map::evaluating_positions(Positions) & .member(origin(OriginSide, OriginX, OriginY), Positions) & map::rectangle_size(N, S, W, E)
+<-
+	if(OriginY == N & OriginX == -E){ // upper right corner
+		DiffX = -2;
+		DiffY = 2;
+		Sides = [n, e];
+	} elif(OriginY == -S & OriginX == -E){ // lower right corner
+		DiffX = -2;
+		DiffY = -2;
+		Sides = [s, e];
+	} elif(OriginY == -S & OriginX == W){ // lower left corner
+		DiffX = 2;
+		DiffY = -2;
+		Sides = [s, w];
+	} elif(OriginY == N & OriginX == W){ // upper left corner
+		DiffX = 2;
+		DiffY = 2;
+		Sides = [n, w];
+	} elif(OriginY == N){ // north side
+		DiffX = 0;
+		DiffY = 2;
+		Sides = [n];
+	} elif(OriginY == -S){ // south side
+		DiffX = 0;
+		DiffY = -2;
+		Sides = [s];
+	} elif(OriginX == -E){ // east side
+		DiffX = -2;
+		DiffY = 0;
+		Sides = [e];
+	} else{ // west side
+		DiffX = 2;
+		DiffY = 0;
+		Sides = [w];
+	}
+	.	
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(start(0, 0), Positions)
 <- 
@@ -382,11 +434,56 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::move_to_evaluating_pos_1(OriginSide) :
 	map::evaluating_positions(Positions) & .member(scout(OriginSide, 0, 0), Positions) &
 	.member(origin(OriginSide, OriginX, OriginY), Positions) // & map::scouts_found(ScoutsList)
+	& map::check_sides(SideN, SideS, SideW, SideE) 
+	& map::rectangle_size(N, S, W, E)
 <-
+	!map::get_rectangle_side(Sides, DiffX, DiffY);
+	if(.member(n, Sides) & not .ground(SideN)){
+		!action::clear(0, -2);
+		if(default::lastActionResult(failed_target)){
+			SideN = bad;
+		} else{
+			SideN = good;
+		}
+	}
+	if(.member(s, Sides) & not .ground(SideS)){
+		!action::clear(0, 2);
+		if(default::lastActionResult(failed_target)){
+			SideS = bad;
+		} else{
+			SideS = good;
+		}
+	}
+	if(.member(w, Sides) & not .ground(SideW)){
+		!action::clear(-2, 0);
+		if(default::lastActionResult(failed_target)){
+			SideW = bad;
+		} else{
+			SideW = good;
+		}
+	}
+	if(.member(e, Sides) & not .ground(SideE)){
+		!action::clear(2, 0);
+		if(default::lastActionResult(failed_target)){
+			SideE = bad;
+		} else{
+			SideE = good;
+		}
+	}
+	
+	-+map::check_sides(SideN, SideS, SideW, SideE); 
+	
 	if(
+		not(
+			(.member(n, Sides) & SideN == bad) |
+			(.member(s, Sides) & SideS == bad) |
+			(.member(w, Sides) & SideW == bad) |
+			(.member(e, Sides) & SideE == bad)
+		) &
 		not (default::goal(0, 0) | default::thing(0, 0, dispenser, _)
 			| default::thing(0, -1, dispenser, _) | default::thing(0, 1, dispenser, _) 
-			| default::thing(-1, 0, dispenser, _) | default::thing(-2, 0, dispenser, _) | default::thing(1, 0, dispenser, _) | default::thing(2, 0, dispenser, _)
+			| default::thing(-1, 0, dispenser, _) | default::thing(-2, 0, dispenser, _) 
+			| default::thing(1, 0, dispenser, _) | default::thing(2, 0, dispenser, _)
 			| default::thing(-1, -1, dispenser, _) | default::thing(-1, 1, dispenser, _)
 			| default::thing(1, -1, dispenser, _) | default::thing(1, 1, dispenser, _)
 			 //| default::obstacle(0, -1) | default::obstacle(0, 1) | default::obstacle(-1, 0) | default::obstacle(1, 0)

@@ -18,6 +18,7 @@ import jason.asSyntax.ASSyntax;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
 import jason.asSyntax.NumberTermImpl;
+import jason.util.Pair;
 import jason.asSyntax.Atom;
 
 
@@ -68,7 +69,7 @@ public class TeamArtifact extends Artifact {
 	private List<Point> stockersAvailablePositions = new ArrayList<>();
 	private List<Point> retrieversAvailablePositions = new ArrayList<>();
 	
-	private static List<String> ourBlocks = new ArrayList<>();
+	private static List<Pair<String, String>> ourBlocks = new ArrayList<>();
 	
 	void init(){
 		logger.info("Team Artifact has been created!");
@@ -810,21 +811,24 @@ public class TeamArtifact extends Artifact {
 	@OPERATION
 	void getBlocks(OpFeedbackParam<Literal[]> list) {
 		List<Literal> things = new ArrayList<Literal>();
-		for(String b : ourBlocks) {
-			things.add(ASSyntax.createLiteral(b));
+		for(Pair<String, String> p : ourBlocks) {
+			Literal literal = ASSyntax.createLiteral("block");	
+			literal.addTerm(ASSyntax.createAtom(p.getFirst()));
+			literal.addTerm(ASSyntax.createAtom(p.getSecond()));
+			things.add(literal);
 		}
 		Literal[] arraythings = things.toArray(new Literal[things.size()]);
 		list.set(arraythings);
 	}
 	
 	@OPERATION
-	void addBlock(String b) {
-		ourBlocks.add(b);
+	void addBlock(String ag, String b) {
+		ourBlocks.add(new Pair<String, String>(ag, b));
 	}
 	
 	@OPERATION
-	void removeBlock(String b) {
-		ourBlocks.remove(b);
+	void removeBlock(String ag) {
+		ourBlocks.removeIf(p -> p.getFirst().equals(ag));
 	}
 	/*
 	@OPERATION
