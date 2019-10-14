@@ -97,8 +97,11 @@
 
 +!always_skip :
 	common::my_role(retriever) &
-	not retrieve::block(X, Y)
+	not retrieve::block(X, Y) & .my_name(Me)
 <-
+	removeAvailableAgent(Me);
+	getMyPos(MyX,MyY);
+	addRetrieverAvailablePos(MyX,MyY);
 	!!retrieve::retrieve_block;
 	.
 +!always_skip

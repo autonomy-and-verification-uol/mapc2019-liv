@@ -18,7 +18,7 @@
 	}
 	getPlanBlockToGoal(Me, 0, 0, BlockX, BlockY, Plan, Clear);
 	plannerDone;
-	.print("@@@@@@ Plan: ",Plan);
+	.print("@@@@@@ Plan get plan block to goal: ",Plan);
 	!planner::execute_plan(Plan, 0, 0, 0, 0);
 	-back_to_origin;
 	.

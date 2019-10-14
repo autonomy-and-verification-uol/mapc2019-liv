@@ -180,13 +180,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
-	getMyPos(MyXNew,MyYNew);
 //	.print("MyXNew ",MyXNew);
 //	.print("MyYNew ",MyYNew);
 //	.print("X ",X);
 //	.print("Y ",Y);
-	NewTargetX = X - MyXNew;
-	NewTargetY = Y - MyYNew;
+	NewTargetX = X - MyX;
+	NewTargetY = Y - MyY;
 //	.print("NewTargetX ",NewTargetX);
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
@@ -207,19 +206,18 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	removeAvailableAgent(Me);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
-	getMyPos(MyXNew,MyYNew);
 //	.print("MyXNew ",MyXNew);
 //	.print("MyYNew ",MyYNew);
 //	.print("X ",X);
 //	.print("Y ",Y);
-	NewTargetX = X - MyXNew;
-	NewTargetY = Y - MyYNew;
+	NewTargetX = X - MyX;
+	NewTargetY = Y - MyY;
 //	.print("NewTargetX ",NewTargetX);
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
-	getMyPos(MyXNew2,MyYNew2);
+	getMyPos(MyXNew,MyYNew);
 	?retrieve::block(BX,BY);
-	.send(Origin, achieve, task::help_connect(MyXNew2+BX,MyYNew2+BY));
+	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
 	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 		!action::connect(Origin,BX,BY);
 	}

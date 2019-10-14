@@ -15,6 +15,7 @@
 	.abolish(common::_[source(_)]);
 	.abolish(newround::_[source(_)]);
 	.abolish(endround::_[source(_)]);
+	.abolish(planner::_[source(_)]);
 	.abolish(team::chosenActions(_, _)[source(_)]);
 	resetMyPos;
 	-default::start;
