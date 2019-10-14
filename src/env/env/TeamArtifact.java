@@ -49,7 +49,7 @@ public class TeamArtifact extends Artifact {
 //	private int maxStockers = 2;
 //	private int stockers;
 	
-	private int maxPlanners = 6;
+	private int maxPlanners = 10;
 	private int planners;
 	
 //	private int maxStop = 1;

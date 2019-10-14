@@ -196,25 +196,41 @@ most_needed_type(Dispensers, AgList, Type) :-
 	+retrieve::scouts_aux([]);
 	for(.range(H, 0, RangeE, 3)){
 		if(retrieve::scouts_aux(Scouts)){
-			.concat(Scouts, [scout(Side, X+H, Y-RangeN)], Scouts1);
+			if(H == RangeE){
+				.concat(Scouts, [scout(Side, X+H-1, Y-RangeN+1)], Scouts1);
+			} else{
+				.concat(Scouts, [scout(Side, X+H, Y-RangeN+1)], Scouts1);
+			}
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
 	for(.range(V, -RangeN+3, RangeS, 3)){
 		if(retrieve::scouts_aux(Scouts)){
-			.concat(Scouts, [scout(Side, X+RangeE, Y+V)], Scouts1);
+			if(V == RangeS){
+				.concat(Scouts, [scout(Side, X+RangeE-1, Y+V-1)], Scouts1);
+			} else{
+				.concat(Scouts, [scout(Side, X+RangeE-1, Y+V)], Scouts1);
+			}
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}		
 	for(.range(H, RangeE-3, -RangeW, -3)){
 		if(retrieve::scouts_aux(Scouts)){
-			.concat(Scouts, [scout(Side, X+H, Y+RangeS)], Scouts1);
+			if(H == -RangeW){
+				.concat(Scouts, [scout(Side, X+H+1, Y+RangeS-1)], Scouts1);
+			} else{
+				.concat(Scouts, [scout(Side, X+H, Y+RangeS-1)], Scouts1);
+			}
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}
 	for(.range(V, RangeS-3, -RangeN, -3)){
 		if(retrieve::scouts_aux(Scouts)){
-			.concat(Scouts, [scout(Side, X-RangeW, Y+V)], Scouts1);
+			if(V == -RangeN){
+				.concat(Scouts, [scout(Side, X-RangeW+1, Y+V+1)], Scouts1);
+			} else{
+				.concat(Scouts, [scout(Side, X-RangeW+1, Y+V)], Scouts1);
+			}
 			-+retrieve::scouts_aux(Scouts1);
 		}
 	}

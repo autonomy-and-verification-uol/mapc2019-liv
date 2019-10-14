@@ -216,7 +216,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +!map::evaluate_origin(Side, Value) :
 	map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions)
 <-
-	!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, 4, 8, 8, 8, Scouts);
+	!retrieve::generate_square_positions_around_origin(origin(X, Y), Side, 5, 9, 9, 9, Scouts);
 	.print("SCOUTSSSSS:", Scouts);
 //	L1 = [vertex(Side, w, V1X, V1Y)|Positions];
 //	L2 = [vertex(Side, e, V2X, V2Y)|L1];
