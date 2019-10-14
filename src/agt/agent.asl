@@ -28,7 +28,7 @@
 	.
 
 +default::actionID(_)
-	: not start & .my_name(Me)
+	: not start
 <- 
 	+start;
 	.wait(1000);
