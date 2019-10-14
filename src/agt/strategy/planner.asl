@@ -6,7 +6,6 @@
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY)
 <- 
-	-back_to_origin;
 	if (default::energy(Energy) & Energy >= 30) {
 		Clear = 1;
 	}
@@ -21,6 +20,7 @@
 	plannerDone;
 	.print("@@@@@@ Plan: ",Plan);
 	!planner::execute_plan(Plan, 0, 0, 0, 0);
+	-back_to_origin;
 	.
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)

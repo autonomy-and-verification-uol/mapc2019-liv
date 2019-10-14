@@ -581,23 +581,37 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::evaluating_positions(Pos)
 <- 
 	+map::checking_task_area;
-	-+map::evaluating_positions([start(0, 1)|Pos]);
+	-+map::evaluating_positions([start(0, 3)|Pos]);
 	!map::move_to_evaluating_pos(start1);
-	!action::clear(0, 5);
+	.findall(LB, default::task(ID, Deadline, Reward, Blocks) & .length(Blocks,LB), Tasks);
+	if (not .empty(Tasks)) {
+		.max(Tasks,MaxTaskAux);
+		if (MaxTaskAux >= 6) {
+			MaxTask = 5;
+		}
+		else {
+			MaxTask = MaxTaskAux;
+		}
+	}
+	else {
+		MaxTask = 5;
+	}
+	
+	!action::clear(0, MaxTask);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
 		getMyPos(MyX, MyY);
 		evaluateOrigin(Leader, MyX, MyY, bad);
 		-map::checking_task_area;
 		.fail;
 	} else {
-		!action::clear(5, 0);
+		!action::clear(MaxTask, 0);
 		if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
 			getMyPos(MyX, MyY);
 			evaluateOrigin(Leader, MyX, MyY, bad);
 			-map::checking_task_area;
 			.fail;
 		} else {
-			!action::clear(-5, 0);
+			!action::clear(-MaxTask, 0);
 				if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
 					getMyPos(MyX, MyY);
 					evaluateOrigin(Leader, MyX, MyY, bad);
@@ -606,7 +620,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 				} else {
 					if(map::evaluating_positions(Pos1)){
 						.delete(start(_, _), Pos1, Pos2);
-						-+map::evaluating_positions([start(0, -1)|Pos2]);
+						-+map::evaluating_positions([start(0, -3)|Pos2]);
 						!map::move_to_evaluating_pos(start1);
 						-map::checking_task_area;
 					}
