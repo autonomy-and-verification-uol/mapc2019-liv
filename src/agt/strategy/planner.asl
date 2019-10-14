@@ -80,12 +80,27 @@
 		} else {
 			FinalLocalTargetY = LocalTargetY + DeltaY;
 		}
+		InVision = false;
 	} else {
+		InVision = true;
 		FinalLocalTargetX = LocalTargetX;
 		FinalLocalTargetY = LocalTargetY;
 	}
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
-	!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+	if (.abs(TargetX) + .abs(TargetY) > 3) {
+		!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+	}
+	else {
+		//Several things:
+		// 1. is the position a good one?
+		// 1.a. If not and we are not going for a dispenser see above solution
+		// 1.b. If not and we are going for a dispenser, Rafael knows what to do (checking for the other directions)
+		// what happen if all directions are occupied? Rafael's answer: pick another dispenser.
+		//  
+		// 
+		ActualFinalLocalTargetX = FinalLocalTargetX;
+		ActualFinalLocalTargetY = FinalLocalTargetY;
+	}
 	.print("Where we are actually going ", ActualFinalLocalTargetX, ", ", ActualFinalLocalTargetY);
 	if (default::energy(Energy) & Energy >= 30) {
 		Clear = 1;
@@ -111,6 +126,11 @@
 	.print("@@@@@@ Plan: ",Plan);
 	!planner::execute_plan(Plan, TargetX, TargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
 	.
+
+-!generate_goal(TargetX, TargetY, Aux)
+<-
+	!execute_plan([], TargetX, TargetY, TargetX, TargetY);
+	.
 	
 +!try_call_planner(true).
 +!try_call_planner(false)
@@ -126,74 +146,118 @@
 	ActualFinalLocalTargetX = FinalLocalTargetX;
 	ActualFinalLocalTargetY = FinalLocalTargetY;
 	.
+// 5 0 
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: FinalLocalTargetY == 0 
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == 5 & not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
 <-
-	!generate_actual_goal(0,5,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+	ActualFinalLocalTargetX = FinalLocalTargetX-1;
+	ActualFinalLocalTargetY = FinalLocalTargetY;
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == 5 & not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
+<-
+	ActualFinalLocalTargetX = FinalLocalTargetX-1;
+	ActualFinalLocalTargetY = FinalLocalTargetY-1;
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == 5 & not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
+<-
+	ActualFinalLocalTargetX = FinalLocalTargetX-1;
+	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
-	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6 & not (default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY-Counter, Type, _) & (Type == block | Type == entity))
+	.fail.
+// -5 0 
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == -5 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
 <-
-	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
-	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX+1;
+	ActualFinalLocalTargetY = FinalLocalTargetY;
 	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == -5 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
 <-
-	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	ActualFinalLocalTargetX = FinalLocalTargetX+1;
+	ActualFinalLocalTargetY = FinalLocalTargetY-1;
 	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter == 6
-<- 
-	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
-	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6 & not (default::thing(FinalLocalTargetX+Counter, FinalLocalTargetY+Counter, Type, _) & (Type == block | Type == entity))
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == -5 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
 <-
-	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
-	ActualFinalLocalTargetX = FinalLocalTargetX + Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX+1;
+	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
-	.
-+!generate_actual_goal_left(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter == 6
-<- 
-	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,1);
-	.
-+!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6 & not (default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY-Counter, Type, _) & (Type == block | Type == entity))
+	.fail.
+// 0 -5
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == -5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
 <-
-	ActualFinalLocalTargetY = FinalLocalTargetY - Counter;
-	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX;
+	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
-+!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY > 0 & Counter < 6
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == -5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
 <-
-	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	ActualFinalLocalTargetX = FinalLocalTargetX-1;
+	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
-+!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6 & not (default::thing(FinalLocalTargetX-Counter, FinalLocalTargetY+Counter, Type, _) & (Type == block | Type == entity))
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == -5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
 <-
-	ActualFinalLocalTargetY = FinalLocalTargetY + Counter;
-	ActualFinalLocalTargetX = FinalLocalTargetX - Counter;
+	ActualFinalLocalTargetX = FinalLocalTargetX+1;
+	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
-+!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: FinalLocalTargetY < 0 & Counter < 6
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter+1)
+	.fail.
+// 0 5
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
+<-
+	ActualFinalLocalTargetX = FinalLocalTargetX;
+	ActualFinalLocalTargetY = FinalLocalTargetY-1;
 	.
-+!generate_actual_goal_right(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY,Counter)
-	: Counter == 6
-<- 
-	.print("Fabio was wrong!!!! -- you wish");
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
+<-
+	ActualFinalLocalTargetX = FinalLocalTargetX-1;
+	ActualFinalLocalTargetY = FinalLocalTargetY-1;
 	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
+<-
+	ActualFinalLocalTargetX = FinalLocalTargetX+1;
+	ActualFinalLocalTargetY = FinalLocalTargetY-1;
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+<-
+	.fail.
+// All other cases will call the closest of the cases above
+// The important assumption here is that the goal is not in vision!
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: .abs(FinalLocalTargetY) < .abs(FinalLocalTargetX) & FinalLocalTargetX > 0
+<-
+	!generate_actual_goal(5,0,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: .abs(FinalLocalTargetY) < .abs(FinalLocalTargetX) & FinalLocalTargetX < 0
+<-
+	!generate_actual_goal(-5,0,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: .abs(FinalLocalTargetY) > .abs(FinalLocalTargetX) & FinalLocalTargetY > 0
+<-
+	!generate_actual_goal(0,5,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	.
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: .abs(FinalLocalTargetY) > .abs(FinalLocalTargetX) & FinalLocalTargetY < 0
+<-
+	!generate_actual_goal(0,-5,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	.
+
+
 
 +!execute_plan(Plan, 0, 0, 0, 0)
 <-
@@ -261,10 +325,62 @@
 		!generate_goal(TargetX, TargetY, notblock);
 	}
 	.
-	
+// If all the above failed, then try to move in the opposite direction of the goal
+// All the following plans will miserably fail if the only possible direction is the one with the attached block...
+// Rafael, you might know how to deal with this.
+
+// I'd like to go east, but I'm giving up and going west
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetX > 0 & (not (default::thing(-1, 0, Type, _)  & (Type == block | Type == entity)) | retrieve::block(-1,0)) & not (default::obstacle(-1, 0))
+<-		
+	!action::move(w);
+	.print("Try to find a plan after moving west -- away from goal!");
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX+1, TargetY, notblock);
+	} else {
+		!generate_goal(TargetX, TargetY, notblock);
+	}
+	.
+// I'd like to go west, but I'm giving up and going east
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetX < 0 & (not (default::thing(1, 0, Type, _)  & (Type == block | Type == entity)) | retrieve::block(1,0)) & not (default::obstacle(1, 0))
+<-		
+	!action::move(e);
+	.print("Try to find a plan after moving east -- away from goal!");
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX-1, TargetY, notblock);
+	} else {
+		!generate_goal(TargetX, TargetY, notblock);
+	}
+	.
+// I'd like to go south, but I'm giving up and going north
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetY > 0 & (not (default::thing(0, -1, Type, _)  & (Type == block | Type == entity)) | retrieve::block(0,-1)) & not (default::obstacle(0, -1))
+<-		
+	!action::move(n);
+	.print("Try to find a plan after moving north -- away from goal!");
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX, TargetY + 1, notblock);
+	} else {
+		!generate_goal(TargetX, TargetY, notblock);
+	}
+	.
+// I'd like to go north, but I'm giving up and going south
++!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) :
+	LocalTargetY < 0 & (not (default::thing(0, 1, Type, _)  & (Type == block | Type == entity)) | retrieve::block(0,1)) & not (default::obstacle(0, 1))
+<-		
+	!action::move(s);
+	.print("Try to find a plan after moving south -- away from goal!");
+	if (default::lastActionResult(success)) {
+		!generate_goal(TargetX, TargetY - 1, notblock);
+	} else {
+		!generate_goal(TargetX, TargetY, notblock);
+	}
+	.
+// We are screwed
 +!execute_plan([], TargetX, TargetY, LocalTargetX, LocalTargetY) 
 <-
-	.print("No trivial solution to the empty plan, probably stuck in a loop");
+	.print("No trivial solution to the empty plan, OBSTACLES EVERYWHERE!");
 	!action::skip;
 	!generate_goal(TargetX, TargetY, notblock);
 	.
