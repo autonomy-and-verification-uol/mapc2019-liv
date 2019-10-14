@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent10",map10);
 		stockersAvailablePositions.clear();
 		retrieversAvailablePositions.clear();
+		ourBlocks.clear();
 //		stockers = 0;
 //		helpers = 0;
 		planners = 0;
@@ -380,6 +382,33 @@ public class TeamArtifact extends Artifact {
 	}
 	
 	@OPERATION
+	void evaluateOrigin(String name, int x, int y, String evaluation, int maxPosS, int maxPosW, int maxPosE) {
+		//if(evaluation.equals("boh")) return;
+		logger.info("evaluateOrigin(" + name + ", " + x + ", " + y + ", " + evaluation + ")");
+		for(String key : agentmaps.get(name).keySet()) {
+			if(key.startsWith("goal_")) {
+				for(Point pp : agentmaps.get(name).get(key)) {
+					if(x == pp.x && y == pp.y) {
+						if(pp instanceof OriginPoint) {
+							if(((OriginPoint) pp).evaluated.equals("boh")) {
+								((OriginPoint) pp).evaluated = evaluation;
+								((OriginPoint) pp).maxPosS = maxPosS;
+								((OriginPoint) pp).maxPosW = maxPosW;
+								((OriginPoint) pp).maxPosE = maxPosE;
+							} 
+							return;
+						}
+						agentmaps.get(name).get(key).remove(pp);
+						agentmaps.get(name).get(key).add(new OriginPoint(x, y, evaluation, maxPosS, maxPosW, maxPosE));
+						return;
+					}
+				}
+			}
+		}
+		logger.info("not found it");
+	}
+	
+	@OPERATION
 	void addScoutToOrigin(String name, int originX, int originY, int scoutX, int scoutY) {
 		for(String key : agentmaps.get(name).keySet()) {
 			if(key.startsWith("goal_")) {
@@ -514,10 +543,21 @@ public class TeamArtifact extends Artifact {
 		private String evaluated = "boh";
 		private List<Point> scouts = new ArrayList<>();
 		private List<Point> retrievers = new ArrayList<>();
+		private int maxPosS;
+		private int maxPosW;
+		private int maxPosE;
 		
 		public OriginPoint(int x, int y, String evaluated) {
 			super(x, y);
 			this.evaluated = evaluated;
+		}
+		
+		public OriginPoint(int x, int y, String evaluated, int maxPosS, int maxPosW, int maxPosE) {
+			super(x, y);
+			this.evaluated = evaluated;
+			this.maxPosS = maxPosS;
+			this.maxPosW = maxPosW;
+			this.maxPosE = maxPosE;
 		}
 		// nothing different to add for now
 	}
@@ -610,6 +650,9 @@ public class TeamArtifact extends Artifact {
 						}
 						literal.addTerm(ASSyntax.createList(scouts.toArray(new Literal[scouts.size()])));
 						literal.addTerm(ASSyntax.createList(retrievers.toArray(new Literal[retrievers.size()])));
+						literal.addTerm(new NumberTermImpl(((OriginPoint)p).maxPosS));
+						literal.addTerm(new NumberTermImpl(((OriginPoint)p).maxPosW));
+						literal.addTerm(new NumberTermImpl(((OriginPoint)p).maxPosE));
 					} else {
 						literal = ASSyntax.createLiteral("goal");
 					}
@@ -672,6 +715,41 @@ public class TeamArtifact extends Artifact {
 		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
 		list.set(arrayagents);
 	}
+	
+	@OPERATION 
+	void getAvailableMeType(String me, OpFeedbackParam<String> type) {
+		type.set(agentAvailable.get(me));
+	}
+	/*
+	@OPERATION 
+	void getMostNeededType(String name, OpFeedbackParam<String> type){
+		//Set<String> types = new HashSet<>();
+		
+		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
+			if (!entry.getKey().startsWith("goal_") & !agentAvailable.containsValue(entry.getKey())) {
+				//type.set(entry.getKey());
+				return;
+			}
+		}
+		Map<String, Integer> availableBlocks = new HashMap<String, Integer>();
+		for (String t : agentAvailable.values()) {
+			if(availableBlocks.containsKey(t)) {
+				availableBlocks.put(t, availableBlocks.get(t)+1);
+			} else {
+				availableBlocks.put(t, 1);
+			}
+		}
+		int min = Integer.MAX_VALUE;
+		String mostNeededType = null;
+		for(Map.Entry<String, Integer> entry : availableBlocks.entrySet()) {
+			if(entry.getValue() < min) {
+				min = entry.getValue();
+				mostNeededType = entry.getKey();
+			}
+		}
+		type.set(mostNeededType);
+	}*/
+	
 	
 //	@OPERATION 
 //	void getAvailableBlocks(OpFeedbackParam<Literal[]> list){
@@ -748,6 +826,40 @@ public class TeamArtifact extends Artifact {
 	void removeBlock(String b) {
 		ourBlocks.remove(b);
 	}
+	/*
+	@OPERATION
+	void removeAvailableBlock(String b) {
+		if(availableBlocks.containsKey(b)) {
+			availableBlocks.put(b, availableBlocks.get(b)-1);
+		}
+	}
+	
+	@OPERATION
+	void addAvailableBlock(String b) {
+		if(availableBlocks.containsKey(b)) {
+			availableBlocks.put(b, availableBlocks.get(b)+1);
+		}
+	}
+	
+	@OPERATION
+	void addAvailableType(String b) {
+		availableBlocks.putIfAbsent(b, 0);
+	}
+	
+	@OPERATION
+	void getMostNeededBlock(OpFeedbackParam<String> b) {
+		int min = Integer.MAX_VALUE;
+		String mostNeededBlock = null;
+		for(String b1 : availableBlocks.keySet()) {
+			int aux = availableBlocks.get(b1);
+			if(aux < min) {
+				min = aux;
+				mostNeededBlock = b1;
+			}
+		}
+		b.set(mostNeededBlock);
+	}*/
+	
 	
 	@OPERATION
 	void clearTeam() {

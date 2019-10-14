@@ -262,7 +262,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	], pos(X+5, Y)).
 
 +!retrieve::retrieve_block 
-	: default::step(Step1)
+	: default::step(Step1) & map::myMap(Leader)
 <-
 //	.wait(not action::move_sent);
 	callPlanner(Flag);
@@ -270,7 +270,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 	getMyPos(MyX, MyY);
 	?default::step(Step2);
 	.print(" Step1 ",Step1," Step2 ",Step2);
-	!retrieve::decide_block_type_flat(Type); .print("I decided to get block type: ", Type);
+	!retrieve::decide_block_type_flat(Type); 
+	.print("I decided to get block type: ", Type);
 	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
 	.print("Target added: ", X, " ", Y);
@@ -289,7 +290,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 
 //-!retrieve::retrieve_block : true <- !!retrieve::retrieve_block.
 //-!retrieve::retrieve_block : true <- true.
-
+	
 +!retrieve::decide_block_type_flat(Type) : 
 	true
 <-
@@ -298,12 +299,26 @@ most_needed_type(Dispensers, AgList, Type) :-
 	!map::get_dispensers(Dispensers);
 	.setof(B, (.member(dispenser(B, _, _), Dispensers) & not .member(B, Blocks)), MostNeededTypes);
 	if(MostNeededTypes == []){
-		.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
-		.shuffle(Types1, Types);
+		.setof(T, .member(T, Blocks), Ts);
+		for(.member(T1, Ts)){
+			.findall(TT1, .member(TT1, Blocks) & TT1 = T1, TTs);
+			.length(TTs, N);
+			if(retrieve::current_min(_, Min)){
+				if(N < Min){
+					-+retrieve::current_min(T1, N);
+				}
+			} else{
+				+retrieve::current_min(T1, N);
+			}
+		}
+		?retrieve::current_min(Type, _);
+		-retrieve::current_min(_, _);
+		//.setof(Type, .member(dispenser(Type, _, _), Dispensers), Types1);
+		//.shuffle(Types1, Types);
 	} else{
 		.shuffle(MostNeededTypes, Types);
+		.nth(0, Types, Type);
 	}
-	.nth(0, Types, Type);
 	addBlock(Type);
 	.
 

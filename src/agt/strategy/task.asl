@@ -173,11 +173,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!help_connect(ConX,ConY)[source(Help)] <- .wait({+default::actionID(_)}); !help_connect(ConX,ConY)[source(Help)].
 	
 +!perform_task(X,Y,noblock)[source(Origin)]
-	: .my_name(Me)
+	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
+	removeBlock(Type);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 //	.print("MyXNew ",MyXNew);
@@ -189,8 +190,9 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetX ",NewTargetX);
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
-	.send(Origin, achieve, task::help_attach(X,Y));
+	getMyPos(MyXNew,MyYNew);
 	?retrieve::block(BX,BY);
+	.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
 	?get_direction(BX,BY,DetachPos);
 	!action::detach(DetachPos);
 	.wait(task::synch_complete[source(Origin)]);
@@ -199,11 +201,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.
 	
 +!perform_task(X,Y)[source(Origin)]
-	: .my_name(Me)
+	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
+	removeBlock(Type);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 //	.print("MyXNew ",MyXNew);

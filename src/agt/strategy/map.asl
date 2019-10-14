@@ -142,7 +142,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.
 
 @update_origin_evaluation1[atomic]
-+!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value)[source(Ag)] :
++!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value, MaxPosS, MaxPosW, MaxPosE)[source(Ag)] :
 	.my_name(Me) & map::myMap(Me)
 <-
 	.print("@@@@@@@@@@@@@@@@: ", update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value));
@@ -152,12 +152,12 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 		for(.member(retriever(RetrieverX, RetrieverY), RetrieversList)){
 			addRetrieverToOrigin(Me, OriginX, OriginY, RetrieverX + OriginX, RetrieverY + OriginY);	
 		}
-		evaluateOrigin(Me, OriginX, OriginY, Value);
+		evaluateOrigin(Me, OriginX, OriginY, Value, MaxPosS, MaxPosW, MaxPosE);
 	}
 	.send(Ag, tell, map::update_origin_res(Side, Value, 1));
 	.
 @update_origin_evaluation2[atomic]
-+!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value)[source(Ag)] :
++!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value, MaxPosS, MaxPosW, MaxPosE)[source(Ag)] :
 	map::myMap(Leader)
 <-
 	.send(Ag, tell, map::update_origin_res(Side, Value, 0));
@@ -166,13 +166,13 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 @request_to_update_origin_evaluation[atomic]
 +!map::request_to_update_origin_evaluation(Side, Value) :
 	map::myMap(Leader) & map::evaluating_positions(Positions) & .member(origin(Side, X, Y), Positions) &
-	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList)
+	map::scouts_found(ScoutsList) & map::retrievers_found(RetrieversList) & map::max_pos(MaxPosS, MaxPosW, MaxPosE)
 <-
 	getMyPos(MyX, MyY);
 	if(not action::reasoning_about_belief(update_origin)){
 		+action::reasoning_about_belief(update_origin);
 	}
-	.send(Leader, achieve, map::update_origin_evaluation(Side, MyX+X, MyY+Y, RetrieversList, Value));
+	.send(Leader, achieve, map::update_origin_evaluation(Side, MyX+X, MyY+Y, RetrieversList, Value, MaxPosS, MaxPosW, MaxPosE));
 	.
 
 //@update_origin_res1[atomic]
@@ -581,54 +581,54 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	map::evaluating_positions(Pos)
 <- 
 	+map::checking_task_area;
-	-+map::evaluating_positions([start(0, 3)|Pos]);
+	-+map::evaluating_positions([start(0, 2)|Pos]);
 	!map::move_to_evaluating_pos(start1);
-	.findall(LB, default::task(ID, Deadline, Reward, Blocks) & .length(Blocks,LB), Tasks);
-	if (not .empty(Tasks)) {
-		.max(Tasks,MaxTaskAux);
-		if (MaxTaskAux >= 6) {
-			MaxTask = 5;
-		}
-		else {
-			MaxTask = MaxTaskAux;
-		}
-	}
-	else {
-		MaxTask = 5;
+	!map::check_task_area_aux(5, s, MaxPosS);
+	?map::evaluating_positions(Pos1a);
+	.delete(start(_, _), Pos1a, Pos1b);
+	-+map::evaluating_positions([start(-2, 0)|Pos1b]);
+	!map::move_to_evaluating_pos(start1);
+	!map::check_task_area_aux(5, w, MaxPosW);
+	?map::evaluating_positions(Pos1c);
+	.delete(start(_, _), Pos1c, Pos1d);
+	-+map::evaluating_positions([start(4, 0)|Pos1d]);
+	!map::move_to_evaluating_pos(start1);
+	!map::check_task_area_aux(5, e, MaxPosE);
+	-map::max_pos(_, _, _);
+	+map::max_pos(MaxPosS+1, MaxPosW+1, MaxPosE+1);
+	?map::evaluating_positions(Pos1e);
+	.delete(start(_, _), Pos1e, Pos1f);
+	-+map::evaluating_positions([start(-2, -2)|Pos1f]);
+	!map::move_to_evaluating_pos(start1);
+	-map::checking_task_area;
+	.	
+	
++!map::check_task_area_aux(2, _, _) : 
+	map::myMap(Leader)
+<-
+	getMyPos(MyX, MyY);
+	evaluateOrigin(Leader, MyX, MyY, bad);
+	-map::checking_task_area;
+	.fail;
+	.
++!map::check_task_area_aux(Range, Side, MaxPos) :
+	true
+<-
+	if(Side == s){
+		!action::clear(0, Range);
+	} elif(Side == w){
+		!action::clear(-Range, 0);
+	} else{
+		!action::clear(Range, 0);
 	}
 	
-	!action::clear(0, MaxTask);
 	if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
-		getMyPos(MyX, MyY);
-		evaluateOrigin(Leader, MyX, MyY, bad);
-		-map::checking_task_area;
-		.fail;
-	} else {
-		!action::clear(MaxTask, 0);
-		if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
-			getMyPos(MyX, MyY);
-			evaluateOrigin(Leader, MyX, MyY, bad);
-			-map::checking_task_area;
-			.fail;
-		} else {
-			!action::clear(-MaxTask, 0);
-				if(default::lastActionResult(failed_target) & map::myMap(Leader)) {
-					getMyPos(MyX, MyY);
-					evaluateOrigin(Leader, MyX, MyY, bad);
-					-map::checking_task_area;
-					.fail;
-				} else {
-					if(map::evaluating_positions(Pos1)){
-						.delete(start(_, _), Pos1, Pos2);
-						-+map::evaluating_positions([start(0, -3)|Pos2]);
-						!map::move_to_evaluating_pos(start1);
-						-map::checking_task_area;
-					}
-				}
-		}
+		!map::check_task_area_aux(Range-1, Side, MaxPos);
+	} else{
+		MaxPos = Range;
 	}
-	.	
-
+	.
+	
 +!map::conditional_stop_evaluating(Leader, GoalX, GoalY)[source(Ag)] :
 	map::myMap(Leader) & common::my_role(goal_evaluator) &
 	map::evaluating_positions(Pos) & .my_name(Me) & .all_names(AllAgents) & .nth(Nth,AllAgents,Me) & .nth(Nth1,AllAgents,Ag)

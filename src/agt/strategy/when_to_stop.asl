@@ -17,15 +17,16 @@
 	: common::my_role(explorer) & not stop::first_to_stop(_) & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader) //& not action::move_sent
 <-
-	!map::get_clusters(Clusters);
+	getGoalClustersWithScouts(Leader, Clusters);
 	//!stop::choose_the_biggest_cluster(Clusters, cluster(ClusterId, GoalList));
 	//.length(GoalList, N);
 	//if(N > 5){
 	if(.member(cluster(_, GoalList), Clusters) & .member(Side, [n,e,w,s]) &
-		.member(origin(Side, GoalX, GoalY), GoalList)// & not .member(origin(boh, _, _), GoalList)
+		.member(origin(Side,Scouts,Retrievers, MaxPosS, MaxPosW, MaxPosE, GoalX, GoalY), GoalList)// & not .member(origin(boh, _, _), GoalList)
 	){
 		firstToStop(Me,Flag);
 		if (Flag) {
+			.print("@@@@@@@@@@@@@@@@@@@ MaxPos: ", MaxPosS, ", ", MaxPosW, ", ", MaxPosE);
 			+stop::first_to_stop(Me);
 			//.print("Removing explorer");
 			//-exploration::explorer;

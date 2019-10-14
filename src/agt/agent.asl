@@ -95,11 +95,14 @@
 	!!always_skip;
 	.
 
+@always_skip[atomic]
 +!always_skip :
 	common::my_role(retriever) &
 	not retrieve::block(X, Y) & .my_name(Me)
 <-
+	getAvailableMeType(Me, Type);
 	removeAvailableAgent(Me);
+	removeBlock(Type);
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(MyX,MyY);
 	!!retrieve::retrieve_block;

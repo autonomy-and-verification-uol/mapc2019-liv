@@ -312,9 +312,11 @@
 	.
 
 -!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
-	: common::my_role(retriever) & retrieve::getting_to_position
+	: common::my_role(retriever) & retrieve::getting_to_position & .my_name(Me)
 <-
 	-retrieve::getting_to_position;
+	getAvailableMeType(Me, Type);
+	removeBlock(Type);
 	!!retrieve::retrieve_block;
 	.
 	
