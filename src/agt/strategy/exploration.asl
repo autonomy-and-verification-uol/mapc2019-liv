@@ -67,6 +67,11 @@ get_clear_direction(s,X,Y) :- X = 0 & Y = 2.
 get_clear_direction(w,X,Y) :- X = -2 & Y = 0.
 get_clear_direction(e,X,Y) :- X = 2 & Y = 0.
 
+get_other_side(n,OtherDir1,OtherDir2) :- OtherDir1 = w & OtherDir2 = e.
+get_other_side(s,OtherDir1,OtherDir2) :- OtherDir1 = w & OtherDir2 = e.
+get_other_side(w,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
+get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
+
 +!explore(DirList) 
 	: common::my_role(explorer) & check_agent_special(n) & check_agent_special(s) & check_agent_special(e) & check_agent_special(w) & random_dir([n,s,e,w],4,Number,Dir)
 <-
@@ -80,14 +85,6 @@ get_clear_direction(e,X,Y) :- X = 2 & Y = 0.
 <-
 	 !explore_until_obstacle(Dir);
 	 .
-	
-// special case	
-+!explore(Dirlist)
-	: common::my_role(explorer) & prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir) 
-<-
-	+special(first);
-	!explore_until_obstacle_special(FirstDir);
-	.
 
 +!explore(Dirlist)
 	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & default::vision(V) & common::find_empty_position(X,Y,1,V)
@@ -98,7 +95,32 @@ get_clear_direction(e,X,Y) :- X = 2 & Y = 0.
 	!!explore(Dirlist);
 //	!default::always_skip;
 	.
-	
+
+// special case	
++!explore(Dirlist)
+	: common::my_role(explorer) & prune_direction_special([n,s,e,w],[],PrunedDirList) & not .empty(PrunedDirList) & .length(PrunedDirList,Length) & .random(Number) & random_dir(PrunedDirList,Length,Number,FirstDir)
+<-
+	?remove_opposite(FirstDir,OppDir);
+	?get_other_side(FirstDir,OtherDir1,OtherDir2);
+	if (check_obstacle(FirstDir) &  check_obstacle(OppDir) & (check_obstacle(OtherDir1) | check_obstacle(OtherDir2))) {
+		if (not check_obstacle(OtherDir1)) {
+			!explore_until_obstacle(OtherDir1);
+		}
+		elif (not check_obstacle(OtherDir2)) {
+			!explore_until_obstacle(OtherDir2);
+		}
+		else {
+			!action::skip;
+			!!explore(Dirlist);
+		}
+		
+	}
+	else {
+		+special(first);
+		!explore_until_obstacle_special(FirstDir);
+	}
+	.
+
 +!explore(Dirlist).
 
 // TODO what to do if I see an agent of another team (just keep trying won't solve it if the other team does the same)?
@@ -129,44 +151,59 @@ get_clear_direction(e,X,Y) :- X = 2 & Y = 0.
 	.
 	
 +!explore_until_obstacle(Dir)
-	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & first_clear
+	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & default::energy(Energy) & Energy >= 270
 <-
-	-first_clear;
 	?get_clear_direction(Dir,X,Y);
 	!action::move(Dir);
 	for(.range(I, 1, 3)){
-		!action::clear(X,Y);
+		if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
+			!action::clear(X,Y);
+		}
 	}
 	if (Dir == n) {
 		if (default::obstacle(X,Y-1) | default::obstacle(X,Y-2)) {
 			for(.range(I, 1, 3)){
-				!action::clear(X,Y-2);
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
+					!action::clear(X,Y-2);
+				}
 			}
 		}
 	}
 	elif (Dir == s) {
 		if (default::obstacle(X,Y+1) | default::obstacle(X,Y+2)) {
 			for(.range(I, 1, 3)){
-				!action::clear(X,Y+2);
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
+					!action::clear(X,Y+2);
+				}
 			}
 		}
 	}
 	elif (Dir == w) {
 		if (default::obstacle(X-1,Y) | default::obstacle(X-2,Y)) {
 			for(.range(I, 1, 3)){
-				!action::clear(X-2,Y);
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
+					!action::clear(X-2,Y);
+				}
 			}
 		}
 	}
 	else {
 		if (default::obstacle(X+1,Y) | default::obstacle(X+2,Y)) {
 			for(.range(I, 1, 3)){
-				!action::clear(X+2,Y);
+				if ((not default::lastAction(clear) | default::lastAction(clear)) & default::lastActionResult(success)) {
+					!action::clear(X+2,Y);
+				}
 			}
 		}
 	}
-	!action::move(Dir);
-	!!explore_until_obstacle(Dir);
+	if (not check_obstacle(Dir)) {
+		!action::move(Dir);
+		!!explore_until_obstacle(Dir);
+	}
+	else {
+		.delete(Dir,[n,s,e,w],DirList);
+		!!explore(DirList);
+	}
 	.
 	
 +!explore_until_obstacle(Dir)

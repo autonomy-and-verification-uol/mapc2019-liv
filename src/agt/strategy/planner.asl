@@ -43,6 +43,7 @@
 +!generate_goal(TargetX, TargetY, Aux)
 	: .my_name(Me)
 <-
+	.print("Start of the planner");
 	if (Aux == notblock) {
 		callPlanner(Flag);
 		!try_call_planner(Flag);
@@ -80,14 +81,13 @@
 		} else {
 			FinalLocalTargetY = LocalTargetY + DeltaY;
 		}
-		InVision = false;
 	} else {
-		InVision = true;
 		FinalLocalTargetX = LocalTargetX;
 		FinalLocalTargetY = LocalTargetY;
 	}
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
-	if (.abs(TargetX) + .abs(TargetY) > 3) {
+	if (math.abs(TargetX) + math.abs(TargetY) > 3) {
+		.print("Target is distance 4 or more away.");
 		!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 	}
 	else {
@@ -129,6 +129,7 @@
 
 -!generate_goal(TargetX, TargetY, Aux)
 <-
+	plannerDone;
 	!execute_plan([], TargetX, TargetY, TargetX, TargetY);
 	.
 	
@@ -237,22 +238,22 @@
 // All other cases will call the closest of the cases above
 // The important assumption here is that the goal is not in vision!
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: .abs(FinalLocalTargetY) < .abs(FinalLocalTargetX) & FinalLocalTargetX > 0
+	: math.abs(FinalLocalTargetY) < math.abs(FinalLocalTargetX) & FinalLocalTargetX > 0
 <-
 	!generate_actual_goal(5,0,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: .abs(FinalLocalTargetY) < .abs(FinalLocalTargetX) & FinalLocalTargetX < 0
+	: math.abs(FinalLocalTargetY) < math.abs(FinalLocalTargetX) & FinalLocalTargetX < 0
 <-
 	!generate_actual_goal(-5,0,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: .abs(FinalLocalTargetY) > .abs(FinalLocalTargetX) & FinalLocalTargetY > 0
+	: math.abs(FinalLocalTargetY) > math.abs(FinalLocalTargetX) & FinalLocalTargetY > 0
 <-
 	!generate_actual_goal(0,5,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
-	: .abs(FinalLocalTargetY) > .abs(FinalLocalTargetX) & FinalLocalTargetY < 0
+	: math.abs(FinalLocalTargetY) > math.abs(FinalLocalTargetX) & FinalLocalTargetY < 0
 <-
 	!generate_actual_goal(0,-5,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	.
@@ -271,7 +272,7 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
-			while (default::lastAction(rotate) & not default::lastActionResult(success)) {
+			while (not default::lastActionResult(success)) {
 				!action::Action;
 			}
 		}
