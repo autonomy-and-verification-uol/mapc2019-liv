@@ -26,9 +26,11 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
     register(E);
 	.
 
+@name[atomic]
 +default::name(ServerMe)
 	: .my_name(Me)
 <-
+	+common::added_name;
 	addServerName(Me,ServerMe);
 	.
 
@@ -38,9 +40,18 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 	+start;
 	.wait(1000);
 	!clear_blocks;
+	!check_added_name;
 	-common::clearing_things;
 //	!always_skip;
 	!!exploration::explore([n,s,e,w]);
+	.
+
+@check_added_name[atomic]
++!check_added_name
+	: not common::added_name & default::name(ServerMe)
+<-
+	+common::added_name;
+	addServerName(Me,ServerMe);
 	.
 	
 +!clear_blocks

@@ -8,3 +8,4 @@
 	+common::clearing_things;
 	!common::update_role_to(explorer);
 	.
+	
