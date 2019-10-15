@@ -209,14 +209,15 @@ i_met_new_agent(Iknow, IdList) :-
 //	.wait(not action::move_sent);
 	getMyPos(OtherX,OtherY);
 	.print(Source," requested leader to merge with ",Ag);
+	?identification::identified(StopRequestList);
 	//!map::get_dispensers(DispList);
 	//getGoalClustersWithScouts(Leader, Clusters);
-	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,Ag,AgRequesting));
+	.send(Source, achieve, identification::reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,Ag,AgRequesting,StopRequestList));
 	.
 
 @replyleaderme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting)[source(Source)]
-	: .my_name(Me) & map::myMap(Me) & ((stop::first_to_stop(Stop) & (Stop == Me | (identification::identified(StopIdList) & .member(Stop, StopIdList)))) | (not stop::first_to_stop(Stop1) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther))
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting,StopRequestList)[source(Source)]
+	: .my_name(Me) & map::myMap(Me) & ((stop::first_to_stop(Stop) & (Stop == Me | (identification::identified(StopIdList) & .member(Stop, StopIdList)))) | ((not stop::first_to_stop(Stop1) | (stop::first_to_stop(Stop2) & not Stop2 == Source & not .member(Stop, StopRequestList))) & (.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther)))
 <-
 	.print(" Starting merge request from  ",AgRequesting," to merge with ",AgRequested," and their leader is ",Leader);
 	.send(Leader, achieve, identification::confirm_merge);
@@ -289,7 +290,7 @@ i_met_new_agent(Iknow, IdList) :-
 	}
 	.
 @replyleadernotme[atomic]
-+!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting)[source(Source)]
++!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting,StopIdList)[source(Source)]
 <-
 	.term2string(AgRequesting,S);
 	if (S == "self") {
