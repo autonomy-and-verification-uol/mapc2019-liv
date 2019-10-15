@@ -319,6 +319,7 @@
 	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == 5
 <-
 	.fail(goal_blocked).
 // -5 0 
@@ -341,6 +342,7 @@
 	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 0 & FinalLocalTargetX == -5
 <-
 	.fail(goal_blocked).
 // 0 -5
@@ -363,6 +365,7 @@
 	ActualFinalLocalTargetY = FinalLocalTargetY+1;
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == -5 & FinalLocalTargetX == 0
 <-
 	.fail(goal_blocked).
 // 0 5
@@ -385,6 +388,7 @@
 	ActualFinalLocalTargetY = FinalLocalTargetY-1;
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+	: FinalLocalTargetY == 5 & FinalLocalTargetX == 0
 <-
 	.fail(goal_blocked).
 // All other cases will call the closest of the cases above
