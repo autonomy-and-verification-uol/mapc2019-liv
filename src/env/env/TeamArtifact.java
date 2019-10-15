@@ -31,8 +31,6 @@ public class TeamArtifact extends Artifact {
 
 	private static Map<Integer, Set<String>> actionsByStep   = new HashMap<Integer, Set<String>>();
 	
-//	private Map<String, Stocker> stockerBlocks   = new HashMap<String, Stocker>();
-	
 	private Map<String, Set<Point>>  map1 	 	= new HashMap<String, Set<Point>>();
 	private Map<String, Set<Point>>  map2 	 	= new HashMap<String, Set<Point>>();
 	private Map<String, Set<Point>>  map3 	 	= new HashMap<String, Set<Point>>();
@@ -72,10 +70,12 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
-		retrieversAvailablePositions.clear();
-		ourBlocks.clear();
 		planners = 0;
 		firstToStop = null;
+		goalAgent = null;
+		targetGoalX = null;
+		targetGoalY = null;
+		goalSide = null;
 		pos  = 10;
 	}
 	
