@@ -413,7 +413,9 @@
 <-
 	!generate_actual_goal(0,-5,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	.
-
++!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
+<-
+	.fail(goal_blocked).
 
 
 +!execute_plan(Plan, 0, 0, 0, 0)

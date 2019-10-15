@@ -429,7 +429,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	-retrieve::attach_completed;
 	while(not retrieve::attach_completed){
 		if (default::thing(DispX,DispY,block,_)) {
-			if (not default::attached(DispX,DispY)) {
+			if (not default::attached(DispX,DispY) & default::team(Team) & not (DispX-1 \== 0 & default::thing(DispX-1,DispY,entity,Team))  & not (DispX+1 \== 0 & default::thing(DispX+1,DispY,entity,Team))  & not (DispY-1 \== 0 & default::thing(DispX,DispY-1,entity,Team))  & not (DispY+1 \== 0 & default::thing(DispX,DispY+1,entity,Team)) ) {
 				!action::attach(Direction);
 				if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
 					.print("here6");
@@ -438,28 +438,28 @@ most_needed_type(Dispensers, AgList, Type) :-
 			}
 			else {
 				!action::skip;
-				if (default::thing(DispX-1,DispY,entity,Team)) {
+				if (DispX-1 \== 0 & default::thing(DispX-1,DispY,entity,Team)) {
 					for(.range(I, 1, 3)){
 						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
 							!action::clear(DispX-1,DispY);
 						}
 					}
 				}
-				elif (default::thing(DispX+1,DispY,entity,Team)) {
+				elif (DispX+1 \== 0 & default::thing(DispX+1,DispY,entity,Team)) {
 					for(.range(I, 1, 3)){
 						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
 							!action::clear(DispX+1,DispY);
 						}
 					}
 				}
-				elif (default::thing(DispX,DispY+1,entity,Team)) {
+				elif (DispY+1 \== 0 & default::thing(DispX,DispY+1,entity,Team)) {
 					for(.range(I, 1, 3)){
 						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
 							!action::clear(DispX,DispY+1);
 						}
 					}
 				}
-				elif (default::thing(DispX,DispY-1,entity,Team)) {
+				elif (DispY-1 \== 0 & default::thing(DispX,DispY-1,entity,Team)) {
 					for(.range(I, 1, 3)){
 						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
 							!action::clear(DispX,DispY-1);
