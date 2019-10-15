@@ -78,7 +78,7 @@ i_met_new_agent(Iknow, IdList) :-
 +!request_information(ID)[source(Name)] 
 	: true 
 <- 
-	.wait(default::actionID(ID)); 
+	.wait(default::actionID(_)); 
 	!send_information(Name);
 	.
 	

@@ -190,15 +190,15 @@
 -!clear(X,Y)[code(.fail(action(Action),result(failed_status)))] <- .print("Agent is disabled."); !clear(X,Y).
 
 // ##### SKIP ACTION #####
-//+!skip
-//	: (default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci))  & not common::escape
-//<-
++!skip
+	: ((default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) | (retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)))) & not common::my_role(origin)  & not common::escape
+<-
 //	getMyPos(MyX, MyY);
 //	if (retrieve::block(X,Y)) {
 //		+rotate_block(X,Y);
 //	}
-//	!common::escape;
-//	!common::move_to_pos(MyX, MyY);
+	!common::escape(MoveBackX,MoveBackY);
+	!common::move_back(MoveBackX,MoveBackY);
 //	if (action::rotate_block(X,Y)) {
 //		while (not retrieve::block(X,Y)) {
 //			!rotate(cw);
@@ -206,7 +206,7 @@
 //		-rotate_block(X,Y);
 //	} 
 //	!skip;
-//	.
+	.
 +!skip
 <-
 	!action::commit_action(skip);

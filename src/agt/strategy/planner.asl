@@ -36,9 +36,14 @@
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(origin)
 <- 
-	-retrieve::moving_to_origin;
-	+task::origin;
-	!!default::always_skip;
+ 	if (default::goal(0,0)) {
+		-retrieve::moving_to_origin;
+		+task::origin;
+		!!default::always_skip;
+	}
+	elif (default::goal(X,Y)) {
+		!generate_goal(X, Y, Aux);
+	}
 	.
 +!generate_goal(0, 0, Aux)  : common::my_role(retriever).
 +!generate_goal(0, 0, Aux)  : common::my_role(explorer).
@@ -584,6 +589,8 @@
 	: common::my_role(retriever) & retrieve::getting_to_position & .my_name(Me)
 <-
 	-retrieve::getting_to_position;
+	getMyPos(MyX,MyY);
+	addRetrieverAvailablePos(TargetX+MyX,TargetY+MyY);
 	//getAvailableMeType(Me, Type);
 	removeBlock(Me);
 	!!retrieve::retrieve_block;

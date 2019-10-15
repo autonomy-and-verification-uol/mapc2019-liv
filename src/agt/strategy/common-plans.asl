@@ -216,16 +216,14 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	}
 	.
 	
-+!escape
++!escape(MoveBackX,MoveBackY)
 	: default::vision(V) & find_empty_position(X,Y,1,V)
 <-
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
 	+escape;
-	!move_to_escape(MyX,MyY,MyX+X,MyY+Y);
+	!move_to_escape(X,Y,MoveBackX,MoveBackY);
 	-escape;
 	.
-+!escape
++!escape(0,0)
 	: true
 <-
 	+escape;
@@ -233,86 +231,114 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	-escape;
 	.
 	
-+!no_escape : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
++!no_escape : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) 
+<-
+	if (retrieve::block(X,Y)) {
+		 if (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)) {
+			!action::skip; 
+			!no_escape;
+		}
+	}
+	.
 +!no_escape : escape <- !action::skip; !no_escape.
 	
-+!move_to_escape(MyX,MyY,MyX,MyY).
-+!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci).
-+!move_to_escape(MyX,MyY,X,Y)
-	: escape & default::thing(X-MyX, Y-MyY, Thing, _) & Thing \== dispenser & (X-MyX = 1 | X-MyX = -1 | Y-MyY = 1 | Y-MyY = -1) & default::vision(V) & find_empty_position(XNew,YNew,1,V)
++!move_to_escape(0,0,MoveBackX,MoveBackY).
+//+!move_to_escape(MyX,MyY,X,Y)
+//	: escape & default::thing(X-MyX, Y-MyY, Thing, _) & Thing \== dispenser & (X-MyX = 1 | X-MyX = -1 | Y-MyY = 1 | Y-MyY = -1) & default::vision(V) & find_empty_position(XNew,YNew,1,V)
+//<-
+//	!move_to_escape(MyX,MyY,XNew,YNew);
+//	.
++!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci)
 <-
-	!move_to_escape(MyX,MyY,XNew,YNew);
-	.
-+!move_to_escape(MyX,MyY,X,Y)
-	: escape & X < MyX 
-<-
-//	.wait(not action::move_sent);
-	getMyPos(MyXNew,MyYNew);
-	!action::move(w);
-	!move_to_escape(MyXNew,MyYNew,X,Y);
-	.
-+!move_to_escape(MyX,MyY,X,Y)
-	: escape & X > MyX 
-<-
-//	.wait(not action::move_sent);
-	getMyPos(MyXNew,MyYNew);
-	!action::move(e);
-	!move_to_escape(MyXNew,MyYNew,X,Y);
-	.
-+!move_to_escape(MyX,MyY,X,Y)
-	: escape & Y < MyY 
-<-
-//	.wait(not action::move_sent);
-	getMyPos(MyXNew,MyYNew);
-	!action::move(n);
-	!move_to_escape(MyXNew,MyYNew,X,Y);
-	.
-+!move_to_escape(MyX,MyY,X,Y)
-	: escape & Y > MyY 
-<-
-//	.wait(not action::move_sent);
-	getMyPos(MyXNew,MyYNew);
-	!action::move(s);
-	!move_to_escape(MyXNew,MyYNew,X,Y);
-	.
-	
-+!move_to_pos(X, Y) : 
-	true
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	!move_to_pos_aux(X, Y, MyX, MyY).
-+!move_to_pos_aux(X, Y, X, Y).
-+!move_to_pos_aux(X, Y, MyX, MyY) :	
-	retrieve::pick_direction(MyX, MyY, X, Y, Direction)
-<-		
-	if (exploration::check_obstacle_special_1(Direction, 1)) {
-		if(i_can_avoid(Direction, DirectionToGo)){
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
-//			.wait(not action::move_sent);
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
-			}
-		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction);
-			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 20);
-			}
-		} else{
-			!retrieve::go_around_obstacle(Direction, 20);
+	if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
+		!action::rotate(cw);
+		if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
+			!action::rotate(cw);
 		}
-	} else {
-		!retrieve::smart_move(Direction);
 	}
-//	.wait(not action::move_sent);
-	getMyPos(MyX2,MyY2);
-	!move_to_pos_aux(X, Y, MyX2, MyY2).
-	
--!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
-	
+	.
++!move_to_escape(X,Y,MoveBackX,MoveBackY)
+	: escape & X < 0 
+<-
+	!action::move(w);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_to_escape(X+1,Y,MoveBackX+1,MoveBackY);
+	}
+	else {
+		!move_to_escape(X,Y,MoveBackX,MoveBackY);
+	}
+	.
++!move_to_escape(X,Y,MoveBackX,MoveBackY)
+	: escape & X > 0 
+<-
+	!action::move(e);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_to_escape(X-1,Y,MoveBackX-1,MoveBackY);
+	}
+	else {
+		!move_to_escape(X,Y,MoveBackX,MoveBackY);
+	}
+	.
++!move_to_escape(X,Y,MoveBackX,MoveBackY)
+	: escape & Y < 0 
+<-
+	!action::move(n);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_to_escape(X,Y+1,MoveBackX,MoveBackY+1);
+	}
+	else {
+		!move_to_escape(X,Y,MoveBackX,MoveBackY);
+	}
+	.
++!move_to_escape(X,Y,MoveBackX,MoveBackY)
+	: escape & Y > 0 
+<-
+	!action::move(s);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_to_escape(X,Y-1,MoveBackX,MoveBackY-1);
+	}
+	else {
+		!move_to_escape(X,Y,MoveBackX,MoveBackY);
+	}
+	.
+
++!move_back(0, 0).
++!move_back(X, Y) : X < 0 
+<- 
+	!action::move(w);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_back(X+1,Y);
+	}
+	else {
+	}
+	.
++!move_back(X, Y) : X > 0 
+<- 
+	!action::move(e);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_back(X-1,Y);
+	}
+	else {
+	}
+	.
++!move_back(X, Y) : Y > 0 
+<- 
+	!action::move(s);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_back(X,Y-1);
+	}
+	else {
+	}
+	.
++!move_back(X, Y) : Y < 0 
+<- 
+	!action::move(n);
+	if (default::submit(move) & default::lastActionResult(success)) {
+		!move_back(X,Y+1);
+	}
+	else {
+	}
+	.
 
 +!common::update_role_to(Role) : common::my_role(Role).
 +!common::update_role_to(NewRole) :
@@ -337,54 +363,6 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	-+common::previous_role(OldRole);
 	!action::skip;
 	.
-
-/*
-+!move_to_pos_aux(_, X, Y, X, Y).
-+!move_to_pos_aux(Leader, X, Y, MyX, MyY) :	
-	retrieve::pick_direction(MyX, MyY, X, Y, Direction)
-<-		
-	if (exploration::check_obstacle_special_1(Direction, 1)) {
-		.print(i_can_avoid(Direction, DirectionToGo));
-		if(retrieve::i_can_avoid(Direction, DirectionToGo)){
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 20, DirectionObstacle1, 1)
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
-			}
-		} elif(map::check_vertixes){
-			hfjkgdhgfdkjghfdghkfd;
-			.fail;
-		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction);
-			if(retrieve::res(0)){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
-				!retrieve::go_around_obstacle(Direction, 20);
-			}
-		} else{
-			!retrieve::go_around_obstacle(Direction, 20);
-		}
-	} else {
-		!retrieve::smart_move(Direction);
-		if(default::lastActionResult(failed_forbidden) & map::check_vertixes){
-			.fail;
-		}
-	}
-	getMyPos(MyX2,MyY2);
-	!move_to_pos_aux(Leader, X, Y, MyX2, MyY2).*/
-
-/*
--!move_to_pos(Leader1, StartX, StartY, X, Y) : 
-	map::myMap(Leader2) & Leader1 \== Leader2
-<- 
-	LocalX = X - StartX;
-	LocalY = Y - StartY;
-	getMyPos(NewStartX, NewStartY);
-	!move_to_pos(Leader2, NewStartX, NewStartY, NewStartX + LocalX, NewStartY + LocalY).*/
-//-!move_to_pos(Leader1, StartX, StartY, X, Y) : true <- .fail.
 
 @removeblockbelief[atomic]
 +default::actionID(_)
