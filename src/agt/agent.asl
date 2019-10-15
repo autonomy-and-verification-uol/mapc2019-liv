@@ -53,6 +53,7 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 	+common::added_name;
 	addServerName(Me,ServerMe);
 	.
++!check_added_name.
 	
 +!clear_blocks
 	: default::energy(Energy) & Energy >= 30 & block_adjacent(X,Y,FinalX,FinalY,Dir)
