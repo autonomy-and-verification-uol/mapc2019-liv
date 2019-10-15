@@ -124,7 +124,7 @@
 			else {
 				if (common::my_role(retriever) & retrieve::collect_block(AddX,AddY)) {
 					-retrieve::collect_block(AddX,AddY);
-					if (default::thing(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY,dispenser,_)) {
+					if (default::thing(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY,dispenser,_) & default::team(OurTeam) & not (default::thing(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY,entity,Team) & Team \== OurTeam)) {
 						if (AddX == -1) {
 							if (not (default::thing(FinalLocalTargetX-2, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))) {
 								+retrieve::collect_block(-1,0);
