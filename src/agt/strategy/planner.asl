@@ -1,5 +1,5 @@
 +!generate_goal(0, 0, Aux) 
-	: common::my_role(retriever) & retrieve::collect_block
+	: common::my_role(retriever) & retrieve::collect_block(_,_)
 <- 
 	!!retrieve::get_block;
 	.
@@ -89,17 +89,135 @@
 	if (math.abs(TargetX) + math.abs(TargetY) > 3) {
 		.print("Target is distance 4 or more away.");
 		!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+		FinalTargetX = TargetX;
+		FinalTargetY = TargetY;
 	}
 	else {
-		//Several things:
-		// 1. is the position a good one?
-		// 1.a. If not and we are not going for a dispenser see above solution
-		// 1.b. If not and we are going for a dispenser, Rafael knows what to do (checking for the other directions)
-		// what happen if all directions are occupied? Rafael's answer: pick another dispenser.
-		//  
-		// 
-		ActualFinalLocalTargetX = FinalLocalTargetX;
-		ActualFinalLocalTargetY = FinalLocalTargetY;
+		if (not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))) {
+			ActualFinalLocalTargetX = FinalLocalTargetX;
+			ActualFinalLocalTargetY = FinalLocalTargetY;
+			FinalTargetX = TargetX;
+			FinalTargetY = TargetY;
+		}
+		else {
+			if (common::my_role(retriever) & retrieve::collect_block(AddX,AddY)) {
+				-retrieve::collect_block(AddX,AddY);
+				if (default::thing(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY,dispenser,_)) {
+					if (AddX == -1) {
+						if (not (default::thing(FinalLocalTargetX-2, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(-1,0);
+							FinalTargetX = FinalLocalTargetX-2;
+							FinalTargetY = FinalLocalTargetY;
+							ActualFinalLocalTargetX = FinalLocalTargetX-2;
+							ActualFinalLocalTargetY = FinalLocalTargetY;
+						}
+						elif (not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,1);
+							FinalTargetX = FinalLocalTargetX-1;
+							FinalTargetY = FinalLocalTargetY+1;
+							ActualFinalLocalTargetX = FinalLocalTargetX-1;
+							ActualFinalLocalTargetY = FinalLocalTargetY+1;
+						}
+						elif (not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,-1);
+							FinalTargetX = FinalLocalTargetX-1;
+							FinalTargetY = FinalLocalTargetY-1;
+							ActualFinalLocalTargetX = FinalLocalTargetX-1;
+							ActualFinalLocalTargetY = FinalLocalTargetY-1;
+						}
+						else {
+							.fail(impossible_dispenser(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY));
+						}
+					}
+					elif (AddX == 1) {
+						if (not (default::thing(FinalLocalTargetX+2, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(1,0);
+							FinalTargetX = FinalLocalTargetX+2;
+							FinalTargetY = FinalLocalTargetY;
+							ActualFinalLocalTargetX = FinalLocalTargetX+2;
+							ActualFinalLocalTargetY = FinalLocalTargetY;
+						}
+						elif (not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,1);
+							FinalTargetX = FinalLocalTargetX+1;
+							FinalTargetY = FinalLocalTargetY+1;
+							ActualFinalLocalTargetX = FinalLocalTargetX+1;
+							ActualFinalLocalTargetY = FinalLocalTargetY+1;
+						}
+						elif (not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,-1);
+							FinalTargetX = FinalLocalTargetX+1;
+							FinalTargetY = FinalLocalTargetY-1;
+							ActualFinalLocalTargetX = FinalLocalTargetX+1;
+							ActualFinalLocalTargetY = FinalLocalTargetY-1;
+						}
+						else {
+							.fail(impossible_dispenser(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY));
+						}
+					}
+					elif (AddY == 1) {
+						if (not (default::thing(FinalLocalTargetX, FinalLocalTargetY+2, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,1);
+							FinalTargetX = FinalLocalTargetX;
+							FinalTargetY = FinalLocalTargetY+2;
+							ActualFinalLocalTargetX = FinalLocalTargetX;
+							ActualFinalLocalTargetY = FinalLocalTargetY+2;
+						}
+						elif (not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(1,0);
+							FinalTargetX = FinalLocalTargetX+1;
+							FinalTargetY = FinalLocalTargetY+1;
+							ActualFinalLocalTargetX = FinalLocalTargetX+1;
+							ActualFinalLocalTargetY = FinalLocalTargetY+1;
+						}
+						elif (not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(-1,0);
+							FinalTargetX = FinalLocalTargetX-1;
+							FinalTargetY = FinalLocalTargetY+1;
+							ActualFinalLocalTargetX = FinalLocalTargetX-1;
+							ActualFinalLocalTargetY = FinalLocalTargetY+1;
+						}
+						else {
+							.fail(impossible_dispenser(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY));
+						}
+					}
+					elif (AddY == -1) {
+						if (not (default::thing(FinalLocalTargetX, FinalLocalTargetY-2, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(0,-1);
+							FinalTargetX = FinalLocalTargetX;
+							FinalTargetY = FinalLocalTargetY-2;
+							ActualFinalLocalTargetX = FinalLocalTargetX;
+							ActualFinalLocalTargetY = FinalLocalTargetY-2;
+						}
+						elif (not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(1,0);
+							FinalTargetX = FinalLocalTargetX+1;
+							FinalTargetY = FinalLocalTargetY-1;
+							ActualFinalLocalTargetX = FinalLocalTargetX+1;
+							ActualFinalLocalTargetY = FinalLocalTargetY-1;
+						}
+						elif (not (default::thing(FinalLocalTargetX-1, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))) {
+							+retrieve::collect_block(-1,0);
+							FinalTargetX = FinalLocalTargetX-1;
+							FinalTargetY = FinalLocalTargetY-1;
+							ActualFinalLocalTargetX = FinalLocalTargetX-1;
+							ActualFinalLocalTargetY = FinalLocalTargetY-1;
+						}
+						else {
+							.fail(impossible_dispenser(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY));
+						}
+					}
+				}
+				else {
+					.fail(impossible_dispenser(FinalLocalTargetX+AddX,FinalLocalTargetY+AddY));
+				}
+			}
+			else {
+				!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
+				FinalTargetX = ActualFinalLocalTargetX;
+				FinalTargetY = ActualFinalLocalTargetY;
+			}
+		}
 	}
 	.print("Where we are actually going ", ActualFinalLocalTargetX, ", ", ActualFinalLocalTargetY);
 	if (default::energy(Energy) & Energy >= 30) {
@@ -124,13 +242,24 @@
 	}
 	plannerDone;
 	.print("@@@@@@ Plan: ",Plan);
-	!planner::execute_plan(Plan, TargetX, TargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
+	!planner::execute_plan(Plan, FinalTargetX, FinalTargetY, ActualFinalLocalTargetX, ActualFinalLocalTargetY);
 	.
 
--!generate_goal(TargetX, TargetY, Aux)
+-!generate_goal(TargetX, TargetY, Aux)[code(.fail(goal_blocked))]
 <-
 	plannerDone;
 	!execute_plan([], TargetX, TargetY, TargetX, TargetY);
+	.
+-!generate_goal(TargetX, TargetY, Aux)[code(.fail(impossible_dispenser(FinalLocalTargetX,FinalLocalTargetY)))]
+	: .my_name(Me)
+<-
+	plannerDone;
+	removeBlock(Me);
+	getMyPos(MyX, MyY);
+	DispX = MyX + FinalLocalTargetX;
+	DispY = MyY + FinalLocalTargetY;
+	+retrieve::minus_one(DispX,DispY);
+	!!retrieve::retrieve_block;
 	.
 	
 +!try_call_planner(true).
@@ -168,7 +297,7 @@
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	.fail.
+	.fail(goal_blocked).
 // -5 0 
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	: FinalLocalTargetY == 0 & FinalLocalTargetX == -5 & not (default::thing(FinalLocalTargetX+1, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))
@@ -190,7 +319,7 @@
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	.fail.
+	.fail(goal_blocked).
 // 0 -5
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	: FinalLocalTargetY == -5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX, FinalLocalTargetY+1, Type, _) & (Type == block | Type == entity))
@@ -212,7 +341,7 @@
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	.fail.
+	.fail(goal_blocked).
 // 0 5
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 	: FinalLocalTargetY == 5 & FinalLocalTargetX == 0 & not (default::thing(FinalLocalTargetX, FinalLocalTargetY-1, Type, _) & (Type == block | Type == entity))
@@ -234,7 +363,7 @@
 	.
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)
 <-
-	.fail.
+	.fail(goal_blocked).
 // All other cases will call the closest of the cases above
 // The important assumption here is that the goal is not in vision!
 +!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY)

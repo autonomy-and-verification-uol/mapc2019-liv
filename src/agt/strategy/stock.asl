@@ -272,18 +272,26 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print(" Step1 ",Step1," Step2 ",Step2);
 	!retrieve::decide_block_type_flat(Type); 
 	.print("I decided to get block type: ", Type);
-	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
+	if (retrieve::minus_one(DispX,DispY)) {
+		-retrieve::minus_one(DispX,DispY);
+		!retrieve::get_nearest_dispenser_minus_one(Type, dispenser(Type, X, Y), DispX, DispY);
+	}
+	else {
+		!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
+	}
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
 	.print("Target added: ", X, " ", Y);
 	.print("My pos: ", MyX, " ", MyY);
 	TargetX = X - MyX;
 	TargetY = Y - MyY;
-	+collect_block;
+	
 	if(TargetX < 0){
 		.print("Relative target: ", TargetX + 1, " ", TargetY);
+		+collect_block(-1,0);
 		!!planner::generate_goal(TargetX + 1, TargetY, block);
 	} else {
 		.print("Relative target: ", TargetX - 1, " ", TargetY);
+		+collect_block(1,0);
 		!!planner::generate_goal(TargetX - 1, TargetY, block);
 	}
 	.
@@ -359,7 +367,14 @@ most_needed_type(Dispensers, AgList, Type) :-
 	true
 <- 
 	!retrieve::pick_block_aux(X, BlocksRange, Block).
-	
+
+@get_nearest_dispenser_minus_one[atomic]
++!retrieve::get_nearest_dispenser_minus_one(Type, Dispenser, DispX, DispY) : 
+	true
+<-
+	!map::get_dispensers(Dispensers); .print("Dispensers: ", Dispensers);
+	.delete(dispenser(_, DispX, DispY), Dispensers, DispensersNew);
+	!retrieve::get_nearest_dispenser_aux1(DispensersNew, Type, Dispenser).
 @get_nearest_dispenser[atomic]
 +!retrieve::get_nearest_dispenser(Type, Dispenser) : 
 	true
@@ -459,7 +474,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 
 +!get_block
 <-
-	-collect_block;
+	-collect_block(_,_);
 	!retrieve::create_and_attach_block;
 //	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
