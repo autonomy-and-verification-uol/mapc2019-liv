@@ -284,6 +284,12 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	!move_to_pos_aux(X, Y, MyX, MyY).
 +!move_to_pos_aux(X, Y, X, Y).
 +!move_to_pos_aux(X, Y, MyX, MyY) :	
+	default::thing(X-MyX, Y-MyY, entity, _)
+<-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ FAIL IN MOV_TO_POS_AUX");
+	.fail;
+	.
++!move_to_pos_aux(X, Y, MyX, MyY) :	
 	retrieve::pick_direction(MyX, MyY, X, Y, Direction)
 <-		
 	if (exploration::check_obstacle_special_1(Direction, 1)) {
@@ -311,7 +317,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	getMyPos(MyX2,MyY2);
 	!move_to_pos_aux(X, Y, MyX2, MyY2).
 	
--!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
+//-!move_to_pos(X, Y) : true <- !!move_to_pos(X, Y).
 	
 
 +!common::update_role_to(Role) : common::my_role(Role).

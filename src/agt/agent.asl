@@ -6,6 +6,7 @@
 { include("strategy/exploration.asl", exploration) }
 { include("strategy/task.asl", task) }
 { include("strategy/when_to_stop.asl", stop) }
+{ include("strategy/arsehole.asl", arsehole) }
 { include("strategy/stock.asl", retrieve) }
 { include("strategy/map.asl", map) }
 { include("strategy/common-plans.asl", common) }
@@ -28,11 +29,15 @@
 	.
 
 +default::actionID(_)
-	: not start
+	: not start & .my_name(Me)
 <- 
 	+start;
 	.wait(1000);
 //	!always_skip;
+	if(Me == agent10){
+		-arsehole::i_am_an_arsehole;
+		+arsehole::i_am_an_arsehole;
+	} 
 	!!exploration::explore([n,s,e,w]);
 	.
 

@@ -14,7 +14,7 @@
 
 @stop1[atomic]
 +stop
-	: common::my_role(explorer) & not stop::first_to_stop(_) & .my_name(Me) // first to stop
+	: not arsehole::i_am_an_arsehole & common::my_role(explorer) & not stop::first_to_stop(_) & .my_name(Me) // first to stop
 	& .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & map::myMap(Leader) //& not action::move_sent
 <-
 	getGoalClustersWithScouts(Leader, Clusters);
@@ -56,7 +56,9 @@
 	
 @stop2[atomic]
 +stop
-	: not stop::really_stop & common::my_role(explorer) & stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) //& not action::move_sent // someone else stopped already and my map is his map
+	: not arsehole::i_am_an_arsehole &
+	  not stop::really_stop & common::my_role(explorer) & 
+	  stop::first_to_stop(Ag) & identification::identified(IdList) & .member(Ag, IdList) //& not action::move_sent // someone else stopped already and my map is his map
 <-
 	.print("ADD really stop belief");
 	+stop::really_stop;
@@ -98,8 +100,8 @@
 //	-stop;
 //	+stop;
 //	.
-	
-+stop : true <- -stop::stop.
+
++stop : not arsehole::i_am_an_arsehole <- -stop::stop.
 
 //+!stop::retrieve_block_as_stocker :
 //	true
@@ -157,6 +159,13 @@
 	!common::update_role_to(explorer);
 	!!exploration::explore([n,s,e,w]);
 	.
+	
+@first_to_stop0[atomic]
++stop::first_to_stop(_)[source(_)] :
+	arsehole::i_am_an_arsehole
+<-
+	!!arsehole::messing_around;
+	.	
 
 @first_to_stop1[atomic]
 +stop::first_to_stop(Ag)[source(_)] :
@@ -187,6 +196,12 @@
 		-stop::first_to_stop(Ag2)[source(_)];
 		+stop::first_to_stop(Ag2)[source(_)];
 	}
+	.
+	
++!stop::check_join_group :
+	common::previous_role(arsehole) & common::my_role(explorer)// & arsehole::i_am_an_arsehole
+<-
+	!!arsehole::messing_around;
 	.
 //@check_join_group[atomic]
 +!stop::check_join_group
