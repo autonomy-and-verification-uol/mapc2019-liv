@@ -162,7 +162,7 @@
 	
 @first_to_stop0[atomic]
 +stop::first_to_stop(_)[source(_)] :
-	arsehole::i_am_an_arsehole
+	arsehole::i_am_an_arsehole & common::my_role(explorer)
 <-
 	!!arsehole::messing_around;
 	.	

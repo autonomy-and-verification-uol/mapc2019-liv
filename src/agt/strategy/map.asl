@@ -185,7 +185,9 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	
 	!action::forget_old_action;
 	!common::go_back_to_previous_role;
-	if (common::my_role(explorer)) {
+	if(arsehole::i_am_an_arsehole & stop::first_to_stop(_)){
+		!!arsehole::messing_around;
+	} elif (common::my_role(explorer)) {
 		//+exploration::explorer;
 		//!common::update_role_to(explorer);
 		!!exploration::explore([n,s,w,e]);

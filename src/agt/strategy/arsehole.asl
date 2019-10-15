@@ -1,20 +1,34 @@
 +!arsehole::messing_around :
-	stop::first_to_stop(Ag) & idenfication::identified(Ags) & .member(Ag, Ags)
+	stop::first_to_stop(Ag) & identification::identified(Ags) & .member(Ag, Ags)
 <-
 	.print("@@@@@@@@@@@@ Messing around inside the stop group");
 	!common::update_role_to(arsehole);
 	!map::get_clusters(Clusters);
 	getTargetGoal(_, GoalX, GoalY, _);
-	.findall(cluster(Name, GoalList),(.member(cluster(Name, GoalList), Clusters) & not .member(origin(_, GoalX, GoalY), GoalList)), ClustersToMessWith);
-	.shuffle(ClustersToMessWith, ClustersToMessWithShuffled);
-	.nth(0, ClustersToMessWithShuffled, ClusterToMessWith);
-	!!arsehole::mess_with_cluster(ClusterToMessWith, 1);
+	.findall(cluster(Name, GoalList),
+		(
+			.member(cluster(Name, GoalList), Clusters) & 
+			not .member(origin(_, GoalX, GoalY), GoalList) &
+			not (.member(goal(X, Y), GoalList) & math.abs(X-GoalX)+math.abs(Y-GoalY) <= 10)
+		), ClustersToMessWith
+	);
+	if(ClustersToMessWith == []){
+		-exploration::special(_);
+		-common::avoid(_);
+		-common::escape;
+		!action::forget_old_action;
+		!!stop::retrieve_block_as_retriever;
+	} else{
+		.shuffle(ClustersToMessWith, ClustersToMessWithShuffled);
+		.nth(0, ClustersToMessWithShuffled, ClusterToMessWith);
+		!!arsehole::mess_with_cluster(ClusterToMessWith, 1);
+	}
 	.
 
 +!arsehole::messing_around :
 	true
 <-
-	.print("@@@@@@@@@@@@ Messing around outside the stop group");
+	.print("@@@@@@@@@@@@ Messing around outside the stop group: ", Ag, ", ", Ags);
 	!common::update_role_to(arsehole);
 	!map::get_clusters(Clusters);
 	.findall(cluster(Name, GoalList),.member(cluster(Name, GoalList), Clusters), ClustersToMessWith);
@@ -30,8 +44,9 @@
 +!arsehole::mess_with_cluster(cluster(Name, GoalList), Safe) :
 	.member(origin(_, X, Y), GoalList) | .member(goal(X, Y), GoalList)
 <-
+	.print("Messing with cluster: ", cluster(Name, GoalList));
 	!common::move_to_pos(X, Y);
-	!arsehole::inspect_cluster(15, Safe);
+	!arsehole::inspect_cluster(5, Safe);
 	!!arsehole::messing_around;
 	.
 -!arsehole::mess_with_cluster(_, _) : true <- .print("@@@@@@@@@@@@@@@@@@@@@@@@@@@' mess_with_cluster failed'"); !!arsehole::messing_around.
@@ -44,6 +59,7 @@
 	default::team(Team) & not (default::thing(X1, Y1, entity, Team) & (X1 \== 0 | Y1 \== 0))
 <-
 	if(Safe == 0){
+		.print("@@@@@@@@@@@@@@@@@@@@ inspect cluster 0");
 		if(not (stop::first_to_stop(Ag) & idenfication::identified(Ags) & .member(Ag, Ags))){
 			!action::clear(X, Y);
 			if(default::thing(X, Y, block, _)){
@@ -55,6 +71,7 @@
 			!arsehole::inspect_cluster(TimeWindow+5);
 		}
 	} else{
+		.print("@@@@@@@@@@@@@@@@@@@@ inspect cluster 1");
 		getTargetGoal(_, GoalX, GoalY, _);
 		getMyPos(MyX, MyY);
 		RelativeGoalX = GoalX - MyX;
