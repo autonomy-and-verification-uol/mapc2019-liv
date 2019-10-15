@@ -48,7 +48,7 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 
 @check_added_name[atomic]
 +!check_added_name
-	: not common::added_name & default::name(ServerMe)
+	: not common::added_name & default::name(ServerMe) & .my_name(Me)
 <-
 	+common::added_name;
 	addServerName(Me,ServerMe);
