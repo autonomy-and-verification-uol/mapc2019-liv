@@ -89,7 +89,13 @@
 		FinalLocalTargetY = LocalTargetY;
 	}
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
-	if ((math.abs(TargetX) + math.abs(TargetY) > 3) | task::doing_task) {
+	if (task::doing_task) {
+		ActualFinalLocalTargetX = FinalLocalTargetX;
+		ActualFinalLocalTargetY = FinalLocalTargetY;
+		FinalTargetX = TargetX;
+		FinalTargetY = TargetY;
+	}
+	elif (math.abs(TargetX) + math.abs(TargetY) > 3) {
 		.print("Target is distance 4 or more away.");
 		!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 		FinalTargetX = TargetX;
