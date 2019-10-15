@@ -30,19 +30,19 @@ check_obstacle_all(s) :- default::obstacle(0,1) | default::thing(0, 1, Thing, _)
 check_obstacle_all(e) :- default::obstacle(1,0) | default::thing(1, 0, Thing, _) & (Thing == entity | Thing == block).
 check_obstacle_all(w) :- default::obstacle(-1,0) | default::thing(-1, 0, Thing, _) & (Thing == entity | Thing == block).
 
-check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(0, -2, entity, Team)) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, -1, entity, Team)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, -1, entity, Team))). 
-check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(0, 2, entity, Team))  | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(1, 1, entity, Team))  | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, 1, entity, Team))). 
-check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(2, 0, entity, Team)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(1, -1, entity, Team))  | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, 1, entity, Team))). 
-check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-2, 0, entity, Team)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(-1, 1, entity, Team)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(-1, -1, entity, Team))).
+check_agent(n) :- ( default::thing(0, -1, entity, _) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(0, -2, entity, _)) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, -1, entity, _)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, -1, entity, _))). 
+check_agent(s) :- ( default::thing(0, 1, entity, _) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(0, 2, entity, _))  | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(1, 1, entity, _))  | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, 1, entity, _))). 
+check_agent(e) :- ( default::thing(1, 0, entity, _) | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(2, 0, entity, _)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(1, -1, entity, _))  | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, 1, entity, _))). 
+check_agent(w) :- ( default::thing(-1, 0, entity, _) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-2, 0, entity, _)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(-1, 1, entity, _)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(-1, -1, entity, _))).
 
-check_agent_special(n) :- retrieve::block(0, -1) & default::team(Team) & default::thing(0, -2, entity, Team).
-check_agent_special(n) :- (not retrieve::block(0, -1)) & default::team(Team) & default::thing(0, -1, entity, Team).
-check_agent_special(s) :- retrieve::block(0, 1) & default::team(Team) & default::thing(0, 2, entity, Team).
-check_agent_special(s) :- (not retrieve::block(0, 1)) & default::team(Team) & default::thing(0, 1, entity, Team).
-check_agent_special(e) :- retrieve::block(1, 0) & default::team(Team) & default::thing(2, 0, entity, Team).
-check_agent_special(e) :- (not retrieve::block(0, -1)) & default::team(Team) & default::thing(1, 0, entity, Team).
-check_agent_special(w) :- retrieve::block(-1, 0) & default::team(Team) & default::thing(-2, 0, entity, Team).
-check_agent_special(w) :- (not retrieve::block(-1, 0)) & default::team(Team) & default::thing(-1, 0, entity, Team).
+check_agent_special(n) :- retrieve::block(0, -1) & default::thing(0, -2, entity, _).
+check_agent_special(n) :- (not retrieve::block(0, -1)) & default::thing(0, -1, entity, _).
+check_agent_special(s) :- retrieve::block(0, 1) & default::thing(0, 2, entity, _).
+check_agent_special(s) :- (not retrieve::block(0, 1)) & default::thing(0, 1, entity, _).
+check_agent_special(e) :- retrieve::block(1, 0) & default::thing(2, 0, entity, _).
+check_agent_special(e) :- (not retrieve::block(0, -1)) & default::thing(1, 0, entity, _).
+check_agent_special(w) :- retrieve::block(-1, 0) & default::thing(-2, 0, entity, _).
+check_agent_special(w) :- (not retrieve::block(-1, 0)) & default::thing(-1, 0, entity, _).
 
 prune_direction([],PrunedDirListTemp,PrunedDirList) :- PrunedDirList = PrunedDirListTemp.
 prune_direction([Dir|L],PrunedDirListTemp,PrunedDirList) :- check_obstacle(Dir) & prune_direction(L,PrunedDirListTemp,PrunedDirList).
