@@ -476,28 +476,8 @@ most_needed_type(Dispensers, AgList, Type) :-
 <-
 	-collect_block(_,_);
 	!retrieve::create_and_attach_block;
-//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
-//	if (common::my_role(stocker)) {
-//		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
-//		getTargetGoal(_, GoalX, GoalY, _);
-//		if (TargetYGlobal < GoalY) {
-//			StockerBlockPos = s;
-//		}
-//		elif (TargetYGlobal > GoalY) {
-//			StockerBlockPos = n;
-//		}
-//		elif (TargetXGlobal > GoalX) {
-//			StockerBlockPos = w;
-//		}
-//		else {
-//			StockerBlockPos = e;
-//		}
-//		+gate(StockerBlockPos);
-//	}
-//	else {
-		getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
-//	}
+	getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
 	TargetX = TargetXGlobal - MyX;
 	TargetY = TargetYGlobal - MyY;
 	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
@@ -505,101 +485,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("Chosen Relative Goal position: ", TargetX, TargetY);
 	+getting_to_position;
 	!planner::generate_goal(TargetX, TargetY, notblock);
-//	!retrieve::move_to_goal;
 	.
-
-+!retrieve::fetch_block_to_goal : 
-	true
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	!retrieve::fetch_block_to_goal_aux(MyX, MyY).
-+!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::target(TargetX, TargetY) &
-	neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, Direction) &
-	.my_name(Me)
-<-
-	!retrieve::create_and_attach_block(Direction);
-	if(stop::first_to_stop(Me)){
-		getTargetGoal(Ag, GoalX, GoalY, SideStr);
-		MyGoalX = GoalX; MyGoalY = GoalY;
-	} else{
-		if (not common::my_role(retriever)) {
-			getStockerAvailablePos(MyGoalX, MyGoalY);
-			if (MyGoalY < GoalY) {
-				StockerBlockPos = s;
-			}
-			elif (MyGoalY > GoalY) {
-				StockerBlockPos = n;
-			}
-			elif (MyGoalX > GoalX) {
-				StockerBlockPos = w;
-			}
-			else {
-				StockerBlockPos = e;
-			}
-			+gate(StockerBlockPos);
-		}
-		else {
-			getRetrieverAvailablePos(MyGoalX, MyGoalY);
-			/*getTargetGoal(Ag, GoalX, GoalY, SideStr);
-			.random(NX);
-			.random(RX);
-			if (NX > 0.5) {
-				RandomX = math.floor(RX * 5)+7;
-			}
-			else {
-				RandomX = math.floor(RX * -5)-7;
-			}
-			.random(NY);
-			.random(RY);
-			if (NY > 0.5) {
-				RandomY = math.floor(RY * 5)+9;
-			}
-			else {
-				RandomY = math.floor(RX * -5)-5;
-			}
-			MyGoalX = GoalX + RandomX;
-			MyGoalY = GoalY + RandomY;*/
-		}
-//		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-//		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
-//		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
-	}
-	.print("Chosen Goal position: ", MyGoalX, MyGoalY);
-	-+retrieve::target(MyGoalX, MyGoalY);
-	!retrieve::move_to_goal.
-+!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::target(TargetX, TargetY) &
-	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
-<-		
-	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
-	if (exploration::check_obstacle_special_1(Direction, 1)) {
-		if(i_can_avoid(Direction, DirectionToGo)){
-			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
-//			.wait(not action::move_sent);
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
-			}
-			.print("OBSTACLE AVOIDED");
-		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction);
-			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 5);
-			}
-		} else{
-			!retrieve::go_around_obstacle(Direction, 5);
-		}
-	} else {
-		!retrieve::smart_move(Direction);
-	}
-	!retrieve::fetch_block_to_goal.
-	
--!retrieve::fetch_block_to_goal : true <- !!retrieve::fetch_block_to_goal.
 
 -!retrieve::smart_move(Direction) : 
 	true 

@@ -157,9 +157,6 @@ i_met_new_agent(Iknow, IdList) :-
 	-map::myMap(Map);
 	+map::myMap(MapOther);
 	updateMyPos(OriginX,OriginY);
-	if (common::my_role(stocker) & task::stocker_in_position) {
-		updateStockerPos(Me,OriginX,OriginY);
-	}
 	if(map::evaluating_cluster([origin(XN, YN), origin(XS, YS), origin(XW, YW), origin(XE, YE)])){
 		-map::evaluating_cluster(_);
 		+map::evaluating_cluster([origin(XN+OriginX, YN+OriginY), origin(XS+OriginX, YS+OriginY), origin(XW+OriginX, YW+OriginY), origin(XE+OriginX, YE+OriginY)]);
@@ -173,7 +170,6 @@ i_met_new_agent(Iknow, IdList) :-
 		.term2string(Me, Me1);
 		if(GoalAgent == Me1){
 			setTargetGoal(Pos, Me, OriginX+GoalX, OriginY+GoalY);
-			updateStockerAvailablePos(OriginX, OriginY);
 			updateRetrieverAvailablePos(OriginX, OriginY);
 		}
 	}

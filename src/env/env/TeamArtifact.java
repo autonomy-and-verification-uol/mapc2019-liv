@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
@@ -47,17 +46,8 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
-//	private int maxStockers = 2;
-//	private int stockers;
-	
 	private int maxPlanners = 5;
 	private int planners;
-	
-//	private int maxStop = 1;
-//	private int stop;
-	
-//	private int maxHelpers = 1;
-//	private int helpers;
 	
 	private String firstToStop;
 	
@@ -66,7 +56,6 @@ public class TeamArtifact extends Artifact {
 	private Integer targetGoalX;
 	private Integer targetGoalY;
 	private String goalSide;
-	private List<Point> stockersAvailablePositions = new ArrayList<>();
 	private List<Point> retrieversAvailablePositions = new ArrayList<>();
 	
 	private static List<Pair<String, String>> ourBlocks = new ArrayList<>();
@@ -83,13 +72,9 @@ public class TeamArtifact extends Artifact {
 		agentmaps.put("agent8",map8);
 		agentmaps.put("agent9",map9);
 		agentmaps.put("agent10",map10);
-		stockersAvailablePositions.clear();
 		retrieversAvailablePositions.clear();
 		ourBlocks.clear();
-//		stockers = 0;
-//		helpers = 0;
 		planners = 0;
-//		stop = 0;
 		firstToStop = null;
 		pos  = 10;
 	}
@@ -122,41 +107,12 @@ public class TeamArtifact extends Artifact {
 		this.planners--;
 	}
 	
-//	@OPERATION
-//	void callStop(OpFeedbackParam<Boolean> flag){
-//		if(this.stop+1 <= this.maxStop) {
-//			this.stop++;
-//			flag.set(true);
-//		}
-//		else {
-//			flag.set(false);
-//		}
-//	}
-//	
-//	@OPERATION
-//	void stopDone(){
-//		this.stop--;
-//	}
 	
 	@OPERATION
 	void joinRetrievers(OpFeedbackParam<String> flag){
-//		if(this.stockers < this.maxStockers) {
-//			this.stockers++;
-//			flag.set("stocker");
-//		}
-//		else if (this.helpers < this.maxHelpers) {
-//			this.helpers++;
-//			flag.set("helper");
-//		}
-//		else {
 			flag.set("retriever");
-//		}
 	}
 	
-//	@OPERATION
-//	void removeRetriever(){
-//		this.retrievers--;
-//	}
 	
 	@OPERATION
 	void getTargetGoal(OpFeedbackParam<String> agent, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> side){
@@ -190,13 +146,6 @@ public class TeamArtifact extends Artifact {
 		}
 	}
 	
-	@OPERATION
-	void updateStockerAvailablePos(int x, int y) {
-		for(Point p: this.stockersAvailablePositions) {
-			p.x += x;
-			p.y += y;
-		}
-	}
 	
 	@OPERATION
 	void updateRetrieverAvailablePos(int x, int y) {
@@ -206,25 +155,6 @@ public class TeamArtifact extends Artifact {
 		}
 	}
 	
-	@OPERATION
-	void initStockerAvailablePos(String name) {
-		logger.info("initStockerAvailablePos");
-		if(this.targetGoalX == null | this.targetGoalY == null) return;
-		this.stockersAvailablePositions.clear();
-		for(String key : agentmaps.get(name).keySet()) {
-			if(key.startsWith("goal_")) {
-				for(Point pp : agentmaps.get(name).get(key)) {
-					if(targetGoalX == pp.x && targetGoalY == pp.y) {
-						for(Point scout : ((OriginPoint) pp).scouts) {
-							logger.info("[" + name + "]" + "( " + scout.x + ", " + scout.y + " ) stocker added");
-							this.stockersAvailablePositions.add(scout);
-						}
-						return;
-					}
-				}
-			}
-		}
-	}
 	
 	@OPERATION
 	void initRetrieverAvailablePos(String name) {
@@ -247,71 +177,7 @@ public class TeamArtifact extends Artifact {
 			}
 		}
 	}
-	
-//	@OPERATION
-//	void addStocker(String agent, int x, int y, String gate) {
-//		this.stockerBlocks.put(agent, new Stocker(new Point(x, y), gate));
-//	}
-//	
-//	@OPERATION
-//	void addStockerBlock(String agent, String type) {
-//		if (this.stockerBlocks.get(agent).b1.isEmpty()) {
-//			this.stockerBlocks.get(agent).b1 = type;
-//		}
-//		else if (this.stockerBlocks.get(agent).b2.isEmpty()) {
-//			this.stockerBlocks.get(agent).b2 = type;
-//		}
-//		else if (this.stockerBlocks.get(agent).b3.isEmpty()) {
-//			this.stockerBlocks.get(agent).b3 = type;
-//		}
-//		else if (this.stockerBlocks.get(agent).b4.isEmpty()) {
-//			this.stockerBlocks.get(agent).b4 = type;
-//		}
-//		else {
-//			logger.info("Already have 4 blocks, should never happen!");
-//		}
-////		logger.info("!! B1 "+this.stockerBlocks.get(agent).b1);
-////		logger.info("!! B2 "+this.stockerBlocks.get(agent).b2);
-////		logger.info("!! B3 "+this.stockerBlocks.get(agent).b3);
-////		logger.info("!! B4 "+this.stockerBlocks.get(agent).b4);
-//	}
-//	
-//	@OPERATION
-//	void removeStockerBlock(String agent, String type) {
-//		if (this.stockerBlocks.get(agent).b1.equals(type)) {
-//			this.stockerBlocks.get(agent).b1 = "";
-//		}
-//		else if (this.stockerBlocks.get(agent).b2.equals(type)) {
-//			this.stockerBlocks.get(agent).b2 = "";
-//		}
-//		else if (this.stockerBlocks.get(agent).b3.equals(type)) {
-//			this.stockerBlocks.get(agent).b3 = "";
-//		}
-//		else if (this.stockerBlocks.get(agent).b4.equals(type)) {
-//			this.stockerBlocks.get(agent).b4 = "";
-//		}
-//		else {
-//			logger.info("Couldn't remove a block, should never happen!");
-//		}
-////		logger.info("!! B1 "+this.stockerBlocks.get(agent).b1);
-////		logger.info("!! B2 "+this.stockerBlocks.get(agent).b2);
-////		logger.info("!! B3 "+this.stockerBlocks.get(agent).b3);
-////		logger.info("!! B4 "+this.stockerBlocks.get(agent).b4);
-//	}
 		
-	@OPERATION
-	void getStockerAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
-		logger.info("Available stocker positions: ");
-		for(Point p : this.stockersAvailablePositions) {
-			logger.info("( "+ p.x + ", " + p.y + " )");
-		}
-		if(!this.stockersAvailablePositions.isEmpty()) {
-			x.set(this.stockersAvailablePositions.get(0).x);
-			y.set(this.stockersAvailablePositions.get(0).y);
-			this.stockersAvailablePositions.remove(0);
-		}
-	}
-	
 	@OPERATION
 	void getRetrieverAvailablePos(OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y) {
 		logger.info("Available retriever positions: ");
@@ -323,12 +189,6 @@ public class TeamArtifact extends Artifact {
 			y.set(this.retrieversAvailablePositions.get(0).y);
 			this.retrieversAvailablePositions.remove(0);
 		}
-	}
-	
-	@OPERATION
-	void addStockerAvailablePos(int x, int y) {
-		logger.info("(" + x + ", " + y + ") is now a stocker available position");
-		this.stockersAvailablePositions.add(new Point(x, y));
 	}
 	
 	@OPERATION
@@ -346,17 +206,6 @@ public class TeamArtifact extends Artifact {
 	void getServerName(String agent, OpFeedbackParam<String> agentServer){
 		agentServer.set(agentNames.get(agent));
 	}
-	
-	/*@OPERATION
-	void evaluateCluster(String name, String cluster, int x, int y, int evaluated) {
-		for(Point p : agentmaps.get(name).get(cluster)) {
-			if(p.x == x && p.y == y) {
-				agentmaps.get(name).get(cluster).remove(p);
-				agentmaps.get(name).get(cluster).add(new OriginPoint(x, y, evaluated));
-				return;
-			}
-		}
-	}*/
 	
 	@OPERATION
 	void evaluateOrigin(String name, int x, int y, String evaluation) {
@@ -478,21 +327,6 @@ public class TeamArtifact extends Artifact {
 			clusterInserterIn.set(myCluster);
 			isANewCluster.set(false);
 			agentmaps.get(name).get(myCluster).add(p);
-			/*
-			for(Point pp : agentmaps.get(name).get(myCluster)) {
-				if(pp instanceof OriginPoint) {
-					if(p.y < pp.y) {
-						agentmaps.get(name).get(myCluster).remove(pp);
-						agentmaps.get(name).get(myCluster).add(new Point(pp.x, pp.y));
-						//agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y));
-						agentmaps.get(name).get(myCluster).add(new OriginPoint(p.x, p.y, ((OriginPoint) pp).evaluated));
-					} else {
-						agentmaps.get(name).get(myCluster).add(p);
-					}
-					return;
-				}
-			}
-			*/
 		}
 	}
 	
@@ -510,35 +344,6 @@ public class TeamArtifact extends Artifact {
 			}
 		}
 	}
-	
-	/*@OPERATION
-	void addOriginToCluster(String name, String type, int x, int y) {
-		Point p = new Point(x, y);
-		for(String key : agentmaps.get(name).keySet()) {
-			if(key.startsWith("goal_") && agentmaps.get(name).get(key).contains(p)) {
-				agentmaps.get(name).get(key).remove(p);
-				agentmaps.get(name).get(key).add(new OriginPoint(x, y));
-			}
-		}
-	}*/
-	
-//	private class Stocker extends Point{
-//		private String gate;
-//		private Point p;
-//		private String b1;
-//		private String b2;
-//		private String b3;
-//		private String b4;
-//		public Stocker(Point p, String gate) {
-//			this.p = p;
-////			logger.info("Adding new stocker at "+p);
-//			this.gate = gate;
-//			this.b1 = "";
-//			this.b2 = "";
-//			this.b3 = "";
-//			this.b4 = "";
-//		}
-//	}
 	
 	private static class OriginPoint extends Point{
 		private String evaluated = "boh";
@@ -721,92 +526,6 @@ public class TeamArtifact extends Artifact {
 	void getAvailableMeType(String me, OpFeedbackParam<String> type) {
 		type.set(agentAvailable.get(me));
 	}
-	/*
-	@OPERATION 
-	void getMostNeededType(String name, OpFeedbackParam<String> type){
-		//Set<String> types = new HashSet<>();
-		
-		for (Map.Entry<String, Set<Point>> entry : agentmaps.get(name).entrySet()) {
-			if (!entry.getKey().startsWith("goal_") & !agentAvailable.containsValue(entry.getKey())) {
-				//type.set(entry.getKey());
-				return;
-			}
-		}
-		Map<String, Integer> availableBlocks = new HashMap<String, Integer>();
-		for (String t : agentAvailable.values()) {
-			if(availableBlocks.containsKey(t)) {
-				availableBlocks.put(t, availableBlocks.get(t)+1);
-			} else {
-				availableBlocks.put(t, 1);
-			}
-		}
-		int min = Integer.MAX_VALUE;
-		String mostNeededType = null;
-		for(Map.Entry<String, Integer> entry : availableBlocks.entrySet()) {
-			if(entry.getValue() < min) {
-				min = entry.getValue();
-				mostNeededType = entry.getKey();
-			}
-		}
-		type.set(mostNeededType);
-	}*/
-	
-	
-//	@OPERATION 
-//	void getAvailableBlocks(OpFeedbackParam<Literal[]> list){
-//		List<Literal> agents 		= new ArrayList<Literal>();
-//		for (Map.Entry<String, Stocker> entry : stockerBlocks.entrySet()) {
-//				if (!entry.getValue().b1.isEmpty()) {
-//					Literal literal = ASSyntax.createLiteral("agent");
-//					Atom name = new Atom(entry.getKey());
-//					Atom type = new Atom(entry.getValue().b1);
-//					literal.addTerm(name);
-//					literal.addTerm(type);
-//					agents.add(literal);
-//				}
-//				if (!entry.getValue().b2.isEmpty()) {
-//					Literal literal = ASSyntax.createLiteral("agent");
-//					Atom name = new Atom(entry.getKey());
-//					Atom type = new Atom(entry.getValue().b2);
-//					literal.addTerm(name);
-//					literal.addTerm(type);
-//					agents.add(literal);
-//				}
-//				if (!entry.getValue().b3.isEmpty()) {
-//					Literal literal = ASSyntax.createLiteral("agent");
-//					Atom name = new Atom(entry.getKey());
-//					Atom type = new Atom(entry.getValue().b3);
-//					literal.addTerm(name);
-//					literal.addTerm(type);
-//					agents.add(literal);
-//				}
-//				if (!entry.getValue().b4.isEmpty()) {
-//					Literal literal = ASSyntax.createLiteral("agent");
-//					Atom name = new Atom(entry.getKey());
-//					Atom type = new Atom(entry.getValue().b4);
-//					literal.addTerm(name);
-//					literal.addTerm(type);
-//					agents.add(literal);
-//				}
-//		}
-//		Literal[] arrayagents = agents.toArray(new Literal[agents.size()]);
-//		list.set(arrayagents);
-//	}
-	
-//	@OPERATION 
-//	void getStockerPos(String stocker, OpFeedbackParam<Integer> x, OpFeedbackParam<Integer> y, OpFeedbackParam<String> gate){
-//		x.set(stockerBlocks.get(stocker).p.x);
-//		y.set(stockerBlocks.get(stocker).p.y);
-////		logger.info("Got stocker "+stocker+" X = "+stockerBlocks.get(stocker).p.x+" Y = "+stockerBlocks.get(stocker).p.y);
-//		
-//		gate.set(stockerBlocks.get(stocker).gate);
-//	}
-//	
-//	@OPERATION 
-//	void updateStockerPos(String stocker, int ox, int oy){
-//		stockerBlocks.get(stocker).p.x = stockerBlocks.get(stocker).p.x + ox;
-//		stockerBlocks.get(stocker).p.x = stockerBlocks.get(stocker).p.y + oy;
-//	}
 	
 	@OPERATION
 	void getBlocks(OpFeedbackParam<Literal[]> list) {
@@ -830,40 +549,6 @@ public class TeamArtifact extends Artifact {
 	void removeBlock(String ag) {
 		ourBlocks.removeIf(p -> p.getFirst().equals(ag));
 	}
-	/*
-	@OPERATION
-	void removeAvailableBlock(String b) {
-		if(availableBlocks.containsKey(b)) {
-			availableBlocks.put(b, availableBlocks.get(b)-1);
-		}
-	}
-	
-	@OPERATION
-	void addAvailableBlock(String b) {
-		if(availableBlocks.containsKey(b)) {
-			availableBlocks.put(b, availableBlocks.get(b)+1);
-		}
-	}
-	
-	@OPERATION
-	void addAvailableType(String b) {
-		availableBlocks.putIfAbsent(b, 0);
-	}
-	
-	@OPERATION
-	void getMostNeededBlock(OpFeedbackParam<String> b) {
-		int min = Integer.MAX_VALUE;
-		String mostNeededBlock = null;
-		for(String b1 : availableBlocks.keySet()) {
-			int aux = availableBlocks.get(b1);
-			if(aux < min) {
-				min = aux;
-				mostNeededBlock = b1;
-			}
-		}
-		b.set(mostNeededBlock);
-	}*/
-	
 	
 	@OPERATION
 	void clearTeam() {
@@ -881,10 +566,8 @@ public class TeamArtifact extends Artifact {
 		map8.clear();
 		map9.clear();
 		map10.clear();
-		stockersAvailablePositions.clear();
 		retrieversAvailablePositions.clear();
 		ourBlocks.clear();
-//		stockerBlocks.clear();
 		this.init();
 	}
 	
