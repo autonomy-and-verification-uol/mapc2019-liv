@@ -3,6 +3,14 @@ relative_right(s,w) :- true.
 relative_right(e,s) :- true.
 relative_right(w,n) :- true.
 
+common::safe_origin_pos(0,-1) :- not default::thing(0,-1,Thing,_).
+common::safe_origin_pos(-1,0) :- not default::thing(-1,0,Thing,_).
+common::safe_origin_pos(1,0) :- not default::thing(1,0,Thing,_).
+common::safe_origin_pos(0,-2) :- not default::thing(0,-2,Thing,_).
+common::safe_origin_pos(-2,0) :- not default::thing(-2,0,Thing,_).
+common::safe_origin_pos(2,0) :- not default::thing(2,0,Thing,_).
+common::safe_origin_pos(0,0) :- true.
+
 direction_block(n,X,Y) :- X = 0 & Y = -1.
 direction_block(s,X,Y) :- X = 0 & Y = 1.
 direction_block(e,X,Y) :- X = 1 & Y = 0.
@@ -252,8 +260,19 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
 		!action::rotate(cw);
+		if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
+			+rotate_back(1);
+		}
 		if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
 			!action::rotate(cw);
+			if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
+				if (common::rotate_back(RB)) {
+					-+rotate_back(RB+1);
+				}
+				else {
+					+rotate_back(1);
+				}
+			}
 		}
 	}
 	.
@@ -261,7 +280,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: escape & X < 0 
 <-
 	!action::move(w);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_to_escape(X+1,Y,MoveBackX+1,MoveBackY);
 	}
 	else {
@@ -272,7 +291,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: escape & X > 0 
 <-
 	!action::move(e);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_to_escape(X-1,Y,MoveBackX-1,MoveBackY);
 	}
 	else {
@@ -283,7 +302,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: escape & Y < 0 
 <-
 	!action::move(n);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_to_escape(X,Y+1,MoveBackX,MoveBackY+1);
 	}
 	else {
@@ -294,7 +313,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: escape & Y > 0 
 <-
 	!action::move(s);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_to_escape(X,Y-1,MoveBackX,MoveBackY-1);
 	}
 	else {
@@ -306,7 +325,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!move_back(X, Y) : X < 0 
 <- 
 	!action::move(w);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_back(X+1,Y);
 	}
 	else {
@@ -315,7 +334,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!move_back(X, Y) : X > 0 
 <- 
 	!action::move(e);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_back(X-1,Y);
 	}
 	else {
@@ -324,7 +343,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!move_back(X, Y) : Y > 0 
 <- 
 	!action::move(s);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_back(X,Y-1);
 	}
 	else {
@@ -333,7 +352,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 +!move_back(X, Y) : Y < 0 
 <- 
 	!action::move(n);
-	if (default::submit(move) & default::lastActionResult(success)) {
+	if (default::lastAction(move) & default::lastActionResult(success)) {
 		!move_back(X,Y+1);
 	}
 	else {

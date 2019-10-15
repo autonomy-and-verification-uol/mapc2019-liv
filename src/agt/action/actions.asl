@@ -191,21 +191,31 @@
 
 // ##### SKIP ACTION #####
 +!skip
-	: ((default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) | (retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)))) & not common::my_role(origin)  & not common::escape
+	: ((default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) | (retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)))) & not common::escape
 <-
-//	getMyPos(MyX, MyY);
-//	if (retrieve::block(X,Y)) {
-//		+rotate_block(X,Y);
-//	}
-	!common::escape(MoveBackX,MoveBackY);
-	!common::move_back(MoveBackX,MoveBackY);
-//	if (action::rotate_block(X,Y)) {
-//		while (not retrieve::block(X,Y)) {
-//			!rotate(cw);
-//		}
-//		-rotate_block(X,Y);
-//	} 
-//	!skip;
+	if (common::my_role(origin)) {
+		?common::safe_origin_pos(X,Y);
+		if (X \== 0 & Y \== 0 & retrieve::block(_,_)) {
+			+common::escape;
+			!common::move_to_escape(X,Y,MoveBackX,MoveBackY);
+			-common::escape;
+			if (common::rotate_back(RB)) {
+			     for ( .range(I,1,RB) ) {
+			     	!action::rotate(ccw);
+			     }
+			     -common::rotate_back(RB);
+			}
+			!common::move_back(MoveBackX,MoveBackY);
+		}
+		else {
+			!action::commit_action(skip); 
+		}
+	}
+	else {
+		!common::escape(MoveBackX,MoveBackY);
+		!common::move_back(MoveBackX,MoveBackY);
+	}
+
 	.
 +!skip
 <-

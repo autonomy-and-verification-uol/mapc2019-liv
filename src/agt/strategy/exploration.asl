@@ -104,7 +104,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 <-
 	?remove_opposite(FirstDir,OppDir);
 	?get_other_side(FirstDir,OtherDir1,OtherDir2);
-	if (check_obstacle(FirstDir) &  check_obstacle(OppDir) & (check_obstacle(OtherDir1) | check_obstacle(OtherDir2))) {
+	if (check_obstacle(FirstDir) &  check_obstacle(OppDir) & (check_obstacle(OtherDir1) | check_obstacle(OtherDir2)) & default::energy(Energy) & default::energy(Energy) & Energy < 240) {
 		if (not check_obstacle(OtherDir1)) {
 			!explore_until_obstacle(OtherDir1);
 		}
