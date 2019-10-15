@@ -87,7 +87,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	 .
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & .random(Number) & random_dir([n,s,e,w],4,Number,Dir) & default::energy(Energy) & Energy >= 270 // & default::vision(V) & common::find_empty_position(X,Y,1,V)
+	: (default::obstacle(0,1) | default::obstacle(0,2)) & (default::obstacle(0,-1) | default::obstacle(0,-2)) & (default::obstacle(1,0) | default::obstacle(2,0)) & (default::obstacle(-1,0) | default::obstacle(-2,0)) & common::my_role(explorer) & .random(Number) & random_dir([n,s,e,w],4,Number,Dir) & default::energy(Energy) & Energy >= 240 // & default::vision(V) & common::find_empty_position(X,Y,1,V)
 <-
 	.print("@@@@@ No movement options available");
 	!action::skip;
@@ -216,7 +216,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	.
 	
 +!explore_until_obstacle(Dir)
-	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & default::energy(Energy) & Energy >= 270
+	: common::my_role(explorer) & check_obstacle(Dir) & default::energy(Energy) & Energy >= 240
 <-
 	!try_to_clear(Dir);
 	.

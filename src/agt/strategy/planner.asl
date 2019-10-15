@@ -3,8 +3,9 @@
 <- 
 	!!retrieve::get_block;
 	.
+	
 +!generate_goal(0, 0, Aux) 
-	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY)
+	: common::my_role(retriever) & back_to_origin & .my_name(Me) & retrieve::block(BlockX,BlockY) & not retrieve::getting_to_position
 <- 
 	if (default::energy(Energy) & Energy >= 30) {
 		Clear = 1;
@@ -22,6 +23,7 @@
 	!planner::execute_plan(Plan, 0, 0, 0, 0);
 	-back_to_origin;
 	.
+	
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(retriever) & .my_name(Me) & retrieve::block(X,Y) & default::thing(X,Y,block,Type)
 <- 
@@ -30,6 +32,7 @@
 	+back_to_origin;
 	!!default::always_skip;
 	.
+	
 +!generate_goal(0, 0, Aux) 
 	: common::my_role(origin)
 <- 
@@ -540,6 +543,10 @@
 			.print("@@@@ Action: ", Action);
 			!action::Action;
 			if (common::my_role(retriever) & retrieve::getting_to_position & not retrieve::block(X,Y)) {
+				?localtargetx(RemoveLocalTargetX);
+				?localtargety(RemoveLocalTargetY);
+				-localtargetx(RemoveLocalTargetX);
+				-localtargety(LocalTargetY);
 				.fail;
 			}
 			if (default::lastAction(move) & not (default::lastActionResult(success)) & default::lastActionParams([Direction|List])) {
