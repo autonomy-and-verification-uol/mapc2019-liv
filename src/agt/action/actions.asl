@@ -206,6 +206,10 @@
 			     -common::rotate_back(RB);
 			}
 			!common::move_back(MoveBackX,MoveBackY);
+			if (not default::goal(0,0)) {
+				?default::goal(GX,GY);
+				!generate_goal(GX, GY, notblock);
+			}
 		}
 		else {
 			!action::commit_action(skip); 
