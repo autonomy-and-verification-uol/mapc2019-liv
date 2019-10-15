@@ -12,6 +12,11 @@
 { include("strategy/planner.asl", planner) }
 { include("strategy/new-round.asl", newround) }
 { include("strategy/end-round.asl", endround) }
+
+block_adjacent(X,Y,FinalX,FinalY,s) :- default::thing(0,1,block,_) & X = 0 & Y = 1 & FinalX = 0 & FinalY = 2.
+block_adjacent(X,Y,FinalX,FinalY,n) :- default::thing(0,-1,block,_) & X = 0 & Y = -1 & FinalX = 0 & FinalY = -2.
+block_adjacent(X,Y,FinalX,FinalY,e) :- default::thing(1,0,block,_) & X = 1 & Y = 0 & FinalX = 2 & FinalY = 0.
+block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y = 0 & FinalX = -2 & FinalY = 0.
 	
 +!register(E)
 	: .my_name(Me)
@@ -32,9 +37,24 @@
 <- 
 	+start;
 	.wait(1000);
+	!clear_blocks;
+	-common::clearing_things;
 //	!always_skip;
 	!!exploration::explore([n,s,e,w]);
 	.
+	
++!clear_blocks
+	: default::energy(Energy) & Energy >= 30 & block_adjacent(X,Y,FinalX,FinalY,Dir)
+<-
+	if (default::attached(X,Y)) {
+		!action::detach(Dir);
+	}
+	for(.range(I, 1, 3)){
+		!action::clear(FinalX,FinalY);
+	}
+	!clear_blocks;
+	.
++!clear_blocks.
 
 +!always_skip :
 	task::origin  & 
