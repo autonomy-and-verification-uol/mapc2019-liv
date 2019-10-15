@@ -490,7 +490,7 @@
 	!action::move(w);
 	.print("Try to find a plan after moving west -- away from goal!");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX-1, TargetY, notblock);
+		!generate_goal(TargetX+1, TargetY, notblock);
 	} else {
 		!generate_goal(TargetX, TargetY, notblock);
 	}
@@ -502,7 +502,7 @@
 	!action::move(e);
 	.print("Try to find a plan after moving east -- away from goal!");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX+1, TargetY, notblock);
+		!generate_goal(TargetX-1, TargetY, notblock);
 	} else {
 		!generate_goal(TargetX, TargetY, notblock);
 	}
@@ -514,7 +514,7 @@
 	!action::move(n);
 	.print("Try to find a plan after moving north -- away from goal!");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX, TargetY - 1, notblock);
+		!generate_goal(TargetX, TargetY + 1, notblock);
 	} else {
 		!generate_goal(TargetX, TargetY, notblock);
 	}
@@ -526,7 +526,7 @@
 	!action::move(s);
 	.print("Try to find a plan after moving south -- away from goal!");
 	if (default::lastActionResult(success)) {
-		!generate_goal(TargetX, TargetY + 1, notblock);
+		!generate_goal(TargetX, TargetY - 1, notblock);
 	} else {
 		!generate_goal(TargetX, TargetY, notblock);
 	}
