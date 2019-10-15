@@ -428,23 +428,66 @@ most_needed_type(Dispensers, AgList, Type) :-
 	+retrieve::fetching_block;
 	-retrieve::attach_completed;
 	while(not retrieve::attach_completed){
-		!action::request(Direction);
-		.print("here1");
-		if(default::lastActionResult(failed_target)){
-			.fail;
+		if (default::thing(DispX,DispY,block,_)) {
+			if (not default::attached(DispX,DispY)) {
+				!action::attach(Direction);
+				if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
+					.print("here6");
+					+retrieve::attach_completed;
+				}
+			}
+			else {
+				!action::skip;
+				if (default::thing(DispX-1,DispY,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX-1,DispY);
+						}
+					}
+				}
+				elif (default::thing(DispX+1,DispY,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX+1,DispY);
+						}
+					}
+				}
+				elif (default::thing(DispX,DispY+1,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX,DispY+1);
+						}
+					}
+				}
+				elif (default::thing(DispX,DispY-1,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX,DispY-1);
+						}
+					}
+				}
+			}
 		}
-		.print("here2");
-		while(not default::lastActionResult(success)){
-			.print("here3");
+		else {
 			!action::request(Direction);
+			.print("here1");
+			if(default::lastActionResult(failed_target)){
+				.fail;
+			}
+			.print("here2");
+			while(not default::lastActionResult(success)){
+				.print("here3");
+				!action::request(Direction);
+			}
+			.print("here4");
+			!action::attach(Direction);
+			.print("here5");
+			if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
+				.print("here6");
+				+retrieve::attach_completed;
+			}
 		}
-		.print("here4");
-		!action::attach(Direction);
-		.print("here5");
-		if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
-			.print("here6");
-			+retrieve::attach_completed;
-		}
+
 	}
 	-retrieve::fetching_block.
 /*
