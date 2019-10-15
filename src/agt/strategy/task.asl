@@ -180,6 +180,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!perform_task(X,Y,noblock)[source(Origin)]
 	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
+	+doing_task;
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
@@ -202,12 +203,14 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	!action::detach(DetachPos);
 	.wait(task::synch_complete[source(Origin)]);
 	-task::synch_complete[source(Origin)];
+	-doing_task;
 	!!retrieve::retrieve_block;
 	.
 	
 +!perform_task(X,Y)[source(Origin)]
 	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
+	+doing_task;
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
@@ -233,5 +236,6 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	-task::synch_complete[source(Origin)];
 	?get_direction(BX,BY,DetachPos);
 	!action::detach(DetachPos);
+	-doing_task;
 	!!retrieve::retrieve_block;
 	.

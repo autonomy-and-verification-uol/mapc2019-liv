@@ -122,6 +122,13 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 		!explore_until_obstacle_special(FirstDir);
 	}
 	.
+	
++!explore(Dirlist)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	!!explore([n,s,e,w]);
+	.
 
 +!explore(Dirlist).
 
@@ -219,6 +226,13 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 <-
 	!!explore(DirList);
 	.
+	
++!explore_until_obstacle(Dir)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	!!explore([n,s,e,w]);
+	.
 
 +!explore_until_obstacle(Dir).
 	
@@ -280,6 +294,14 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
 	!default::always_skip;
+	.
+
++!explore_until_obstacle_special(Dir)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	-special(_);
+	!!explore([n,s,e,w]);
 	.
 
 +!explore_until_obstacle_special(Dir).

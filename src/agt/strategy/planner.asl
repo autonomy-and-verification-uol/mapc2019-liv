@@ -86,7 +86,7 @@
 		FinalLocalTargetY = LocalTargetY;
 	}
 	.print("Where we'd like to go ", FinalLocalTargetX, ", ", FinalLocalTargetY);
-	if (math.abs(TargetX) + math.abs(TargetY) > 3) {
+	if ((math.abs(TargetX) + math.abs(TargetY) > 3) | task::doing_task) {
 		.print("Target is distance 4 or more away.");
 		!generate_actual_goal(FinalLocalTargetX,FinalLocalTargetY,ActualFinalLocalTargetX,ActualFinalLocalTargetY);
 		FinalTargetX = TargetX;
@@ -101,7 +101,7 @@
 		}
 		else {
 			!action::skip;
-			if (not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type, _) & (Type == block | Type == entity))) {
+			if (not (default::thing(FinalLocalTargetX, FinalLocalTargetY, Type2, _) & (Type2 == block | Type2 == entity))) {
 				ActualFinalLocalTargetX = FinalLocalTargetX;
 				ActualFinalLocalTargetY = FinalLocalTargetY;
 				FinalTargetX = TargetX;
