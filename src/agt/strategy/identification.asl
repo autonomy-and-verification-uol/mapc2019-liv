@@ -216,7 +216,7 @@ i_met_new_agent(Iknow, IdList) :-
 
 @replyleaderme[atomic]
 +!reply_leader(Leader,LocalX,LocalY,GlobalX,GlobalY,OtherX,OtherY,AgRequested,AgRequesting)[source(Source)]
-	: .my_name(Me) & map::myMap(Me) & .all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther
+	: .my_name(Me) & map::myMap(Me) & ((stop::first_to_stop(Stop) & (Stop == Me | (identification::identified(StopIdList) & .member(Stop, StopIdList)))) | (.all_names(AllAgents) & .nth(Pos,AllAgents,Me) & .nth(PosOther,AllAgents,Leader) & Pos < PosOther))
 <-
 	.print(" Starting merge request from  ",AgRequesting," to merge with ",AgRequested," and their leader is ",Leader);
 	.send(Leader, achieve, identification::confirm_merge);
