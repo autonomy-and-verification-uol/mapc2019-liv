@@ -257,24 +257,24 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 //	!move_to_escape(MyX,MyY,XNew,YNew);
 //	.
 +!move_to_escape(MyX,MyY,X,Y) : escape & not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci)
-<-
-	if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
-		!action::rotate(cw);
-		if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
-			+rotate_back(1);
-		}
-		if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
-			!action::rotate(cw);
-			if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
-				if (common::rotate_back(RB)) {
-					-+rotate_back(RB+1);
-				}
-				else {
-					+rotate_back(1);
-				}
-			}
-		}
-	}
+//<-
+//	if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
+//		!action::rotate(cw);
+//		if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
+//			+rotate_back(1);
+//		}
+//		if(retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci))) {
+//			!action::rotate(cw);
+//			if (common::my_role(origin) & default::lastAction(rotate) & default::lastActionResult(success)) {
+//				if (common::rotate_back(RB)) {
+//					-+rotate_back(RB+1);
+//				}
+//				else {
+//					+rotate_back(1);
+//				}
+//			}
+//		}
+//	}
 	.
 +!move_to_escape(X,Y,MoveBackX,MoveBackY)
 	: escape & X < 0 

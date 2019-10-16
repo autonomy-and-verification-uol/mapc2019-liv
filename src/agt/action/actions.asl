@@ -191,33 +191,27 @@
 
 // ##### SKIP ACTION #####
 +!skip
-	: ((default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) | (retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)))) & not common::escape
+	: ((default::thing(0,0,marker,clear) | default::thing(0,0,marker,ci)) | (retrieve::block(X,Y) & (default::thing(X,Y,marker,clear) | default::thing(X,Y,marker,ci)))) & not common::escape & common::my_role(origin)
 <-
-	if (common::my_role(origin)) {
-		?common::safe_origin_pos(X,Y);
-		if (X \== 0 & Y \== 0 & retrieve::block(_,_)) {
-			+common::escape;
-			!common::move_to_escape(X,Y,MoveBackX,MoveBackY);
-			-common::escape;
-			if (common::rotate_back(RB)) {
-			     for ( .range(I,1,RB) ) {
-			     	!action::rotate(ccw);
-			     }
-			     -common::rotate_back(RB);
-			}
-			!common::move_back(MoveBackX,MoveBackY);
-			if (not default::goal(0,0)) {
-				?default::goal(GX,GY);
-				!generate_goal(GX, GY, notblock);
-			}
-		}
-		else {
-			!action::commit_action(skip); 
+	?common::safe_origin_pos(X,Y);
+	if (X \== 0 & Y \== 0 & retrieve::block(_,_)) {
+		+common::escape;
+		!common::move_to_escape(X,Y,MoveBackX,MoveBackY);
+		-common::escape;
+//		if (common::rotate_back(RB)) {
+//		     for ( .range(I,1,RB) ) {
+//		     	!action::rotate(ccw);
+//		     }
+//		     -common::rotate_back(RB);
+//		}
+		!common::move_back(MoveBackX,MoveBackY);
+		if (not default::goal(0,0)) {
+			?default::goal(GX,GY);
+			!generate_goal(GX, GY, notblock);
 		}
 	}
 	else {
-		!common::escape(MoveBackX,MoveBackY);
-		!common::move_back(MoveBackX,MoveBackY);
+		!action::commit_action(skip); 
 	}
 
 	.
