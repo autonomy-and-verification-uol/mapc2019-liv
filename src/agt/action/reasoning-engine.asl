@@ -55,6 +55,30 @@
 	if (Result == failed_random & LastAction \== skip){
 		.print("My action failed due to random failure, sending it again.");
 		!commit_action(Action); // repeat the previous action
+	}
+	elif (Result == failed_status & LastAction \== clear) {
+		.print("Agent is disabled.");
+		if (retrieve::block(X,Y) & default::thing(X,Y,block,_) ) {
+			if (common::my_role(origin)) {
+				+task::danger;
+			}
+			else {
+				-retrieve::block(X,Y);
+			}
+		}
+		!commit_action(Action); 
+	}
+	elif (Result == failed_status & LastAction == clear & default::energy(Energy) & Energy >= 30) {
+		.print("Agent is disabled.");
+		if (retrieve::block(X,Y) & default::thing(X,Y,block,_) ) {
+			if (common::my_role(origin)) {
+				+task::danger;
+			}
+			else {
+				-retrieve::block(X,Y);
+			}
+		}
+		!commit_action(Action); 
 	}else{
 //		if (default::lastAction(move)) {
 //			-move_sent;

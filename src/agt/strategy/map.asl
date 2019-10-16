@@ -41,7 +41,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @perceivegoal[atomic]
 +default::goal(X,Y)
-	: not map::evaluating_vertexes
+	: not map::evaluating_vertexes & not common::clearing_things
 <-
 	getMyPos(MyX,MyY);
 	!map::get_clusters(Clusters);
@@ -59,7 +59,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 
 @available_to_evaluate1[atomic]
 +?map::available_to_evaluate(1, GoalLocalX, GoalLocalY) :
-	not common::my_role(goal_evaluator)
+	not common::my_role(goal_evaluator) & not common::clearing_things
 <-
 	+map::evaluating_positions([start(GoalLocalX, GoalLocalY)]);
 	!!common::update_role_to(goal_evaluator);
@@ -68,7 +68,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 +?map::available_to_evaluate(0, _, _) .
 	
 -!map::evaluate(_, _) : 
-	common::previous_role(retriever) 
+	common::previous_role(retriever)  & not common::clearing_things
 <- 
 	.print("Evaluation failed"); 
 	-map::evaluating_positions(_); 
@@ -76,7 +76,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	!common::go_back_to_previous_role;
 	!!retrieve::retrieve_block.
 -!map::evaluate(_, _) : 
-	common::previous_role(explorer)  
+	common::previous_role(explorer) & not common::clearing_things
 <- 
 	.print("Evaluation failed"); 
 	-map::evaluating_positions(_); 
@@ -85,7 +85,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	//!common::update_role_to(explorer);
 	!!exploration::explore([n,s,w,e]).
 +!map::evaluate(GoalLocalX, GoalLocalY) :
-	true
+	not common::clearing_things
 <-
 	//-exploration::explorer;
 	!action::forget_old_action;
@@ -140,6 +140,7 @@ check_path(XOld,YOld,X,Y,XFirst,YFirst) :- (default::obstacle(X-1,Y) & X-1 \== X
 	.print("OriginW evaluated as:", Value4);
 	*/
 	.
++!map::evaluate(GoalLocalX, GoalLocalY) : common::clearing_things.
 
 @update_origin_evaluation1[atomic]
 +!map::update_origin_evaluation(Side, OriginX, OriginY, RetrieversList, Value, MaxPosS, MaxPosW, MaxPosE)[source(Ag)] :

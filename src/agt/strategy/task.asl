@@ -67,26 +67,106 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.
 
 @update_beliefs_submit[atomic]
-+!update_beliefs_submit
-	: committed(Id,CommitListSort)
++!update_beliefs_submit(Flag)
 <-
-	.print("Submitted task ",Id);
 	-ready_submit(0);
 	-batch(_);
 	if (default::lastAction(submit) & not default::lastActionResult(success)) {
 		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
+		Flag = -1;
+	}
+	else {
+		Flag = 1;
 	}
 	.abolish(retrieve::block(_,_));
 	+task::no_block;
-	-committed(Id,CommitListSort);
 	.
 
 +!perform_task_origin_next
 	: committed(Id,CommitListSort) & ready_submit(0)
 <-
+	.print("Submitted task ",Id);
 	!action::submit(Id);
-	!update_beliefs_submit;
+	!update_beliefs_submit(Flag);
+	if (Flag == -1) {
+		.broadcast(achieve, task::task_failed);
+		!clear_all;
+	}
+	-committed(Id,CommitListSort);
 	!default::always_skip;
+	.
+	
++!clear_all
+	: default::energy(Energy) & Energy >= 30 & default::thing(X,Y,block,_) & Y > 0
+<-
+	if (X == 0 & Y == 1) {
+		FinalX = X;
+		FinalY = Y+1;
+	}
+	elif (X == 0 & Y == -1) {
+		FinalX = X;
+		FinalY = Y-1;
+	}
+	elif (X == 1 & Y == 0) {
+		FinalX = X+1;
+		FinalY = Y;
+	}
+	elif (X == -1 & Y == 0) {
+		FinalX = X-1;
+		FinalY = Y;
+	}
+	else {
+		FinalX = X;
+		FinalY = Y;
+	}
+	for(.range(I, 1, 3)){
+		!action::clear(FinalX,FinalY);
+	}
+	!clear_all
+	.
++!clear_all.
+
++!task_failed
+	: doing_task & retrieve::block(X,Y) & direction_block(Dir,X,Y)
+<-
+	+danger2;
+	!action::detach(Dir); // easy fix for the second attached block (I do not know)
+	// we do not care if this has failed or not, the origin should clear the block
+	-retrieve::block(X,Y);
+	.
++!task_failed
+	: doing_task
+<-
+	-doing_task;
+	-planner::back_to_origin;
+	!!retrieve::retrieve_block;
+	.
++!task_failed
+	: common::my_role(origin) & committed(Id,CommitListSort)
+<-
+	+no_skip;
+	!clear_all;
+	-ready_submit(_);
+	-batch(_);
+	.abolish(retrieve::block(_,_));
+	+task::no_block;
+	-committed(Id,CommitListSort);
+	-helping_connect;
+	-no_skip;
+	.
++!task_failed.
+
++!go_back_to_position
+<-
+	getMyPos(MyX, MyY);
+	getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
+	TargetX = TargetXGlobal - MyX;
+	TargetY = TargetYGlobal - MyY;
+	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
+	.print("Agent position: ", MyX, MyY);
+	.print("Chosen Relative Goal position: ", TargetX, TargetY);
+	+getting_to_position;
+	!planner::generate_goal(TargetX, TargetY, notblock);
 	.
 
 @next_job_task[atomic]
@@ -180,6 +260,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!perform_task(X,Y,noblock)[source(Origin)]
 	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
+	+doing_task;
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
@@ -196,18 +277,32 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	?retrieve::block(BX,BY);
-	.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
-	?get_direction(BX,BY,DetachPos);
-	!action::detach(DetachPos);
-	.wait(task::synch_complete[source(Origin)]);
-	-task::synch_complete[source(Origin)];
+	if (not danger2) {
+		?retrieve::block(BX,BY);
+		.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
+		if (not danger2) {
+			?get_direction(BX,BY,DetachPos);
+			!action::detach(DetachPos);
+			.wait(task::synch_complete[source(Origin)] | task::danger2);
+			-task::synch_complete[source(Origin)];
+		}
+		else {
+			-planner::back_to_origin;
+			-danger2;
+		}
+	}
+	else {
+		-planner::back_to_origin;
+		-danger2;
+	}
+	-doing_task;
 	!!retrieve::retrieve_block;
 	.
 	
 +!perform_task(X,Y)[source(Origin)]
 	: .my_name(Me) & retrieve::block(BBX, BBY) & default::thing(BBX, BBY, block, Type)
 <-
+	+doing_task;
 	!action::forget_old_action(default,always_skip);
 	.print("@@@@ Received order for new task, origin does not have a block");
 	removeAvailableAgent(Me);
@@ -224,14 +319,27 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	?retrieve::block(BX,BY);
-	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
-	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
-		!action::connect(Origin,BX,BY);
+	if (not danger2) {
+		?retrieve::block(BX,BY);
+		.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
+		while (not (default::lastAction(connect) & default::lastActionResult(success)) & not task::danger2) {
+			!action::connect(Origin,BX,BY);
+		}
+		.wait(task::synch_complete[source(Origin)] | task::danger2);
+		-task::synch_complete[source(Origin)];
+		if (not danger2) {
+			?get_direction(BX,BY,DetachPos);
+			!action::detach(DetachPos);
+		}
+		else {
+			-planner::back_to_origin;
+			-danger2;
+		}
 	}
-	.wait(task::synch_complete[source(Origin)]);
-	-task::synch_complete[source(Origin)];
-	?get_direction(BX,BY,DetachPos);
-	!action::detach(DetachPos);
+	else {
+		-planner::back_to_origin;
+		-danger2;
+	}
+	-doing_task;
 	!!retrieve::retrieve_block;
 	.

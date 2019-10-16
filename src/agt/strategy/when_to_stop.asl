@@ -39,7 +39,6 @@
 //			!action::forget_old_action;
 			//.member(origin(_, GoalX, GoalY), GoalList);
 			setTargetGoal(Pos, Me, GoalX, GoalY, Side);
-			initStockerAvailablePos(Leader);
 			initRetrieverAvailablePos(Leader);
 			.broadcast(tell, stop::first_to_stop(Me));
 			!action::forget_old_action;

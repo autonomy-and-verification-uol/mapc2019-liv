@@ -30,19 +30,19 @@ check_obstacle_all(s) :- default::obstacle(0,1) | default::thing(0, 1, Thing, _)
 check_obstacle_all(e) :- default::obstacle(1,0) | default::thing(1, 0, Thing, _) & (Thing == entity | Thing == block).
 check_obstacle_all(w) :- default::obstacle(-1,0) | default::thing(-1, 0, Thing, _) & (Thing == entity | Thing == block).
 
-check_agent(n) :- default::team(Team) & ( default::thing(0, -1, entity, Team) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(0, -2, entity, Team)) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, -1, entity, Team)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, -1, entity, Team))). 
-check_agent(s) :- default::team(Team) & ( default::thing(0, 1, entity, Team) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(0, 2, entity, Team))  | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(1, 1, entity, Team))  | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, 1, entity, Team))). 
-check_agent(e) :- default::team(Team) & ( default::thing(1, 0, entity, Team) | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(2, 0, entity, Team)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(1, -1, entity, Team))  | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, 1, entity, Team))). 
-check_agent(w) :- default::team(Team) & ( default::thing(-1, 0, entity, Team) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-2, 0, entity, Team)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(-1, 1, entity, Team)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(-1, -1, entity, Team))).
+check_agent(n) :- ( default::thing(0, -1, entity, _) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(0, -2, entity, _)) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, -1, entity, _)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, -1, entity, _))). 
+check_agent(s) :- ( default::thing(0, 1, entity, _) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(0, 2, entity, _))  | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(1, 1, entity, _))  | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-1, 1, entity, _))). 
+check_agent(e) :- ( default::thing(1, 0, entity, _) | (default::thing(1, 0, block, _) & retrieve::block(1,0) & default::thing(2, 0, entity, _)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(1, -1, entity, _))  | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(1, 1, entity, _))). 
+check_agent(w) :- ( default::thing(-1, 0, entity, _) | (default::thing(-1, 0, block, _) & retrieve::block(-1,0) & default::thing(-2, 0, entity, _)) | (default::thing(0, 1, block, _) & retrieve::block(0,1) & default::thing(-1, 1, entity, _)) | (default::thing(0, -1, block, _) & retrieve::block(0,-1) & default::thing(-1, -1, entity, _))).
 
-check_agent_special(n) :- retrieve::block(0, -1) & default::team(Team) & default::thing(0, -2, entity, Team).
-check_agent_special(n) :- (not retrieve::block(0, -1)) & default::team(Team) & default::thing(0, -1, entity, Team).
-check_agent_special(s) :- retrieve::block(0, 1) & default::team(Team) & default::thing(0, 2, entity, Team).
-check_agent_special(s) :- (not retrieve::block(0, 1)) & default::team(Team) & default::thing(0, 1, entity, Team).
-check_agent_special(e) :- retrieve::block(1, 0) & default::team(Team) & default::thing(2, 0, entity, Team).
-check_agent_special(e) :- (not retrieve::block(0, -1)) & default::team(Team) & default::thing(1, 0, entity, Team).
-check_agent_special(w) :- retrieve::block(-1, 0) & default::team(Team) & default::thing(-2, 0, entity, Team).
-check_agent_special(w) :- (not retrieve::block(-1, 0)) & default::team(Team) & default::thing(-1, 0, entity, Team).
+check_agent_special(n) :- retrieve::block(0, -1) & default::thing(0, -2, entity, _).
+check_agent_special(n) :- (not retrieve::block(0, -1)) & default::thing(0, -1, entity, _).
+check_agent_special(s) :- retrieve::block(0, 1) & default::thing(0, 2, entity, _).
+check_agent_special(s) :- (not retrieve::block(0, 1)) & default::thing(0, 1, entity, _).
+check_agent_special(e) :- retrieve::block(1, 0) & default::thing(2, 0, entity, _).
+check_agent_special(e) :- (not retrieve::block(0, -1)) & default::thing(1, 0, entity, _).
+check_agent_special(w) :- retrieve::block(-1, 0) & default::thing(-2, 0, entity, _).
+check_agent_special(w) :- (not retrieve::block(-1, 0)) & default::thing(-1, 0, entity, _).
 
 prune_direction([],PrunedDirListTemp,PrunedDirList) :- PrunedDirList = PrunedDirListTemp.
 prune_direction([Dir|L],PrunedDirListTemp,PrunedDirList) :- check_obstacle(Dir) & prune_direction(L,PrunedDirListTemp,PrunedDirList).
@@ -87,7 +87,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	 .
 
 +!explore(Dirlist)
-	: default::obstacle(0,1) & default::obstacle(0,-1) & default::obstacle(1,0) & default::obstacle(-1,0) & common::my_role(explorer) & .random(Number) & random_dir([n,s,e,w],4,Number,Dir) & default::energy(Energy) & Energy >= 270 // & default::vision(V) & common::find_empty_position(X,Y,1,V)
+	: (default::obstacle(0,1) | default::obstacle(0,2)) & (default::obstacle(0,-1) | default::obstacle(0,-2)) & (default::obstacle(1,0) | default::obstacle(2,0)) & (default::obstacle(-1,0) | default::obstacle(-2,0)) & common::my_role(explorer) & .random(Number) & random_dir([n,s,e,w],4,Number,Dir) & default::energy(Energy) & Energy >= 240 // & default::vision(V) & common::find_empty_position(X,Y,1,V)
 <-
 	.print("@@@@@ No movement options available");
 	!action::skip;
@@ -104,7 +104,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 <-
 	?remove_opposite(FirstDir,OppDir);
 	?get_other_side(FirstDir,OtherDir1,OtherDir2);
-	if (check_obstacle(FirstDir) &  check_obstacle(OppDir) & (check_obstacle(OtherDir1) | check_obstacle(OtherDir2))) {
+	if (check_obstacle(FirstDir) &  check_obstacle(OppDir) & (check_obstacle(OtherDir1) | check_obstacle(OtherDir2)) & default::energy(Energy) & default::energy(Energy) & Energy < 240) {
 		if (not check_obstacle(OtherDir1)) {
 			!explore_until_obstacle(OtherDir1);
 		}
@@ -121,6 +121,13 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 		+special(first);
 		!explore_until_obstacle_special(FirstDir);
 	}
+	.
+	
++!explore(Dirlist)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	!!explore([n,s,e,w]);
 	.
 
 +!explore(Dirlist).
@@ -209,7 +216,7 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	.
 	
 +!explore_until_obstacle(Dir)
-	: common::my_role(explorer) & check_obstacle(Dir) & not action::out_of_bounds(Dir) & default::energy(Energy) & Energy >= 270
+	: common::my_role(explorer) & check_obstacle(Dir) & default::energy(Energy) & Energy >= 240
 <-
 	!try_to_clear(Dir);
 	.
@@ -218,6 +225,13 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 	: common::my_role(explorer) & .delete(Dir,[n,s,e,w],DirAux) & remove_opposite(Dir,NewDir) & .delete(NewDir,DirAux,DirList) 
 <-
 	!!explore(DirList);
+	.
+	
++!explore_until_obstacle(Dir)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	!!explore([n,s,e,w]);
 	.
 
 +!explore_until_obstacle(Dir).
@@ -280,6 +294,14 @@ get_other_side(e,OtherDir1,OtherDir2) :- OtherDir1 = n & OtherDir2 = s.
 <-
 	.print("@@@@@ No movement options available AT SPECIAL, sending skip forever");
 	!default::always_skip;
+	.
+
++!explore_until_obstacle_special(Dir)
+	: common::my_role(explorer)
+<-
+	!action::skip;
+	-special(_);
+	!!explore([n,s,e,w]);
 	.
 
 +!explore_until_obstacle_special(Dir).

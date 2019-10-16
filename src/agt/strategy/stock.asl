@@ -272,18 +272,26 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print(" Step1 ",Step1," Step2 ",Step2);
 	!retrieve::decide_block_type_flat(Type); 
 	.print("I decided to get block type: ", Type);
-	!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
+	if (retrieve::minus_one(DispX,DispY)) {
+		-retrieve::minus_one(DispX,DispY);
+		!retrieve::get_nearest_dispenser_minus_one(Type, dispenser(Type, X, Y), DispX, DispY);
+	}
+	else {
+		!retrieve::get_nearest_dispenser(Type, dispenser(Type, X, Y));
+	}
 	.print("The nearest dispenser is: ", dispenser(Type, X, Y));
 	.print("Target added: ", X, " ", Y);
 	.print("My pos: ", MyX, " ", MyY);
 	TargetX = X - MyX;
 	TargetY = Y - MyY;
-	+collect_block;
+	
 	if(TargetX < 0){
 		.print("Relative target: ", TargetX + 1, " ", TargetY);
+		+collect_block(-1,0);
 		!!planner::generate_goal(TargetX + 1, TargetY, block);
 	} else {
 		.print("Relative target: ", TargetX - 1, " ", TargetY);
+		+collect_block(1,0);
 		!!planner::generate_goal(TargetX - 1, TargetY, block);
 	}
 	.
@@ -359,7 +367,14 @@ most_needed_type(Dispensers, AgList, Type) :-
 	true
 <- 
 	!retrieve::pick_block_aux(X, BlocksRange, Block).
-	
+
+@get_nearest_dispenser_minus_one[atomic]
++!retrieve::get_nearest_dispenser_minus_one(Type, Dispenser, DispX, DispY) : 
+	true
+<-
+	!map::get_dispensers(Dispensers); .print("Dispensers: ", Dispensers);
+	.delete(dispenser(_, DispX, DispY), Dispensers, DispensersNew);
+	!retrieve::get_nearest_dispenser_aux1(DispensersNew, Type, Dispenser).
 @get_nearest_dispenser[atomic]
 +!retrieve::get_nearest_dispenser(Type, Dispenser) : 
 	true
@@ -413,23 +428,66 @@ most_needed_type(Dispensers, AgList, Type) :-
 	+retrieve::fetching_block;
 	-retrieve::attach_completed;
 	while(not retrieve::attach_completed){
-		!action::request(Direction);
-		.print("here1");
-		if(default::lastActionResult(failed_target)){
-			.fail;
+		if (default::thing(DispX,DispY,block,_)) {
+			if (not default::attached(DispX,DispY) & default::team(Team) & not (DispX-1 \== 0 & default::thing(DispX-1,DispY,entity,Team))  & not (DispX+1 \== 0 & default::thing(DispX+1,DispY,entity,Team))  & not (DispY-1 \== 0 & default::thing(DispX,DispY-1,entity,Team))  & not (DispY+1 \== 0 & default::thing(DispX,DispY+1,entity,Team)) ) {
+				!action::attach(Direction);
+				if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
+					.print("here6");
+					+retrieve::attach_completed;
+				}
+			}
+			else {
+				!action::skip;
+				if (DispX-1 \== 0 & default::thing(DispX-1,DispY,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX-1,DispY);
+						}
+					}
+				}
+				elif (DispX+1 \== 0 & default::thing(DispX+1,DispY,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX+1,DispY);
+						}
+					}
+				}
+				elif (DispY+1 \== 0 & default::thing(DispX,DispY+1,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX,DispY+1);
+						}
+					}
+				}
+				elif (DispY-1 \== 0 & default::thing(DispX,DispY-1,entity,Team)) {
+					for(.range(I, 1, 3)){
+						if ((not default::lastAction(clear) | default::lastAction(clear)) & (default::lastActionResult(success) | default::lastActionResult(failed_random))) {
+							!action::clear(DispX,DispY-1);
+						}
+					}
+				}
+			}
 		}
-		.print("here2");
-		while(not default::lastActionResult(success)){
-			.print("here3");
+		else {
 			!action::request(Direction);
+			.print("here1");
+			if(default::lastActionResult(failed_target)){
+				.fail;
+			}
+			.print("here2");
+			while(not default::lastActionResult(success)){
+				.print("here3");
+				!action::request(Direction);
+			}
+			.print("here4");
+			!action::attach(Direction);
+			.print("here5");
+			if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
+				.print("here6");
+				+retrieve::attach_completed;
+			}
 		}
-		.print("here4");
-		!action::attach(Direction);
-		.print("here5");
-		if(default::lastActionResult(success) & retrieve::block(DispX, DispY)){
-			.print("here6");
-			+retrieve::attach_completed;
-		}
+
 	}
 	-retrieve::fetching_block.
 /*
@@ -459,30 +517,10 @@ most_needed_type(Dispensers, AgList, Type) :-
 
 +!get_block
 <-
-	-collect_block;
+	-collect_block(_,_);
 	!retrieve::create_and_attach_block;
-//	.wait(not action::move_sent);
 	getMyPos(MyX, MyY);
-//	if (common::my_role(stocker)) {
-//		getStockerAvailablePos(TargetXGlobal, TargetYGlobal);
-//		getTargetGoal(_, GoalX, GoalY, _);
-//		if (TargetYGlobal < GoalY) {
-//			StockerBlockPos = s;
-//		}
-//		elif (TargetYGlobal > GoalY) {
-//			StockerBlockPos = n;
-//		}
-//		elif (TargetXGlobal > GoalX) {
-//			StockerBlockPos = w;
-//		}
-//		else {
-//			StockerBlockPos = e;
-//		}
-//		+gate(StockerBlockPos);
-//	}
-//	else {
-		getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
-//	}
+	getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
 	TargetX = TargetXGlobal - MyX;
 	TargetY = TargetYGlobal - MyY;
 	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
@@ -490,101 +528,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 	.print("Chosen Relative Goal position: ", TargetX, TargetY);
 	+getting_to_position;
 	!planner::generate_goal(TargetX, TargetY, notblock);
-//	!retrieve::move_to_goal;
 	.
-
-+!retrieve::fetch_block_to_goal : 
-	true
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	!retrieve::fetch_block_to_goal_aux(MyX, MyY).
-+!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::target(TargetX, TargetY) &
-	neighbour_to_dispenser(MyX, MyY, TargetX, TargetY, Direction) &
-	.my_name(Me)
-<-
-	!retrieve::create_and_attach_block(Direction);
-	if(stop::first_to_stop(Me)){
-		getTargetGoal(Ag, GoalX, GoalY, SideStr);
-		MyGoalX = GoalX; MyGoalY = GoalY;
-	} else{
-		if (not common::my_role(retriever)) {
-			getStockerAvailablePos(MyGoalX, MyGoalY);
-			if (MyGoalY < GoalY) {
-				StockerBlockPos = s;
-			}
-			elif (MyGoalY > GoalY) {
-				StockerBlockPos = n;
-			}
-			elif (MyGoalX > GoalX) {
-				StockerBlockPos = w;
-			}
-			else {
-				StockerBlockPos = e;
-			}
-			+gate(StockerBlockPos);
-		}
-		else {
-			getRetrieverAvailablePos(MyGoalX, MyGoalY);
-			/*getTargetGoal(Ag, GoalX, GoalY, SideStr);
-			.random(NX);
-			.random(RX);
-			if (NX > 0.5) {
-				RandomX = math.floor(RX * 5)+7;
-			}
-			else {
-				RandomX = math.floor(RX * -5)-7;
-			}
-			.random(NY);
-			.random(RY);
-			if (NY > 0.5) {
-				RandomY = math.floor(RY * 5)+9;
-			}
-			else {
-				RandomY = math.floor(RX * -5)-5;
-			}
-			MyGoalX = GoalX + RandomX;
-			MyGoalY = GoalY + RandomY;*/
-		}
-//		!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-//		.random(R); .length(HelpersPos, NHelpersPos); R1 = R * (NHelpersPos-1);
-//		.nth(R1, HelpersPos, pos(MyGoalX, MyGoalY));
-	}
-	.print("Chosen Goal position: ", MyGoalX, MyGoalY);
-	-+retrieve::target(MyGoalX, MyGoalY);
-	!retrieve::move_to_goal.
-+!retrieve::fetch_block_to_goal_aux(MyX, MyY) :	
-	retrieve::target(TargetX, TargetY) &
-	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
-<-		
-	.print("TargetX: ", TargetX, " TargetY: ", TargetY);
-	if (exploration::check_obstacle_special_1(Direction, 1)) {
-		if(i_can_avoid(Direction, DirectionToGo)){
-			.print("GO AROUND OBSTACLE: ", i_can_avoid(Direction, DirectionToGo));
-			!retrieve::go_around_obstacle(Direction, DirectionToGo, MyX, MyY, 0, 5, DirectionObstacle1, 1)
-//			.wait(not action::move_sent);
-			getMyPos(MyX1,MyY1);
-			if(MyX == MyX1 & MyY == MyY1){
-				for(.range(_, 1, 5) & .random(R) & .nth(math.floor(R*3.99), [n,s,w,e], Dir)){
-					!retrieve::smart_move(Dir);
-				}
-			}
-			.print("OBSTACLE AVOIDED");
-		} elif(default::energy(Energy) & Energy >= 30 & not exploration::check_agent_special(Direction)){
-			!retrieve::smart_clear(Direction);
-			if(retrieve::res(0)){
-				!retrieve::go_around_obstacle(Direction, 5);
-			}
-		} else{
-			!retrieve::go_around_obstacle(Direction, 5);
-		}
-	} else {
-		!retrieve::smart_move(Direction);
-	}
-	!retrieve::fetch_block_to_goal.
-	
--!retrieve::fetch_block_to_goal : true <- !!retrieve::fetch_block_to_goal.
 
 -!retrieve::smart_move(Direction) : 
 	true 
@@ -766,92 +710,7 @@ most_needed_type(Dispensers, AgList, Type) :-
 			.fail;
 		}
 	}.
-	
-+!retrieve::move_to_goal : 
-	.my_name(Me) & common::my_role(helper)
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	getTargetGoal(_, GoalX, GoalY, _);
-//	.term2string(Side, SideStr);
-	.print("Chosen Goal position: ", GoalX+1, GoalY);
-	MyGoalX = GoalX+1; MyGoalY = GoalY;
-	-+retrieve::target(MyGoalX, MyGoalY);
-	!retrieve::move_to_goal_aux(MyX, MyY).
 
-+!retrieve::move_to_goal : 
-	.my_name(Me)
-<- 
-//	.wait(not action::move_sent);
-	getMyPos(MyX,MyY);
-	if(stop::first_to_stop(Me)){
-		getTargetGoal(_, GoalX, GoalY, _);
-//		.term2string(Side, SideStr);
-		.print("Chosen Goal position: ", GoalX, GoalY);
-		MyGoalX = GoalX; MyGoalY = GoalY;
-		-+retrieve::target(MyGoalX, MyGoalY);
-	}
-	!retrieve::move_to_goal_aux(MyX, MyY).
-+!retrieve::move_to_goal_aux(TargetX, TargetY) :	
-	retrieve::target(TargetX, TargetY) & stop::first_to_stop(Ag)
-<-
-//	if(retrieve::block(0, -1)){
-//		!retrieve::smart_rotate(n, s);
-//		!retrieve::move_to_goal_aux(TargetX, TargetY);
-//	} elif(retrieve::block(-1, 0)){
-//		!retrieve::smart_rotate(w, s);
-//		!retrieve::move_to_goal_aux(TargetX, TargetY);
-//	} elif(retrieve::block(1, 0)){
-//		!retrieve::smart_rotate(e, s);
-//		!retrieve::move_to_goal_aux(TargetX, TargetY);
-//	} else{
-	.my_name(Me);
-	if  (stop::first_to_stop(Me)) {
-		-moving_to_origin;
-		+task::origin;
-	}
-	elif (common::my_role(helper)) {
-		-moving_to_origin;
-		.send(Ag, tell, task::helper(Me));
-	}
-	elif (common::my_role(stocker)) {
-//		.wait(not action::move_sent);
-		getMyPos(MyX,MyY);
-		?gate(Gate);
-		addStocker(Me, MyX, MyY, Gate);
-		+task::stocker_in_position;
-		if (retrieve::block(X,Y)) {
-			?default::thing(X,Y,block,Type);
-			addStockerBlock(Me, Type);
-		}
-		
-//			addAvailableAgent(Me,Type);
-		.send(Ag, tell, task::stocker(Me));
-	}
-	!default::always_skip;
-//	}
-	.
-	
-//+!retrieve::move_to_goal_aux(MyX, MyY) :
-//	retrieve::retriever & .my_name(Me) & not(stop::first_to_stop(Me)) & retrieve::target(TargetX, TargetY) &
-//	(math.abs(MyX - TargetX) + math.abs(MyY - TargetY)) <= 3 &
-//	pick_direction(MyX, MyY, TargetX, TargetY, Direction) & exploration::check_agent_special(Direction)
-//<-
-//	getTargetGoal(_, GoalX, GoalY, SideStr);
-//	.term2string(Side, SideStr);
-//	!retrieve::generate_helpers_position(origin(GoalX, GoalY), Side, HelpersPos, _);
-//	.nth(Pos, HelpersPos, pos(TargetX, TargetY));
-//	.length(HelpersPos, NHelpersPos);
-//	if(Pos == (NHelpersPos-1)){
-//		Pos1 = 0;
-//	} else{
-//		Pos1 = Pos + 1;
-//	}
-//	.nth(Pos1, HelpersPos, pos(NewTargetX, NewTargetY));
-//	getAvailablePos(NewTargetX, NewTargetY);
-//	-+retrieve::target(NewTargetX, NewTargetY)
-//	!retrieve::move_to_goal_aux(MyX, MyY);
-//	.
 +!retrieve::move_to_goal_aux(MyX, MyY) :	
 	retrieve::target(TargetX, TargetY) & 
 	pick_direction(MyX, MyY, TargetX, TargetY, Direction) 
