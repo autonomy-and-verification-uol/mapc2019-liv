@@ -165,11 +165,11 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 		!task::task_failed;
 	}
 	else {
-		?default::step(Step);
-		if (not default::task(Id, _, _, _) | (default::task(Id, Deadline, _, _) & Step > Deadline)) {
-			.broadcast(achieve, task::task_failed);
-			!task::task_failed;
-		}
+//		?default::step(Step);
+//		if (not default::task(Id, _, _, _) | (default::task(Id, Deadline, _, _) & Step > Deadline)) {
+//			.broadcast(achieve, task::task_failed);
+//			!task::task_failed;
+//		}
 		!action::skip;
 		!!always_skip;
 	}

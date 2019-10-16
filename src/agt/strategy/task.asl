@@ -275,12 +275,24 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	?retrieve::block(BX,BY);
-	.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
-	?get_direction(BX,BY,DetachPos);
-	!action::detach(DetachPos);
-	.wait(task::synch_complete[source(Origin)]);
-	-task::synch_complete[source(Origin)];
+	if (not danger2) {
+		?retrieve::block(BX,BY);
+		.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
+		if (not danger2) {
+			?get_direction(BX,BY,DetachPos);
+			!action::detach(DetachPos);
+			.wait(task::synch_complete[source(Origin)] | task::danger2);
+			-task::synch_complete[source(Origin)];
+		}
+		else {
+			-planner::back_to_origin;
+			-danger2;
+		}
+	}
+	else {
+		-planner::back_to_origin;
+		-danger2;
+	}
 	-doing_task;
 	!!retrieve::retrieve_block;
 	.
@@ -305,15 +317,27 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	?retrieve::block(BX,BY);
-	.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
-	while (not (default::lastAction(connect) & default::lastActionResult(success))) {
-		!action::connect(Origin,BX,BY);
+	if (not danger2) {
+		?retrieve::block(BX,BY);
+		.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
+		while (not (default::lastAction(connect) & default::lastActionResult(success)) & not task::danger2) {
+			!action::connect(Origin,BX,BY);
+		}
+		.wait(task::synch_complete[source(Origin)] | task::danger2);
+		-task::synch_complete[source(Origin)];
+		if (not danger2) {
+			?get_direction(BX,BY,DetachPos);
+			!action::detach(DetachPos);
+		}
+		else {
+			-planner::back_to_origin;
+			-danger2;
+		}
 	}
-	.wait(task::synch_complete[source(Origin)]);
-	-task::synch_complete[source(Origin)];
-	?get_direction(BX,BY,DetachPos);
-	!action::detach(DetachPos);
+	else {
+		-planner::back_to_origin;
+		-danger2;
+	}
 	-doing_task;
 	!!retrieve::retrieve_block;
 	.
