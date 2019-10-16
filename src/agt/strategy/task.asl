@@ -67,26 +67,108 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.
 
 @update_beliefs_submit[atomic]
-+!update_beliefs_submit
-	: committed(Id,CommitListSort)
++!update_beliefs_submit(Flag)
 <-
-	.print("Submitted task ",Id);
 	-ready_submit(0);
 	-batch(_);
 	if (default::lastAction(submit) & not default::lastActionResult(success)) {
 		.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TASK FAILED")
+		Flag = -1;
+	}
+	else {
+		Flag = 1;
 	}
 	.abolish(retrieve::block(_,_));
 	+task::no_block;
-	-committed(Id,CommitListSort);
 	.
 
 +!perform_task_origin_next
 	: committed(Id,CommitListSort) & ready_submit(0)
 <-
+	.print("Submitted task ",Id);
 	!action::submit(Id);
-	!update_beliefs_submit;
+	!update_beliefs_submit(Flag);
+	if (Flag == -1) {
+		.broadcast(achieve, task::task_failed);
+		!clear_all;
+	}
+	-committed(Id,CommitListSort);
 	!default::always_skip;
+	.
+	
++!clear_all
+	: default::energy(Energy) & Energy >= 30 & default::thing(X,Y,block,_)
+<-
+	if (X == 0 & Y == 1) {
+		FinalX = X;
+		FinalY = Y+1;
+	}
+	elif (X == 0 & Y == -1) {
+		FinalX = X;
+		FinalY = Y-1;
+	}
+	elif (X == 1 & Y == 0) {
+		FinalX = X+1;
+		FinalY = Y;
+	}
+	elif (X == -1 & Y == 0) {
+		FinalX = X-1;
+		FinalY = Y;
+	}
+	else {
+		FinalX = X;
+		FinalY = Y;
+	}
+	for(.range(I, 1, 3)){
+		!action::clear(FinalX,FinalY);
+	}
+	!clear_all
+	.
++!clear_all.
+
++!task_failed
+	: doing_task & retrieve::block(X,Y)
+<-
+	!action::forget_old_action;
+	.drop_desire(task::perform_task(_,_,_)[source(_)]);
+	.drop_desire(task::perform_task(_,_)[source(_)]);
+	.drop_future_intention(task::perform_task(_,_,_)[source(_)]);
+	.drop_future_intention(task::perform_task(_,_)[source(_)]);
+	-doing_task;
+	-planner::back_to_origin;
+	!go_back_to_position;
+	.
++!task_failed
+	: doing_task
+<-
+	-doing_task;
+	-planner::back_to_origin;
+	!!retrieve::retrieve_block;
+	.
++!task_failed
+	: common::my_role(origin) & committed(Id,CommitListSort)
+<-
+	!clear_all;
+	-ready_submit(_);
+	-batch(_);
+	.abolish(retrieve::block(_,_));
+	+task::no_block;
+	-committed(Id,CommitListSort);
+	-helping_connect;
+	.
++!task_failed.
+
++!go_back_to_position
+<-
+	getMyPos(MyX, MyY);
+	getRetrieverAvailablePos(TargetXGlobal, TargetYGlobal);
+	TargetX = TargetXGlobal - MyX;
+	TargetY = TargetYGlobal - MyY;
+	.print("Chosen Global Goal position: ", TargetXGlobal, TargetYGlobal);
+	.print("Agent position: ", MyX, MyY);
+	.print("Chosen Relative Goal position: ", TargetX, TargetY);
+	+getting_to_position;
+	!planner::generate_goal(TargetX, TargetY, notblock);
 	.
 
 @next_job_task[atomic]

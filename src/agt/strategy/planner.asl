@@ -560,12 +560,17 @@
 		else {
 			.print("@@@@ Action: ", Action);
 			!action::Action;
-			if (common::my_role(retriever) & retrieve::getting_to_position & not retrieve::block(X,Y)) {
+			if (common::my_role(retriever) & (retrieve::getting_to_position | task::doing_task) & not retrieve::block(X,Y)) {
 				?localtargetx(RemoveLocalTargetX);
 				?localtargety(RemoveLocalTargetY);
 				-localtargetx(RemoveLocalTargetX);
 				-localtargety(LocalTargetY);
-				.fail;
+				if (retrieve::getting_to_position) {
+					.fail(retriever_getting_position);
+				}
+				elif (task::doing_task) {
+					.fail(retriever_doing_task);
+				}
 			}
 			if (default::lastAction(move) & not (default::lastActionResult(success)) & default::lastActionParams([Direction|List])) {
 				if ( Direction == n & planner::localtargety(LocalTargetYAux) ) {
@@ -591,14 +596,22 @@
 	!generate_goal(TargetX - FinalLocalTargetX, TargetY - FinalLocalTargetY, notblock);
 	.
 
--!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)
+-!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)[code(.fail(retriever_getting_position))]
 	: common::my_role(retriever) & retrieve::getting_to_position & .my_name(Me)
 <-
 	-retrieve::getting_to_position;
 	getMyPos(MyX,MyY);
 	addRetrieverAvailablePos(TargetX+MyX,TargetY+MyY);
-	//getAvailableMeType(Me, Type);
 	removeBlock(Me);
+	!!retrieve::retrieve_block;
+	.
+-!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)[code(.fail(retriever_doing_task))]
+	: common::my_role(retriever) & task::doing_task & .my_name(Me)
+<-
+	-task::doing_task;
+	.broadcast(achieve, task::task_failed);
+	-doing_task;
+	-planner::back_to_origin;
 	!!retrieve::retrieve_block;
 	.
 	
