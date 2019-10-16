@@ -97,7 +97,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	.
 	
 +!clear_all
-	: default::energy(Energy) & Energy >= 30 & default::thing(X,Y,block,_)
+	: default::energy(Energy) & Energy >= 30 & default::thing(X,Y,block,_) & Y > 0
 <-
 	if (X == 0 & Y == 1) {
 		FinalX = X;
@@ -129,14 +129,8 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!task_failed
 	: doing_task & retrieve::block(X,Y)
 <-
-	!action::forget_old_action;
-	.drop_desire(task::perform_task(_,_,_)[source(_)]);
-	.drop_desire(task::perform_task(_,_)[source(_)]);
-	.drop_future_intention(task::perform_task(_,_,_)[source(_)]);
-	.drop_future_intention(task::perform_task(_,_)[source(_)]);
-	-doing_task;
-	-planner::back_to_origin;
-	!go_back_to_position;
+	+danger2;
+	-retrieve::block(X,Y);
 	.
 +!task_failed
 	: doing_task
@@ -148,6 +142,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!task_failed
 	: common::my_role(origin) & committed(Id,CommitListSort)
 <-
+	+no_skip;
 	!clear_all;
 	-ready_submit(_);
 	-batch(_);
@@ -155,6 +150,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 	+task::no_block;
 	-committed(Id,CommitListSort);
 	-helping_connect;
+	-no_skip;
 	.
 +!task_failed.
 

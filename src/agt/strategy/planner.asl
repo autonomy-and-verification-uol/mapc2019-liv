@@ -609,8 +609,12 @@
 	: common::my_role(retriever) & task::doing_task & .my_name(Me)
 <-
 	-task::doing_task;
-	.broadcast(achieve, task::task_failed);
-	-doing_task;
+	if (not task::danger2) {
+		.broadcast(achieve, task::task_failed);
+	}
+	else {
+		-task::danger2;
+	}
 	-planner::back_to_origin;
 	!!retrieve::retrieve_block;
 	.

@@ -395,6 +395,23 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 	: not default::lastAction(rotate) & retrieve::block(X,Y) & not default::thing(X,Y,block,_)
 <-
 	-retrieve::block(X,Y);
+	if (common::my_role(origin)) {
+		+danger;
+	}
 	.
 	
-	
++!check_disable(Action)
+	: retrieve::block(X,Y) & default::thing(X,Y,block,_) & not default::disabled & direction_block(Dir,X,Y)
+<-
+	!action::attach(Dir);
+	if (not default::lastActionResult(success) & common::my_role(origin)) {
+		-retrieve::block(X,Y);
+		if (common::my_role(origin)) {
+			.broadcast(achieve, task::task_failed);
+			!task::task_failed;
+		}
+	}
+	!action::Action;
+	.
++!check_disable(Action)
+<- !action::Action.

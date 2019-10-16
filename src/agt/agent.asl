@@ -70,7 +70,7 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 
 +!always_skip :
 	task::origin  & 
-	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30
+	not task::committed(_,_) & default::obstacle(X,Y) & default::energy(Energy) & Energy >= 30 & not task::no_skip
 <-
 	for(.range(I, 1, 3)){
 		if (retrieve::block(BX,BY)) {
@@ -126,7 +126,7 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 	}
 	!!always_skip;
 	.
-
+	
 @always_skip[atomic]
 +!always_skip :
 	common::my_role(retriever) &
@@ -140,15 +140,21 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 	!!retrieve::retrieve_block;
 	.
 +!always_skip 
-	: task::origin  & task::committed(_,_) & retrieve::block(_,_)
+	: task::origin  & task::committed(Id,_) & not task::no_skip
 <-
 	+safe(1);
-	for (retrieve::block(X,Y)) {
-		?safe(Safe);
-		if (Safe == 1) {
-			if (not default::thing(X,Y,block,_)) {
-				-safe(Safe);
-				+safe(0);
+	if (common::danger) {
+		-+safe(0);
+		-common::danger;
+	}
+	else {
+		for (retrieve::block(X,Y)) {
+			?safe(Safe);
+			if (Safe == 1) {
+				if (not default::thing(X,Y,block,_)) {
+					-safe(Safe);
+					+safe(0);
+				}
 			}
 		}
 	}
@@ -159,10 +165,29 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 		!task::task_failed;
 	}
 	else {
+		?default::step(Step);
+		if (not default::task(Id, _, _, _) | (default::task(Id, Deadline, _, _) & Step > Deadline)) {
+			.broadcast(achieve, task::task_failed);
+			!task::task_failed;
+		}
 		!action::skip;
 		!!always_skip;
 	}
 	.
++!always_skip
+	: not task::no_skip
+<-
+	!action::skip;
+	!!always_skip;
+	.
+	
++!always_skip
+	: task::no_skip
+<-
+	.wait(not task::no_skip);
+	!always_skip;
+	.
+	
 +!always_skip
 	: true
 <-
