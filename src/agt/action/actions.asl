@@ -43,7 +43,7 @@
 	!move(e);
 	.
 // Avoid clear markers moving west
-+!move(e)
++!move(w)
 	: not default::thing(0,0,marker,clear) & not default::thing(0,0,marker,ci) & ((default::thing(-1,0,marker,clear) | default::thing(-1,0,marker,ci))  | (retrieve::block(-1,0) & (default::thing(-2,0,marker,clear) | default::thing(-2,0,marker,ci))))
 <-
 	!skip;
@@ -213,7 +213,6 @@
 	else {
 		!action::commit_action(skip); 
 	}
-
 	.
 +!skip
 <-

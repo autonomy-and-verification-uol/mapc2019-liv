@@ -139,6 +139,30 @@ block_adjacent(X,Y,FinalX,FinalY,w) :- default::thing(-1,0,block,_) & X = -1 & Y
 	addRetrieverAvailablePos(MyX,MyY);
 	!!retrieve::retrieve_block;
 	.
++!always_skip 
+	: task::origin  & task::committed(_,_) & retrieve::block(_,_)
+<-
+	+safe(1);
+	for (retrieve::block(X,Y)) {
+		?safe(Safe);
+		if (Safe == 1) {
+			if (not default::thing(X,Y,block,_)) {
+				-safe(Safe);
+				+safe(0);
+			}
+		}
+	}
+	?safe(Safe2);
+	-safe(Safe2);
+	if (Safe2 == 0) {
+		.broadcast(achieve, task::task_failed);
+		!task::task_failed;
+	}
+	else {
+		!action::skip;
+		!!always_skip;
+	}
+	.
 +!always_skip
 	: true
 <-
