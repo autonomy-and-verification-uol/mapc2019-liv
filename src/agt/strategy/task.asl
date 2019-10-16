@@ -127,9 +127,11 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!clear_all.
 
 +!task_failed
-	: doing_task & retrieve::block(X,Y)
+	: doing_task & retrieve::block(X,Y) & direction_block(Dir,X,Y)
 <-
 	+danger2;
+	!action::detach(Dir); // easy fix for the second attached block (I do not know)
+	// we do not care if this has failed or not, the origin should clear the block
 	-retrieve::block(X,Y);
 	.
 +!task_failed
