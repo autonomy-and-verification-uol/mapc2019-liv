@@ -564,13 +564,13 @@
 				?localtargetx(RemoveLocalTargetX);
 				?localtargety(RemoveLocalTargetY);
 				-localtargetx(RemoveLocalTargetX);
-				-localtargety(LocalTargetY);
+				-localtargety(RemoveLocalTargetY);
 				if (retrieve::getting_to_position) {
 					.fail(retriever_getting_position);
 				}
-				elif (task::doing_task) {
-					.fail(retriever_doing_task);
-				}
+//				elif (task::doing_task) {
+//					.fail(retriever_doing_task);
+//				}
 			}
 			if (default::lastAction(move) & not (default::lastActionResult(success)) & default::lastActionParams([Direction|List])) {
 				if ( Direction == n & planner::localtargety(LocalTargetYAux) ) {
@@ -605,17 +605,17 @@
 	removeBlock(Me);
 	!!retrieve::retrieve_block;
 	.
--!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)[code(.fail(retriever_doing_task))]
-	: common::my_role(retriever) & task::doing_task & .my_name(Me)
-<-
-	-task::doing_task;
-	if (not task::danger2) {
-		.broadcast(achieve, task::task_failed);
-	}
-	else {
-		-task::danger2;
-	}
-	-planner::back_to_origin;
-	!!retrieve::retrieve_block;
-	.
+//-!execute_plan(Plan, TargetX, TargetY, LocalTargetX, LocalTargetY)[code(.fail(retriever_doing_task))]
+//	: common::my_role(retriever) & task::doing_task & .my_name(Me)
+//<-
+//	-task::doing_task;
+////	if (not task::danger2) {
+////		.broadcast(achieve, task::task_failed);
+////	}
+////	else {
+////		-task::danger2;
+////	}
+//	-planner::back_to_origin;
+//	!!retrieve::retrieve_block;
+//	.
 	

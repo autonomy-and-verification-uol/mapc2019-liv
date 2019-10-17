@@ -10,7 +10,7 @@
 	  "setup" : "conf/setup/testsample.txt",
 	
       "steps" : 500,
-      "randomSeed" : 19,
+      "norandomSeed" : 19,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
 

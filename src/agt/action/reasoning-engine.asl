@@ -60,7 +60,8 @@
 		.print("Agent is disabled.");
 		if (retrieve::block(X,Y) & default::thing(X,Y,block,_) ) {
 			if (common::my_role(origin)) {
-				+task::danger;
+//				.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ AHAHAHA");
+//				+task::danger;
 			}
 			else {
 				-retrieve::block(X,Y);
@@ -72,7 +73,7 @@
 		.print("Agent is disabled.");
 		if (retrieve::block(X,Y) & default::thing(X,Y,block,_) ) {
 			if (common::my_role(origin)) {
-				+task::danger;
+//				+task::danger;
 			}
 			else {
 				-retrieve::block(X,Y);

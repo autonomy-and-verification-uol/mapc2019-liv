@@ -396,7 +396,7 @@ find_empty_position(X,Y,Count,Vision) :- Count <= Vision & find_empty_position(X
 <-
 	-retrieve::block(X,Y);
 	if (common::my_role(origin)) {
-		+danger;
+//		+danger;
 	}
 	.
 

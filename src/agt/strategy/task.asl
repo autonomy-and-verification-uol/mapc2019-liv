@@ -79,7 +79,6 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 		Flag = 1;
 	}
 	.abolish(retrieve::block(_,_));
-	+task::no_block;
 	.
 
 +!perform_task_origin_next
@@ -129,7 +128,7 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!task_failed
 	: doing_task & retrieve::block(X,Y) & direction_block(Dir,X,Y)
 <-
-	+danger2;
+//	+danger2;
 	!action::detach(Dir); // easy fix for the second attached block (I do not know)
 	// we do not care if this has failed or not, the origin should clear the block
 	-retrieve::block(X,Y);
@@ -144,12 +143,12 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 +!task_failed
 	: common::my_role(origin) & committed(Id,CommitListSort)
 <-
+	.print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ===============");
 	+no_skip;
 	!clear_all;
 	-ready_submit(_);
 	-batch(_);
 	.abolish(retrieve::block(_,_));
-	+task::no_block;
 	-committed(Id,CommitListSort);
 	-helping_connect;
 	-no_skip;
@@ -277,24 +276,24 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	if (not danger2) {
+//	if (not danger2) {
 		?retrieve::block(BX,BY);
 		.send(Origin, achieve, task::help_attach(MyXNew+BX,MyYNew+BY));
-		if (not danger2) {
+//		if (not danger2) {
 			?get_direction(BX,BY,DetachPos);
 			!action::detach(DetachPos);
-			.wait(task::synch_complete[source(Origin)] | task::danger2);
+			.wait(task::synch_complete[source(Origin)]);
 			-task::synch_complete[source(Origin)];
-		}
-		else {
-			-planner::back_to_origin;
-			-danger2;
-		}
-	}
-	else {
-		-planner::back_to_origin;
-		-danger2;
-	}
+//		}
+//		else {
+//			-planner::back_to_origin;
+//			-danger2;
+//		}
+//	}
+//	else {
+//		-planner::back_to_origin;
+//		-danger2;
+//	}
 	-doing_task;
 	!!retrieve::retrieve_block;
 	.
@@ -319,27 +318,27 @@ get_block_connect(TargetX, TargetY, X, Y) :- retrieve::block(TargetX,TargetY+1) 
 //	.print("NewTargetY ",NewTargetY);
 	!planner::generate_goal(NewTargetX, NewTargetY, notblock);
 	getMyPos(MyXNew,MyYNew);
-	if (not danger2) {
+//	if (not danger2) {
 		?retrieve::block(BX,BY);
 		.send(Origin, achieve, task::help_connect(MyXNew+BX,MyYNew+BY));
-		while (not (default::lastAction(connect) & default::lastActionResult(success)) & not task::danger2) {
+		while (not (default::lastAction(connect) & default::lastActionResult(success))) {
 			!action::connect(Origin,BX,BY);
 		}
-		.wait(task::synch_complete[source(Origin)] | task::danger2);
+		.wait(task::synch_complete[source(Origin)]);
 		-task::synch_complete[source(Origin)];
-		if (not danger2) {
+//		if (not danger2) {
 			?get_direction(BX,BY,DetachPos);
 			!action::detach(DetachPos);
-		}
-		else {
-			-planner::back_to_origin;
-			-danger2;
-		}
-	}
-	else {
-		-planner::back_to_origin;
-		-danger2;
-	}
+//		}
+//		else {
+//			-planner::back_to_origin;
+//			-danger2;
+//		}
+//	}
+//	else {
+//		-planner::back_to_origin;
+//		-danger2;
+//	}
 	-doing_task;
 	!!retrieve::retrieve_block;
 	.

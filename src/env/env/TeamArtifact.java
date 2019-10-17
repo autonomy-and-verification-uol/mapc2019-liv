@@ -44,7 +44,7 @@ public class TeamArtifact extends Artifact {
 	
 	private Map<String, Map<String, Set<Point>>> agentmaps = new HashMap<String, Map<String, Set<Point>>>();
 	
-	private int maxPlanners = 5;
+	private int maxPlanners = 10;
 	private int planners;
 	
 	private String firstToStop;
