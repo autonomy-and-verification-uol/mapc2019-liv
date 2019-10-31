@@ -26,7 +26,7 @@ After installing FD (http://www.fast-downward.org/ObtainingAndRunningFastDownwar
 Finally, in the Eclipse project, navigate to `planner/run2.sh` and change the beginning of line 5 `/home/angelo/git/planner/./fast-downward.py` to the path where your `fast-downward.py` is installed.
 
 ## How to run
-While testing, we use JUnit to run both the server and our JaCaMo code at the same time.
+We used JUnit to run both the server and our JaCaMo code at the same time.
 
 To run the sample map, right-click `test/liv/agentcontest2019/ScenarioRunSample.java` file, "Run as", "jUnit Test".
 The server's output is shown on the Eclipse console. The JaCaMo output is loaded into a separate window. Press `enter` at the Eclipse console to start the simulation.
